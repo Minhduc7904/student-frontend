@@ -16,7 +16,7 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
 
     // Course Routes
-    COURSES: '/courses',
+    COURSE_ENROLLMENTS: '/courses/enrollments',
     COURSE_DETAIL: (id) => `/courses/${id}`,
     COURSE_LESSON: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
 

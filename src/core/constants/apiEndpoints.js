@@ -43,6 +43,11 @@ export const API_ENDPOINTS = {
         ADD_REVIEW: (id) => `/courses/${id}/reviews`,
     },
 
+    // Course Enrollments
+    COURSE_ENROLLMENTS: {
+        MY: '/course-enrollments/student/my',
+    },
+
     // Exams
     EXAMS: {
         LIST: '/exams',

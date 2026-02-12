@@ -2,6 +2,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import authReducer from '../../features/auth/store/authSlice'
 import notificationReducer from '../../features/notification/store/notificationSlice'
 import profileReducer from '../../features/profile/store/profileSlice'
+import courseEnrollmentReducer from '../../features/home/courses/store/courseEnrollmentSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authReducer,
     notification: notificationReducer,
     profile: profileReducer,
+    courseEnrollment: courseEnrollmentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

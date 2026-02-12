@@ -29,6 +29,7 @@ export default {
                     aqua: '#5BFAFF',
                     soft: '#D9FCFC',
                     light: '#80C7FD',
+                    lighter: '#E3F2FF',
                 },
                 yellow: {
                     500: '#FDD22C',
@@ -48,6 +49,10 @@ export default {
                 pink: {
                     500: '#FF5280',
                     100: '#FFDBE5',
+                },
+                purple: {
+                    500: '#9B51E0',
+                    100: '#EBEAFF',
                 },
                 gray: {
                     900: '#333333',

@@ -26,3 +26,5 @@ export * from './status';
 
 // Roles & Permissions
 export * from './roles';
+
+export * from './course'
