@@ -1,78 +1,99 @@
 /**
- * Date utility functions
+ * Date utility functions (Vietnam timezone - Asia/Ho_Chi_Minh)
  */
 
+const VN_TIMEZONE = "Asia/Ho_Chi_Minh";
+
 /**
- * Format date to Vietnamese format
- * @param {string|Date} date - Date to format
- * @returns {string} Formatted date string (DD/MM/YYYY)
- * @example
- * formatDate(new Date()) // "11/02/2026"
+ * Convert to Date safely
+ */
+function toDate(date) {
+    const d = new Date(date);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Format date to Vietnamese format (DD/MM/YYYY)
  */
 export function formatDate(date) {
-    if (!date) return '';
-    
-    const d = new Date(date);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    
-    return `${day}/${month}/${year}`;
+    const d = toDate(date);
+    if (!d) return '';
+
+    return d.toLocaleDateString('vi-VN', {
+        timeZone: VN_TIMEZONE,
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    });
 }
 
 /**
  * Format date to relative time (e.g., "2 giờ trước")
- * @param {string|Date} date - Date to format
- * @returns {string} Relative time string in Vietnamese
- * @example
- * formatRelativeTime(new Date(Date.now() - 3600000)) // "1 giờ trước"
  */
 export function formatRelativeTime(date) {
-    if (!date) return '';
-    
+    const d = toDate(date);
+    if (!d) return '';
+
     const now = new Date();
-    const then = new Date(date);
-    const diffInSeconds = Math.floor((now - then) / 1000);
-    
+    const diffInSeconds = Math.floor((now - d) / 1000);
+
     if (diffInSeconds < 60) return 'Vừa xong';
     if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} phút trước`;
     if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} giờ trước`;
     if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} ngày trước`;
-    
-    return formatDate(date);
+
+    return formatDate(d);
 }
 
 /**
- * Format date to datetime string
- * @param {string|Date} date - Date to format
- * @returns {string} Formatted datetime string (DD/MM/YYYY HH:mm)
- * @example
- * formatDateTime(new Date()) // "11/02/2026 14:30"
+ * Format date to datetime string (DD/MM/YYYY HH:mm)
  */
 export function formatDateTime(date) {
-    if (!date) return '';
-    
-    const d = new Date(date);
+    const d = toDate(date);
+    if (!d) return '';
+
     const dateStr = formatDate(d);
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    
-    return `${dateStr} ${hours}:${minutes}`;
+
+    const timeStr = d.toLocaleTimeString('vi-VN', {
+        timeZone: VN_TIMEZONE,
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+    });
+
+    return `${dateStr} ${timeStr}`;
 }
 
 /**
- * Get time only from date
- * @param {string|Date} date - Date to format
- * @returns {string} Time string (HH:mm)
- * @example
- * formatTime(new Date()) // "14:30"
+ * Get time only from date (HH:mm)
  */
-export function formatTime(date) {
-    if (!date) return '';
-    
-    const d = new Date(date);
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-    
-    return `${hours}:${minutes}`;
+export const formatTime = (time) => {
+    if (!time) return '';
+
+    const d = new Date(time);
+    if (isNaN(d.getTime())) return '';
+
+    // Lấy giờ UTC
+    const hoursUTC = d.getUTCHours();
+    const minutes = d.getUTCMinutes();
+
+    // Việt Nam = UTC +7
+    const hoursVN = (hoursUTC + 7) % 24;
+
+    return `${String(hoursVN).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+};
+
+/**
+ * Get day of month in Vietnam timezone (DD)
+ * @param {string|Date} date - Date to extract day
+ * @returns {string} Day string (01 - 31)
+ */
+export function getDay(date) {
+    const d = toDate(date);
+    if (!d) return '';
+
+    return d.toLocaleDateString('vi-VN', {
+        timeZone: VN_TIMEZONE,
+        day: '2-digit',
+    });
 }

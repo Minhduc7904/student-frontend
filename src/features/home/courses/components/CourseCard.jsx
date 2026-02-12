@@ -5,6 +5,8 @@ import EnglishCourseImage from "../../../../assets/images/EnglishCourseImage.png
 import PhysicCourseImage from "../../../../assets/images/PhysicCourseImage.png";
 import { SUBJECT_IDS } from "../../../../core/constants/subject";
 import { PartyPopper } from "lucide-react";
+import { ROUTES } from "../../../../core/constants";
+import { useNavigate } from "react-router-dom";
 
 /**
  * Course Card Component
@@ -12,6 +14,7 @@ import { PartyPopper } from "lucide-react";
  */
 const CourseCard = memo(({ enrollment, bgColor = 'bg-blue-lighter' }) => {
     const { course, status, completionPercentage = 0 } = enrollment;
+    const navigate = useNavigate();
 
     const progress = Math.min(100, Math.max(0, completionPercentage));
 
@@ -36,7 +39,9 @@ const CourseCard = memo(({ enrollment, bgColor = 'bg-blue-lighter' }) => {
 
     return (
         <div className="w-full flex justify-start items-center">
-            <div className={`hover:scale-105 transition active:scale-105 cursor-pointer w-full px-4 sm:px-5 lg:px-6 py-3 gap-4 flex flex-col justify-center items-center rounded-2xl ${bgColor}`}>
+            <div
+                onClick={() => navigate(ROUTES.COURSE_DETAIL(course.courseId))}
+                className={`hover:scale-105 transition active:scale-105 cursor-pointer w-full px-4 sm:px-5 lg:px-6 py-3 gap-4 flex flex-col justify-center items-center rounded-2xl ${bgColor}`}>
 
                 {/* Header */}
                 <div className="flex flex-row gap-4 items-center w-full">
@@ -49,10 +54,10 @@ const CourseCard = memo(({ enrollment, bgColor = 'bg-blue-lighter' }) => {
                     </div>
 
                     <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className="text-sm font-semibold text-black truncate">
+                        <span className="text-subhead-4 font-semibold text-black truncate">
                             {course.title || "Tên khóa học"}
                         </span>
-                        <span className="text-xs text-blue-900 truncate">
+                        <span className="text-text-5 text-blue-900 truncate">
                             {course.teacherName || "Giáo viên"}
                         </span>
                     </div>

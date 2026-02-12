@@ -2,7 +2,10 @@ import { configureStore } from '@reduxjs/toolkit'
 import authReducer from '../../features/auth/store/authSlice'
 import notificationReducer from '../../features/notification/store/notificationSlice'
 import profileReducer from '../../features/profile/store/profileSlice'
-import courseEnrollmentReducer from '../../features/home/courses/store/courseEnrollmentSlice'
+import courseEnrollmentReducer from '../../features/course-enrollment/store/courseEnrollmentSlice'
+import learningItemReducer from '../../features/learning-item/store/learningItemSlice'
+import classSessionReducer from '../../features/class-session/store/classSessionSlice'
+import courseDetailReducer from '../../features/course-detail/store/courseDetailSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -12,6 +15,9 @@ export const store = configureStore({
     notification: notificationReducer,
     profile: profileReducer,
     courseEnrollment: courseEnrollmentReducer,
+    learningItem: learningItemReducer,
+    classSession: classSessionReducer,
+    courseDetail: courseDetailReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

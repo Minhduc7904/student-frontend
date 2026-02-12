@@ -117,14 +117,14 @@ const HomeLayout = () => {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col lg:flex-row h-full bg-white overflow-y-auto lg:overflow-hidden">
+            <div className="flex-1 flex flex-col lg:flex-row h-full bg-white overflow-y-auto lg:overflow-hidden custom-scrollbar">
                 {/* Right Sidebar - Hiển thị trên cùng trên mobile, bên phải trên desktop */}
                 <div className="order-first lg:order-last">
                     <RightSidebar />
                 </div>
 
                 {/* Page content */}
-                <main className="flex-1 px-4 lg:px-[60px] pt-10 lg:overflow-y-auto">
+                <main className="flex-1 px-4 xl:px-6 2xl:px-[60px] pt-10 lg:overflow-y-auto custom-scrollbar">
                     <SearchHeader onAddCourse={handleAddCourse} />
                     <Suspense fallback={<ContentLoading />}>
                         <Outlet />

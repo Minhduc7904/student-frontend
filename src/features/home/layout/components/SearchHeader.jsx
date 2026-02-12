@@ -43,7 +43,7 @@ const SearchHeader = memo(({ onAddCourse }) => {
                 className="bg-yellow-100 cursor-pointer active:scale-[0.98] hover:bg-yellow-500 
                     rounded-lg 
                     px-3 sm:px-4 lg:px-[14px] 
-                    py-2 
+                    py-1
                     flex flex-row gap-1.5 sm:gap-2 
                     items-center justify-center 
                     transition

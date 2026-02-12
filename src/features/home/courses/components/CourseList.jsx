@@ -1,68 +1,20 @@
-import { memo, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import {
-    fetchMyEnrollments,
-    selectEnrollments,
-    selectLoadingMyEnrollments,
-    selectCourseEnrollmentError,
-    selectCourseEnrollmentFilters,
-    selectCourseEnrollmentPagination,
-} from "../store/courseEnrollmentSlice";
+import { memo } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ContentLoading } from "../../../../shared/components";
+import { useCourseList } from "../hooks";
 import CourseCard from "./CourseCard";
-import { Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 
 /**
  * Course List Component
  * Hiển thị danh sách khóa học đã đăng ký
  */
 const CourseList = memo(() => {
-    const dispatch = useDispatch();
-
-    const enrollments = useSelector(selectEnrollments);
-    const loading = useSelector(selectLoadingMyEnrollments);
-    const error = useSelector(selectCourseEnrollmentError);
-    const filters = useSelector(selectCourseEnrollmentFilters);
-    const pagination = useSelector(selectCourseEnrollmentPagination);
-
-    useEffect(() => {
-        dispatch(
-            fetchMyEnrollments({
-                ...filters,
-                page: pagination.page,
-                limit: pagination.limit,
-            })
-        );
-    }, [dispatch, filters, pagination.page, pagination.limit]);
-
-    const handlePrev = () => {
-        if (pagination.page > 1) {
-            dispatch(
-                fetchMyEnrollments({
-                    ...filters,
-                    page: pagination.page - 1,
-                    limit: pagination.limit,
-                })
-            );
-        }
-    };
-
-    const handleNext = () => {
-        dispatch(
-            fetchMyEnrollments({
-                ...filters,
-                page: pagination.page + 1,
-                limit: pagination.limit,
-            })
-        );
-    };
+    const { enrollments, loading, error, pagination, handlePrev, handleNext } =
+        useCourseList();
 
     // Loading state
     if (loading) {
-        return (
-            <div className="flex items-center justify-center py-20">
-                <Loader2 size={40} className="animate-spin text-yellow-400" />
-            </div>
-        );
+        return <ContentLoading message="Đang tải khóa học..." height="py-20" />;
     }
 
     // Error state

@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { courseEnrollmentService } from '../../../../core/services/modules/courseEnrollmentService';
-import { enrollmentStatus } from '../../../../core/constants';
-import { handleAsyncThunk } from '../../../../shared/utils/asyncThunkHelper';
+import { courseEnrollmentService } from '../../../core/services/modules/courseEnrollmentService';
+import { enrollmentStatus } from '../../../core/constants';
+import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 const initialState = {
     enrollments: [],

@@ -55,6 +55,7 @@ export default {
                     100: '#EBEAFF',
                 },
                 gray: {
+                    1000: '#24252C',
                     900: '#333333',
                     800: '#525252',
                     700: '#737373',
@@ -64,6 +65,7 @@ export default {
                     muted: '#6E6A7C',
                     subtle: '#7E818C',
                     100: '#E4E5E7',
+                    
                 },
                 background: '#F4F8FF',
                 white: '#FFFFFF',

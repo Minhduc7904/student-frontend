@@ -17,7 +17,7 @@ const RightSidebar = memo(() => {
             <RightSidebarHeader profile={profile} notificationCount={3} />
             
             {/* Scrollable content area */}
-            <div className="flex-1 lg:overflow-y-auto flex flex-col gap-4 lg:gap-5 xl:gap-6 mt-4 lg:mt-5 xl:mt-6 w-full overflow-x-hidden lg:pr-1">
+            <div className="flex-1 lg:overflow-y-auto custom-scrollbar flex flex-col gap-4 lg:gap-5 xl:gap-6 mt-4 lg:mt-5 xl:mt-6 w-full overflow-x-hidden lg:pr-1">
                 <CalendarSection />
                 <StudyTimeSection />
             </div>

@@ -31,6 +31,7 @@ export const API_ENDPOINTS = {
     COURSES: {
         LIST: '/courses',
         DETAIL: (id) => `/courses/${id}`,
+        STUDENT_DETAIL: (id) => `/courses/student/${id}`,
         LESSONS: (id) => `/courses/${id}/lessons`,
         LESSON_DETAIL: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
         ENROLL: (id) => `/courses/${id}/enroll`,
@@ -43,9 +44,28 @@ export const API_ENDPOINTS = {
         ADD_REVIEW: (id) => `/courses/${id}/reviews`,
     },
 
+    // Lessons
+    LESSONS: {
+        COURSE_LESSONS: (courseId) => `/lessons/student/course/${courseId}`,
+        LESSON_DETAIL: (lessonId) => `/lessons/${lessonId}/student`,
+        COMPLETE_LESSON: (courseId, lessonId) => `/lessons/student/${courseId}/lessons/${lessonId}/complete`,
+    },
+
     // Course Enrollments
     COURSE_ENROLLMENTS: {
         MY: '/course-enrollments/student/my',
+    },
+
+    // Class Sessions
+    CLASS_SESSIONS: {
+        MY_SESSIONS: '/class-sessions/student/my-sessions',
+    },
+
+    // Learning Items
+    LEARNING_ITEMS: {
+        MY_HOMEWORKS: '/learning-items/student/my-homeworks',
+        SUBMIT_HOMEWORK: (id) => `/learning-items/${id}/submit-homework`,
+        HOMEWORK_DETAIL: (id) => `/learning-items/${id}`,
     },
 
     // Exams
