@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { courseService } from '../../../core/services/modules/courseService';
 import { lessonService } from '../../../core/services/modules/lessonService';
+import { learningItemService } from '../../../core/services/modules/learningItemService';
 import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 /**
@@ -17,6 +18,9 @@ const initialState = {
     lessonDetail: null,
     lessonDetailLoading: false,
     lessonDetailError: null,
+    learningItemDetail: null,
+    learningItemDetailLoading: false,
+    learningItemDetailError: null,
 };
 
 /**
@@ -74,6 +78,23 @@ export const fetchLessonDetail = createAsyncThunk(
     }
 );
 
+/**
+ * Fetch learning item detail by ID
+ */
+export const fetchLearningItemDetail = createAsyncThunk(
+    'courseDetail/fetchLearningItemDetail',
+    async (learningItemId, thunkAPI) => {
+        return handleAsyncThunk(
+            () => learningItemService.getLearningItemDetail(learningItemId),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lấy thông tin mục học tập thất bại',
+            }
+        );
+    }
+);
+
 
 /**
  * Course Detail Slice
@@ -100,6 +121,10 @@ const courseDetailSlice = createSlice({
             state.lessonDetail = null;
             state.lessonDetailError = null;
         },
+        clearLearningItemDetail: (state) => {
+            state.learningItemDetail = null;
+            state.learningItemDetailError = null;
+        },
     },
     extraReducers: (builder) => {
         builder
@@ -122,6 +147,8 @@ const courseDetailSlice = createSlice({
             .addCase(fetchCourseLessons.pending, (state) => {
                 state.lessonsLoading = true;
                 state.lessonsError = null;
+                state.lessons = [];
+                state.chapters = [];
             })
             .addCase(fetchCourseLessons.fulfilled, (state, action) => {
                 state.lessonsLoading = false;
@@ -210,6 +237,7 @@ const courseDetailSlice = createSlice({
             .addCase(fetchLessonDetail.pending, (state) => {
                 state.lessonDetailLoading = true;
                 state.lessonDetailError = null;
+                state.lessonDetail = null;
             })
             .addCase(fetchLessonDetail.fulfilled, (state, action) => {
                 state.lessonDetailLoading = false;
@@ -219,6 +247,21 @@ const courseDetailSlice = createSlice({
                 state.lessonDetailLoading = false;
                 state.lessonDetailError = action.payload || action.error.message;
                 state.lessonDetail = null;
+            })
+            // Fetch Learning Item Detail
+            .addCase(fetchLearningItemDetail.pending, (state) => {
+                state.learningItemDetailLoading = true;
+                state.learningItemDetailError = null;
+                state.learningItemDetail = null;
+            })
+            .addCase(fetchLearningItemDetail.fulfilled, (state, action) => {
+                state.learningItemDetailLoading = false;
+                state.learningItemDetail = action.payload.data;
+            })
+            .addCase(fetchLearningItemDetail.rejected, (state, action) => {
+                state.learningItemDetailLoading = false;
+                state.learningItemDetailError = action.payload || action.error.message;
+                state.learningItemDetail = null;
             });
     },
 });
@@ -232,6 +275,7 @@ export const {
     clearLessons,
     clearChapters,
     clearLessonDetail,
+    clearLearningItemDetail,
 } = courseDetailSlice.actions;
 
 /**
@@ -247,5 +291,8 @@ export const selectChapters = (state) => state.courseDetail.chapters;
 export const selectLessonDetail = (state) => state.courseDetail.lessonDetail;
 export const selectLessonDetailLoading = (state) => state.courseDetail.lessonDetailLoading;
 export const selectLessonDetailError = (state) => state.courseDetail.lessonDetailError;
+export const selectLearningItemDetail = (state) => state.courseDetail.learningItemDetail;
+export const selectLearningItemDetailLoading = (state) => state.courseDetail.learningItemDetailLoading;
+export const selectLearningItemDetailError = (state) => state.courseDetail.learningItemDetailError;
 
 export default courseDetailSlice.reducer;

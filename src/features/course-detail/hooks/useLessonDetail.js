@@ -27,11 +27,6 @@ export const useLessonDetail = () => {
         if (lessonId) {
             dispatch(fetchLessonDetail(lessonId));
         }
-
-        // Cleanup khi unmount hoặc lessonId thay đổi
-        return () => {
-            dispatch(clearLessonDetail());
-        };
     }, [dispatch, lessonId]);
 
     return {

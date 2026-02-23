@@ -1,9 +1,36 @@
 import { useCallback, useState, Suspense, memo, useEffect } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, Link } from "react-router-dom";
 import { ContentLoading } from "../../../shared/components/loading";
 import { useCourseDetail } from "../hooks";
 import StartList from '../../../assets/icons/StarList.svg';
 import { SvgIcon } from "../../../shared/components";
+import { ROUTES } from "../../../core/constants";
+
+/**
+ * Course Not Found Component
+ */
+const CourseNotFound = () => {
+    return (
+        <div className="flex-1 flex items-center justify-center px-4">
+            <div className="text-center">
+                <h1 className="text-9xl font-bold text-gray-300 mb-4">404</h1>
+                <h2 className="text-3xl font-bold text-gray-800 mb-4">
+                    Không tìm thấy khóa học
+                </h2>
+                <p className="text-gray-600 mb-8">
+                    Khóa học bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.
+                </p>
+                <Link
+                    to={ROUTES.COURSE_ENROLLMENTS}
+                    className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg inline-block"
+                >
+                    Quay về danh sách khóa học
+                </Link>
+            </div>
+        </div>
+    );
+};
+
 /**
  * Course Detail Layout
  * - Fetch course detail và lessons
@@ -19,6 +46,32 @@ const CourseDetailLayout = () => {
         lessonsLoading,
         lessonsError,
     } = useCourseDetail();
+
+    // Hiển thị loading khi đang tải
+    if (loading) {
+        return (
+            <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+                <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
+                    <SvgIcon src={StartList} width={232} height={137} />
+                </div>
+                <div className="flex-1 flex items-center justify-center">
+                    <ContentLoading />
+                </div>
+            </div>
+        );
+    }
+
+    // Hiển thị 404 nếu có lỗi hoặc không tìm thấy course
+    if (error || !courseDetail) {
+        return (
+            <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+                <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
+                    <SvgIcon src={StartList} width={232} height={137} />
+                </div>
+                <CourseNotFound />
+            </div>
+        );
+    }
 
     return (
         <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">

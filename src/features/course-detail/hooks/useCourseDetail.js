@@ -40,13 +40,6 @@ export const useCourseDetail = () => {
             // Fetch lessons
             dispatch(fetchCourseLessons(courseId));
         }
-
-        // Cleanup khi unmount hoặc courseId thay đổi
-        return () => {
-            dispatch(clearCourseDetail());
-            dispatch(clearLessons());
-            dispatch(clearChapters());
-        };
     }, [dispatch, courseId]);
 
     return {

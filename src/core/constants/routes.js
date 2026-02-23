@@ -19,6 +19,7 @@ export const ROUTES = {
     COURSE_ENROLLMENTS: '/courses/enrollments',
     COURSE_DETAIL: (id) => `/courses/${id}`,
     COURSE_LESSON: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
+    COURSE_LEARNING_ITEM: (courseId, lessonId, learningItemId) => `/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}`,
 
     // Exam Routes
     EXAMS: '/exams',

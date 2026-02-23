@@ -18,6 +18,7 @@ export default {
             fontWeight: {
                 640: '640',
                 680: '680',
+                600: '600',
             },
             colors: {
                 blue: {

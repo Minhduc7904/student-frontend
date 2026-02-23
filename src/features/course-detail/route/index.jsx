@@ -36,6 +36,14 @@ export const courseDetailRoutes = [
                             description: 'Trang bài học khóa học',
                         },
                     },
+                    {
+                        path: ROUTES.COURSE_LEARNING_ITEM(':courseId', ':lessonId', ':learningItemId'),
+                        element: <CourseLessonsPage />,
+                        meta: {
+                            title: 'Mục học tập',
+                            description: 'Trang mục học tập',
+                        },
+                    },
                 ],
             },
         ]

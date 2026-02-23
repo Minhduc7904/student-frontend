@@ -66,6 +66,8 @@ export const API_ENDPOINTS = {
         MY_HOMEWORKS: '/learning-items/student/my-homeworks',
         SUBMIT_HOMEWORK: (id) => `/learning-items/${id}/submit-homework`,
         HOMEWORK_DETAIL: (id) => `/learning-items/${id}`,
+        STUDENT_DETAIL: (id) => `/learning-items/${id}/student`,
+        STREAM_VIDEO: (learningItemId, mediaId) => `/learning-items/${learningItemId}/student/video/stream/${mediaId}`,
     },
 
     // Exams
