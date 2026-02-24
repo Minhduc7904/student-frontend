@@ -10,3 +10,5 @@ export * from './notificationService';
 export * from './classSessionService';
 export * from './lessonService';
 export * from './learningItemService';
+export * from './competitionService';
+export * from './doCompetitionService';

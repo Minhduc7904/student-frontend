@@ -1,14 +1,22 @@
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Search } from "lucide-react";
+import {
+    fetchCompetitionRanking,
+    selectCompetitionRanking,
+    selectCompetitionRankingLoading,
+    selectCompetitionRankingError
+} from "../../../store/courseDetailSlice";
 
 const RANKING_STATS = [
-    { title: 'Điểm cao nhất', value: '10', bgColor: '#9BA8F4F7', icon: 'award' },
-    { title: 'Thời gian', value: '10', bgColor: '#FFB47F', icon: 'clock' },
-    { title: 'Xếp hạng', value: '10', bgColor: '#F8DC89', icon: 'trophy' },
-    { title: 'Số lần làm', value: '10', bgColor: '#BCFFBE', icon: 'redo' }
+    { title: 'Điểm cao nhất', key: 'highestScore', bgColor: '#9BA8F4F7', icon: 'award' },
+    { title: 'Thời gian', key: 'timeSpent', bgColor: '#FFB47F', icon: 'clock' },
+    { title: 'Xếp hạng', key: 'rank', bgColor: '#F8DC89', icon: 'trophy' },
+    { title: 'Số lần làm', key: 'attemptCount', bgColor: '#BCFFBE', icon: 'redo' }
 ];
 
 const StatCard = ({ title, value, bgColor, icon }) => (
-    <div className="flex flex-col justify-center items-center w-[180px]">
+    <div className="flex flex-col justify-center items-center w-45">
         <div className="justify-start items-center w-full px-3 py-2 rounded-tl-lg rounded-tr-lg gap-1 flex flex-row" style={{ backgroundColor: bgColor }}>
             {icon === 'award' && (
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -45,33 +53,144 @@ const StatCard = ({ title, value, bgColor, icon }) => (
         </div>
         <div className="flex w-full justify-start items-center px-3 py-4 rounded-bl-xl rounded-br-xl border border-t-0 border-[#F6F6F6]">
             <span className="text-[24px] text-gray-900 font-600">
-                {value}
+                {value || 'N/A'}
             </span>
         </div>
     </div>
 );
 
-export const RankingTabContent = () => (
-    <div className="py-4 flex w-full flex-col gap-8 justify-center items-center rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
-        {/* Stats Grid */}
-        <div className="flex w-full flex-row px-8 justify-between items-center">
-            {RANKING_STATS.map((stat) => (
-                <StatCard key={stat.title} {...stat} />
-            ))}
-        </div>
+/**
+ * Format time from seconds to readable format
+ */
+const formatTime = (seconds) => {
+    if (!seconds) return 'N/A';
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
 
-        {/* Search Bar */}
-        <div className="gap-4 w-full flex flex-row justify-start items-center px-8">
-            <div className="flex justify-center items-center">
-                <div className="relative w-full h-10 sm:h-11 lg:h-48">
-                    <Search
-                        size={20}
-                        className="absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 text-gray-500 lg:w-6 lg:h-6"
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m ${secs}s`;
+    return `${secs}s`;
+};
+
+/**
+ * Get user's stats from ranking data
+ */
+const getUserStats = (rankingData, studentId) => {
+    if (!rankingData || !rankingData.rankings) {
+        return {
+            highestScore: 'N/A',
+            timeSpent: 'N/A',
+            rank: 'N/A',
+            attemptCount: 'N/A'
+        };
+    }
+
+    // Find user's ranking
+    const userRanking = rankingData.rankings.find(
+        r => r.student?.studentId === studentId
+    );
+
+    if (userRanking) {
+        return {
+            highestScore: `${userRanking.totalPoints}/${userRanking.maxPoints}`,
+            timeSpent: formatTime(userRanking.timeSpentSeconds),
+            rank: userRanking.rank,
+            attemptCount: userRanking.attemptNumber || 1
+        };
+    }
+
+    return {
+        highestScore: 'N/A',
+        timeSpent: 'N/A',
+        rank: 'N/A',
+        attemptCount: 'N/A'
+    };
+};
+
+export const RankingTabContent = ({ competitionId, studentId }) => {
+    const dispatch = useDispatch();
+    const rankingData = useSelector(selectCompetitionRanking);
+    const loading = useSelector(selectCompetitionRankingLoading);
+    const error = useSelector(selectCompetitionRankingError);
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [page, setPage] = useState(1);
+    const limit = 10;
+
+    // Fetch ranking data when component mounts or competitionId changes
+    useEffect(() => {
+        if (competitionId) {
+            dispatch(fetchCompetitionRanking({
+                competitionId,
+                params: { page, limit }
+            }));
+        }
+    }, [dispatch, competitionId, page]);
+
+    // Get user stats
+    const userStats = getUserStats(rankingData, studentId);
+
+    // Filter rankings by search term
+    const filteredRankings = rankingData?.rankings?.filter(ranking => {
+        if (!searchTerm) return true;
+        const fullName = ranking.student?.fullName || '';
+        return fullName.toLowerCase().includes(searchTerm.toLowerCase());
+    }) || [];
+
+    if (loading) {
+        return (
+            <div className="py-8 flex w-full justify-center items-center">
+                <span className="text-gray-500">Đang tải bảng xếp hạng...</span>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="py-8 flex w-full justify-center items-center">
+                <span className="text-red-500">Không thể tải bảng xếp hạng</span>
+            </div>
+        );
+    }
+
+    if (!competitionId) {
+        return (
+            <div className="py-8 flex w-full justify-center items-center">
+                <span className="text-gray-500">Chưa có dữ liệu bảng xếp hạng</span>
+            </div>
+        );
+    }
+
+    return (
+        <div className="py-4 flex w-full flex-col gap-8 justify-center items-center rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
+            {/* Stats Grid */}
+            <div className="flex w-full flex-row px-8 justify-between items-center">
+                {RANKING_STATS.map((stat) => (
+                    <StatCard
+                        key={stat.title}
+                        title={stat.title}
+                        value={userStats[stat.key]}
+                        bgColor={stat.bgColor}
+                        icon={stat.icon}
                     />
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm tên..."
-                        className="
+                ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="gap-4 w-full h-fit flex flex-row justify-start items-center px-8">
+                <div className="flex justify-center items-center">
+                    <div className="relative w-full">
+                        <Search
+                            size={20}
+                            className="absolute left-2 sm:left-2.5 top-1/2 -translate-y-1/2 text-gray-500 lg:w-6 lg:h-6"
+                        />
+                        <input
+                            type="text"
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            placeholder="Tìm kiếm tên..."
+                            className="
                             w-full h-full
                             pl-9 sm:pl-10 lg:pl-12 
                             pr-3 sm:pr-4 
@@ -84,12 +203,91 @@ export const RankingTabContent = () => (
                             focus:border-yellow-400
                             transition
                         "
-                    />
+                        />
+                    </div>
+                </div>
+                <span className="text-text-5 text-gray-900">
+                    {filteredRankings.length} kết quả
+                </span>
+            </div>
+
+            {/* Ranking Table */}
+            <div className="w-full px-8">
+                <div className="overflow-x-auto">
+                    <table className="w-full">
+                        <thead>
+                            <tr className="border-b border-gray-200">
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Hạng</th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Họ và tên</th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Lớp</th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Trường</th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Điểm</th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">Thời gian</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredRankings.length === 0 ? (
+                                <tr>
+                                    <td colSpan="6" className="text-center py-8 text-gray-500">
+                                        Không có kết quả
+                                    </td>
+                                </tr>
+                            ) : (
+                                filteredRankings.map((ranking) => {
+                                    const isCurrentUser = ranking.student?.studentId === studentId;
+                                    return (
+                                        <tr
+                                            key={ranking.competitionSubmitId}
+                                            className={`border-b border-gray-100 hover:bg-gray-50 transition ${isCurrentUser ? 'bg-blue-50' : ''
+                                                }`}
+                                        >
+                                            <td className="py-3 px-4">
+                                                <div className={`flex items-center justify-center w-8 h-8 rounded-full ${ranking.rank === 1 ? 'bg-yellow-400' :
+                                                        ranking.rank === 2 ? 'bg-gray-300' :
+                                                            ranking.rank === 3 ? 'bg-orange-400' : 'bg-gray-100'
+                                                    }`}>
+                                                    <span className={`text-text-4 font-semibold ${ranking.rank <= 3 ? 'text-white' : 'text-gray-900'
+                                                        }`}>
+                                                        {ranking.rank}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className={`text-text-4 ${isCurrentUser ? 'font-semibold text-blue-800' : 'text-gray-900'}`}>
+                                                    {ranking.student?.fullName || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-text-4 text-gray-700">
+                                                    {ranking.student?.grade || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-text-4 text-gray-700">
+                                                    {ranking.student?.school || 'N/A'}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-text-4 font-semibold text-gray-900">
+                                                    {ranking.totalPoints}/{ranking.maxPoints}
+                                                </span>
+                                                <span className="text-text-5 text-gray-500 ml-1">
+                                                    ({ranking.percentageScore.toFixed(1)}%)
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <span className="text-text-4 text-gray-700">
+                                                    {formatTime(ranking.timeSpentSeconds)}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            )}
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <span className="text-text-5 text-gray-900">
-                25 kết quả
-            </span>
         </div>
-    </div>
-);
+    );
+};

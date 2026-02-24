@@ -1,8 +1,7 @@
 import { useState, useCallback, useMemo, memo, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Link, useLocation } from "react-router-dom";
-import { SvgIcon } from "../../../../shared/components";
-import { getLogoUrl } from "../../../../shared/constants";
+import { SvgIcon, Logo } from "../../../../shared/components";
 import ChevronLeft from "../../../../assets/icons/ChevronLeft.svg";
 import ChevronRight from "../../../../assets/icons/ChevronRight.svg";
 import { ROUTES } from "../../../../core/constants";
@@ -293,13 +292,7 @@ export const Sidebar = memo(({ isCollapsed, onToggleCollapse }) => {
                 flex flex-col
             ">
                 {/* Logo Collapsed */}
-                <div className="w-full py-2 md:py-2.5 lg:py-3 flex justify-center items-center flex-shrink-0">
-                    <img
-                        src={getLogoUrl('VARIANT1')}
-                        alt="Logo"
-                        className="w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 object-contain"
-                    />
-                </div>
+                <Logo mode="collapsed" />
 
                 {/* Expand Button */}
                 <div className="flex items-center w-full justify-end flex-shrink-0">
@@ -342,13 +335,7 @@ export const Sidebar = memo(({ isCollapsed, onToggleCollapse }) => {
             flex flex-col
         ">
             {/* Logo */}
-            <div className="w-full px-6 py-2 md:px-8 md:py-2.5 lg:px-10 lg:py-3 flex justify-start items-center flex-shrink-0">
-                <img
-                    src={getLogoUrl()}
-                    alt="Logo"
-                    className="h-10 md:h-11 lg:h-12 w-auto object-contain"
-                />
-            </div>
+            <Logo mode="default" />
 
             {/* Collapse Button */}
             <div className="flex items-center w-full justify-end flex-shrink-0">

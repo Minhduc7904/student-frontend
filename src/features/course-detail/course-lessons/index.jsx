@@ -106,8 +106,8 @@ export const CourseLessonsPage = () => {
                     learningItemError || (!learningItemLoading && !learningItemDetail) ? (
                         <LessonNotFound courseId={courseId} />
                     ) : (
-                        <LearningItemContent 
-                            learningItemDetail={learningItemDetail} 
+                        <LearningItemContent
+                            learningItemDetail={learningItemDetail}
                             lessonDetail={lessonDetail}
                             loading={learningItemLoading}
                         />

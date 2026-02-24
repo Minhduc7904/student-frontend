@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { courseService } from '../../../core/services/modules/courseService';
 import { lessonService } from '../../../core/services/modules/lessonService';
 import { learningItemService } from '../../../core/services/modules/learningItemService';
+import { competitionService } from '../../../core/services/modules/competitionService';
 import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
 /**
@@ -21,6 +22,9 @@ const initialState = {
     learningItemDetail: null,
     learningItemDetailLoading: false,
     learningItemDetailError: null,
+    competitionRanking: null,
+    competitionRankingLoading: false,
+    competitionRankingError: null,
 };
 
 /**
@@ -95,6 +99,23 @@ export const fetchLearningItemDetail = createAsyncThunk(
     }
 );
 
+/**
+ * Fetch competition ranking by competition ID
+ */
+export const fetchCompetitionRanking = createAsyncThunk(
+    'courseDetail/fetchCompetitionRanking',
+    async ({ competitionId, params = {} }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionService.getCompetitionRanking(competitionId, params),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lấy bảng xếp hạng thất bại',
+            }
+        );
+    }
+);
+
 
 /**
  * Course Detail Slice
@@ -124,6 +145,10 @@ const courseDetailSlice = createSlice({
         clearLearningItemDetail: (state) => {
             state.learningItemDetail = null;
             state.learningItemDetailError = null;
+        },
+        clearCompetitionRanking: (state) => {
+            state.competitionRanking = null;
+            state.competitionRankingError = null;
         },
     },
     extraReducers: (builder) => {
@@ -262,6 +287,21 @@ const courseDetailSlice = createSlice({
                 state.learningItemDetailLoading = false;
                 state.learningItemDetailError = action.payload || action.error.message;
                 state.learningItemDetail = null;
+            })
+            // Fetch Competition Ranking
+            .addCase(fetchCompetitionRanking.pending, (state) => {
+                state.competitionRankingLoading = true;
+                state.competitionRankingError = null;
+                state.competitionRanking = null;
+            })
+            .addCase(fetchCompetitionRanking.fulfilled, (state, action) => {
+                state.competitionRankingLoading = false;
+                state.competitionRanking = action.payload.data;
+            })
+            .addCase(fetchCompetitionRanking.rejected, (state, action) => {
+                state.competitionRankingLoading = false;
+                state.competitionRankingError = action.payload || action.error.message;
+                state.competitionRanking = null;
             });
     },
 });
@@ -276,6 +316,7 @@ export const {
     clearChapters,
     clearLessonDetail,
     clearLearningItemDetail,
+    clearCompetitionRanking,
 } = courseDetailSlice.actions;
 
 /**
@@ -294,5 +335,8 @@ export const selectLessonDetailError = (state) => state.courseDetail.lessonDetai
 export const selectLearningItemDetail = (state) => state.courseDetail.learningItemDetail;
 export const selectLearningItemDetailLoading = (state) => state.courseDetail.learningItemDetailLoading;
 export const selectLearningItemDetailError = (state) => state.courseDetail.learningItemDetailError;
+export const selectCompetitionRanking = (state) => state.courseDetail.competitionRanking;
+export const selectCompetitionRankingLoading = (state) => state.courseDetail.competitionRankingLoading;
+export const selectCompetitionRankingError = (state) => state.courseDetail.competitionRankingError;
 
 export default courseDetailSlice.reducer;

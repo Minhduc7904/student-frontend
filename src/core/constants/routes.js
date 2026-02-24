@@ -27,6 +27,10 @@ export const ROUTES = {
     EXAM_START: (id) => `/exams/${id}/start`,
     EXAM_RESULT: (id) => `/exams/${id}/result`,
 
+    // Competition Routes
+    DO_COMPETITION_START: (competitionId) => `/do-competition/${competitionId}/start`,
+    DO_COMPETITION_SUBMIT: (competitionId, submitId) => `/do-competition/${competitionId}/submit/${submitId}`,
+
     // User Routes
     PROFILE: '/profile',
     PROFILE_EDIT: '/profile/edit',

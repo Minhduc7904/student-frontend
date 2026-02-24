@@ -1,0 +1,230 @@
+import { useEffect, useCallback, useState, useRef } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { PageLoading } from '../../shared/components/loading';
+import { useCompetitionTimer, useCompetitionExam, useCompetitionAnswers } from './hooks';
+import { selectCurrentAttempt, submitCompetitionAnswer, applyOptimisticAnswer } from './store/doCompetitionSlice';
+import { ROUTES } from '../../core/constants';
+import { CompetitionHeader } from './layout/CompetitionHeader';
+import { CompetitionContent } from './layout/CompetitionContent';
+import { CompetitionSidebar } from './layout/CompetitionSidebar';
+import { Clock, AlertTriangle } from 'lucide-react';
+
+/**
+ * Do Competition Page
+ * Trang làm bài thi chính
+ */
+export const DoCompetition = () => {
+    const { competitionId, submitId } = useParams();
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
+
+    // Lấy currentAttempt từ Redux để verify
+    const currentAttempt = useSelector(selectCurrentAttempt);
+
+    // Validate: Kiểm tra currentAttempt phải match với submitId
+    useEffect(() => {
+        const submitIdNum = parseInt(submitId, 10);
+
+        if (!currentAttempt || currentAttempt.competitionSubmitId !== submitIdNum) {
+            // Redirect về trang start nếu không có attempt hoặc không khớp
+            console.warn('Invalid attempt or submitId mismatch. Redirecting to start...');
+            navigate(ROUTES.DO_COMPETITION_START(competitionId), { replace: true });
+        }
+    }, [currentAttempt, submitId, competitionId, navigate]);
+
+    // Chỉ gọi hooks khi đã validate thành công
+    const isValidAttempt = currentAttempt && currentAttempt.competitionSubmitId === parseInt(submitId, 10);
+
+    // Return loading hoặc redirect nếu chưa validate
+    if (!isValidAttempt) {
+        return <PageLoading message="Đang kiểm tra phiên làm bài..." />;
+    }
+
+    // Sử dụng custom hook để quản lý thời gian (chỉ khi đã validate)
+    const {
+        timeData,
+        loading: timeLoading,
+        error: timeError,
+        isOverTime,
+        remainingMinutes,
+        remainingSeconds,
+        formattedTime,
+        totalMinutes,
+        elapsedMinutes,
+        refresh: refreshTime,
+    } = useCompetitionTimer(submitId, {
+        autoStart: true,
+        onTimeUp: (data) => {
+            console.log('Time is up!', data);
+            // TODO: Auto submit hoặc show warning
+        },
+        onError: (error) => {
+            console.error('Error fetching time:', error);
+        },
+    });
+
+    // Sử dụng custom hook để lấy đề thi (chỉ khi đã validate)
+    const {
+        competition,
+        exam,
+        sections,
+        unassignedQuestions,
+        loading: examLoading,
+        error: examError,
+        hasExam,
+        hasSections,
+        totalQuestions,
+        refresh: refreshExam,
+    } = useCompetitionExam(competitionId, {
+        autoFetch: true,
+        onSuccess: (data) => {
+            console.log('Exam loaded:', data);
+        },
+        onError: (error) => {
+            console.error('Error loading exam:', error);
+        },
+    });
+
+    // Sử dụng custom hook để lấy câu trả lời (chỉ khi exam đã load xong)
+    const {
+        answers,
+        answeredIds,
+        answersMap,
+        totalAnswered,
+        loading: answersLoading,
+        error: answersError,
+        refresh: refreshAnswers,
+    } = useCompetitionAnswers(submitId, {
+        autoFetch: true,
+        enabled: hasExam,  // Chứ exam load xong mới gọi answers
+        onSuccess: (data) => {
+            console.log('Answers loaded:', data);
+        },
+        onError: (error) => {
+            console.error('Error loading answers:', error);
+        },
+    });
+
+    // ID câu hỏi đang được focus/highlight (dùng cho sidebar và scroll)
+    const [currentQuestionId, setCurrentQuestionId] = useState(null);
+    // Mobile sidebar overlay
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    // Ref to CompetitionContent's scrollToQuestion function
+    const contentScrollRef = useRef(null);
+
+    // Per-question debounce timers for API submission (avoid rapid-fire requests)
+    const submitTimersRef = useRef({});
+
+    // Called only from sidebar: select + scroll to question
+    const handleSidebarQuestionClick = useCallback((questionId) => {
+        setCurrentQuestionId(questionId);
+        setSidebarOpen(false);
+        contentScrollRef.current?.(questionId);
+    }, []);
+
+    // Called only from QuestionCard click: select without scrolling
+    const handleCardSelect = useCallback((questionId) => {
+        setCurrentQuestionId(questionId);
+    }, []);
+
+    /**
+     * Handle answer selection from QuestionCard
+     * Builds DTO body based on question type (no questionId in body — it's in the URL via answerId)
+     */
+    const handleAnswerSelect = useCallback(
+        ({ questionId, questionType, statementId, isTrue, answerText }) => {
+            const currentAnswer = answersMap.get(questionId);
+            const answerId = currentAnswer?.competitionAnswerId ?? 0;
+
+            let body;
+            if (questionType === 'SINGLE_CHOICE') {
+                body = { selectedStatementIds: [statementId] };
+            } else if (questionType === 'MULTIPLE_CHOICE') {
+                const existing = currentAnswer?.selectedStatementIds ?? [];
+                const isSelected = existing.includes(statementId);
+                body = {
+                    selectedStatementIds: isSelected
+                        ? existing.filter((id) => id !== statementId)
+                        : [...existing, statementId],
+                };
+            } else if (questionType === 'TRUE_FALSE') {
+                // Cập nhật entry cho statementId, chỉ gửi những statement đã có isTrue (bỏ qua null/undefined)
+                const existing = currentAnswer?.trueFalseAnswers ?? [];
+                const updated = existing.filter((a) => a.statementId !== statementId);
+                if (isTrue !== null && isTrue !== undefined) {
+                    updated.push({ statementId, isTrue });
+                }
+                body = { trueFalseAnswers: updated.filter((a) => a.isTrue !== null && a.isTrue !== undefined) };
+            } else if (questionType === 'SHORT_ANSWER' || questionType === 'ESSAY') {
+                body = { answer: answerText ?? '' };
+            } else {
+                // unhandled type
+                return;
+            }
+
+            // Optimistic update — patch UI immediately, no wait for API
+            dispatch(applyOptimisticAnswer({ questionId, body }));
+
+            // SHORT_ANSWER / ESSAY already debounce inside ShortAnswerInput — call API directly
+            if (questionType === 'SHORT_ANSWER' || questionType === 'ESSAY') {
+                dispatch(submitCompetitionAnswer({ submitId, answerId, questionId, body }));
+                return;
+            }
+
+            // For choice questions: debounce per-question so rapid selections batch into one request
+            if (submitTimersRef.current[questionId]) {
+                clearTimeout(submitTimersRef.current[questionId]);
+            }
+            submitTimersRef.current[questionId] = setTimeout(() => {
+                delete submitTimersRef.current[questionId];
+                dispatch(submitCompetitionAnswer({ submitId, answerId, questionId, body }));
+            }, 1000);
+        },
+        [answersMap, submitId, dispatch]
+    );
+
+    // Show loading while fetching initial data
+    if ((timeLoading && !timeData) || (examLoading && !hasExam) || (hasExam && answersLoading && !answers.length)) {
+        return <PageLoading message="Đang tải thông tin bài thi..." />;
+    }
+
+    return (
+        <div className="h-screen flex flex-col bg-gray-50">
+            <CompetitionHeader
+                competition={competition}
+                loading={examLoading && !competition}
+                onToggleSidebar={() => setSidebarOpen((v) => !v)}
+            />
+            {/* Body: fill remaining height, no outer scroll */}
+            {/* Mobile header = h-12 (row1) + h-8 (row2) = 80px = mt-20; md+ = mt-16; lg = mt-17 */}
+            <div className="flex flex-1 overflow-hidden mt-20 md:mt-16 lg:mt-17">
+                <CompetitionContent
+                    sections={sections}
+                    unassignedQuestions={unassignedQuestions}
+                    loading={examLoading && !hasExam}
+                    onAnswerSelect={handleAnswerSelect}
+                    onSelect={handleCardSelect}
+                    currentQuestionId={currentQuestionId}
+                    scrollToRef={contentScrollRef}
+                />
+                <CompetitionSidebar
+                    competition={competition}
+                    sections={sections}
+                    unassignedQuestions={unassignedQuestions}
+                    formattedTime={formattedTime}
+                    remainingSeconds={remainingSeconds}
+                    isOverTime={isOverTime}
+                    answeredIds={answeredIds}
+                    currentQuestionId={currentQuestionId}
+                    onQuestionClick={handleSidebarQuestionClick}
+                    loading={examLoading && !hasExam}
+                    isOpen={sidebarOpen}
+                    onClose={() => setSidebarOpen(false)}
+                />
+            </div>
+        </div>
+    );
+};
+
+export default DoCompetition;

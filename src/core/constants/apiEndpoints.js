@@ -92,6 +92,20 @@ export const API_ENDPOINTS = {
         DELETE: (id) => `/notifications/${id}`,
     },
 
+    // Competitions
+    COMPETITIONS: {
+        STUDENT_RANKING: (id) => `/competitions/${id}/student/ranking`,
+    },
+
+    // Do Competition
+    DO_COMPETITION: {
+        START_ATTEMPT: (competitionId) => `/do-competition/${competitionId}/start`,
+        GET_REMAINING_TIME: (submitId) => `/do-competition/submit/${submitId}/remaining-time`,
+        GET_EXAM: (competitionId) => `/do-competition/${competitionId}/exam`,
+        GET_ANSWERS: (submitId) => `/do-competition/submit/${submitId}/answers`,
+        SUBMIT_ANSWER: (submitId, answerId) => `/do-competition/submit/${submitId}/answer/${answerId}`,
+    },
+
     // Statistics
     STATS: {
         DASHBOARD: '/stats/dashboard',

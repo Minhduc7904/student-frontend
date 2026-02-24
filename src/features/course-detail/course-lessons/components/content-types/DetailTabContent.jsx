@@ -1,12 +1,54 @@
 import { Play } from "lucide-react";
+import { formatDate } from '@/shared/utils';
 
-const DETAIL_MOCK_DATA = {
-    status: 'Chưa làm',
-    questionCount: 20,
-    duration: '45 phút',
-    deadline: '20/02/2025',
-    timeRemaining: '5 ngày 10 giờ',
-    feedback: 'Chờ chữa bài'
+// Status configuration
+const STATUS_CONFIG = {
+    DO_NOW: {
+        label: 'Chưa làm',
+        color: 'red',
+        bgClass: 'bg-red-100',
+        textClass: 'text-red-500',
+        buttonText: 'Làm ngay',
+        buttonClass: 'bg-blue-800 text-white hover:bg-blue-900',
+        buttonIcon: true
+    },
+    REDO: {
+        label: 'Làm lại',
+        color: 'orange',
+        bgClass: 'bg-orange-100',
+        textClass: 'text-orange-500',
+        buttonText: 'Làm lại',
+        buttonClass: 'bg-blue-800 text-white hover:bg-blue-900',
+        buttonIcon: true
+    },
+    LATE_SUBMIT: {
+        label: 'Nộp muộn',
+        color: 'yellow',
+        bgClass: 'bg-yellow-100',
+        textClass: 'text-yellow-600',
+        buttonText: 'Làm bài (Muộn)',
+        buttonClass: 'bg-yellow-600 text-white hover:bg-yellow-700',
+        buttonIcon: true
+    },
+    OVERDUE: {
+        label: 'Quá hạn',
+        color: 'gray',
+        bgClass: 'bg-gray-100',
+        textClass: 'text-gray-500',
+        buttonText: 'Đã quá hạn',
+        buttonClass: 'bg-gray-300 text-gray-500 cursor-not-allowed',
+        buttonIcon: false,
+        disabled: true
+    },
+    COMPLETED: {
+        label: 'Đã hoàn thành',
+        color: 'green',
+        bgClass: 'bg-green-100',
+        textClass: 'text-green-600',
+        buttonText: 'Xem lại bài làm',
+        buttonClass: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
+        buttonIcon: false
+    }
 };
 
 const DETAIL_FIELDS = [
@@ -18,7 +60,59 @@ const DETAIL_FIELDS = [
     { label: 'Nhận xét', key: 'feedback' }
 ];
 
-export const DetailTabContent = ({ content }) => (
+/**
+ * Format remaining time from seconds
+ */
+const formatRemainingTime = (seconds) => {
+    if (!seconds || seconds <= 0) return 'Hết hạn';
+
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+
+    const parts = [];
+    if (days > 0) parts.push(`${days} ngày`);
+    if (hours > 0) parts.push(`${hours} giờ`);
+    if (days === 0 && minutes > 0) parts.push(`${minutes} phút`);
+
+    return parts.length > 0 ? parts.join(' ') : 'Dưới 1 phút';
+};
+
+/**
+ * Get detail data from content
+ */
+const getDetailData = (content) => {
+    if (!content || !content.progress) {
+        return {
+            status: 'Chưa có dữ liệu',
+            questionCount: 0,
+            duration: 'N/A',
+            deadline: 'N/A',
+            timeRemaining: 'N/A',
+            feedback: 'N/A'
+        };
+    }
+
+    const { progress, competition, dueDate } = content;
+    const statusConfig = STATUS_CONFIG[progress.status] || STATUS_CONFIG.DO_NOW;
+
+    return {
+        status: statusConfig.label,
+        questionCount: progress.questionCount || 0,
+        duration: competition?.duration ? `${competition.duration} phút` : 'N/A',
+        deadline: progress.deadline ? formatDate(progress.deadline) : (dueDate ? formatDate(dueDate) : 'Không có thời hạn'),
+        timeRemaining: progress.remainingTimeSeconds ? formatRemainingTime(progress.remainingTimeSeconds) : 
+                       (progress.status === 'OVERDUE' || progress.status === 'COMPLETED' ? 'N/A' : 'N/A'),
+        feedback: progress.homeworkSubmit ? (progress.homeworkSubmit.feedback || 'Không có nhận xét') : 'Chưa nộp bài'
+    };
+};
+
+export const DetailTabContent = ({ content, onStartCompetition }) => {
+    const detailData = getDetailData(content);
+    const status = content?.progress?.status || 'DO_NOW';
+    const statusConfig = STATUS_CONFIG[status] || STATUS_CONFIG.DO_NOW;
+
+    return (
     <div className="w-full flex flex-col gap-6">
         {/* Information Card */}
         <div className="py-4 rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] gap-5 flex flex-col justify-center items-center w-full">
@@ -35,13 +129,30 @@ export const DetailTabContent = ({ content }) => (
                         ))}
                     </div>
                     <div className="flex-1 flex flex-col gap-2 justify-center items-start">
-                        {DETAIL_FIELDS.map(field => (
-                            <div key={field.key} className="p-0.5">
-                                <span className="text-text-4 text-gray-900">
-                                    {DETAIL_MOCK_DATA[field.key]}
-                                </span>
-                            </div>
-                        ))}
+                        {DETAIL_FIELDS.map(field => {
+                            const value = detailData[field.key];
+                            
+                            // Render status badge instead of plain text
+                            if (field.key === 'status') {
+                                return (
+                                    <div key={field.key} className="py-0.5">
+                                        <div className={`w-fit px-3 py-0.5 ${statusConfig.bgClass} rounded-lg`}>
+                                            <span className={`${statusConfig.textClass} text-text-5`}>
+                                                {value}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <div key={field.key} className="p-0.5">
+                                    <span className="text-text-4 text-gray-900">
+                                        {value}
+                                    </span>
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -60,11 +171,15 @@ export const DetailTabContent = ({ content }) => (
             <div className="w-full flex justify-center items-center">
                 <button
                     type="button"
-                    className="w-60 rounded-lg cursor-pointer active:scale-95 transition px-3 py-2 bg-blue-100 flex flex-row gap-2.5 justify-center items-center"
+                    disabled={statusConfig.disabled}
+                    onClick={statusConfig.disabled ? undefined : onStartCompetition}
+                    className={`w-60 rounded-lg transition px-3 py-2 ${statusConfig.buttonClass} ${
+                        !statusConfig.disabled ? 'cursor-pointer active:scale-95' : ''
+                    } flex flex-row gap-2.5 justify-center items-center`}
                 >
-                    <Play className="w-5 h-5 text-blue-800" />
-                    <span className="text-subhead-4 text-blue-800">
-                        Làm bài
+                    {statusConfig.buttonIcon && <Play className="w-5 h-5" />}
+                    <span className="text-subhead-4">
+                        {statusConfig.buttonText}
                     </span>
                 </button>
             </div>
@@ -87,16 +202,19 @@ export const DetailTabContent = ({ content }) => (
                     </div>
                     <div className="p-0.5">
                         <span className="text-text-4 text-[#5E5E5E]">
-                            Chỉ có thể xem sau khi làm bài
+                            {content?.progress?.isDone 
+                                ? 'Click để xem video giải thích chi tiết' 
+                                : 'Chỉ có thể xem sau khi làm bài'}
                         </span>
                     </div>
                 </div>
-                <div className="w-fit px-3 py-0.5 bg-red-100 rounded-lg">
-                    <span className="text-red-500 text-text-5">
-                        Chưa làm
+                <div className={`w-fit px-3 py-0.5 ${statusConfig.bgClass} rounded-lg`}>
+                    <span className={`${statusConfig.textClass} text-text-5`}>
+                        {statusConfig.label}
                     </span>
                 </div>
             </div>
         </div>
     </div>
 );
+};
