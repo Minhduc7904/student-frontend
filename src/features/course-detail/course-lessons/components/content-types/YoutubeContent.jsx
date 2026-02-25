@@ -22,16 +22,16 @@ export const YoutubeContent = ({ learningItemDetail }) => {
     const videoId = currentContent ? getYoutubeVideoId(currentContent.youtubeUrl) : null;
 
     return (
-        <div className="w-full flex flex-col gap-8">
-            <div className="flex flex-col gap-2">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 lg:gap-8">
+            <div className="flex flex-col gap-3 sm:gap-4 lg:gap-6">
                 {/* Tab để switch video */}
                 {youtubeContents.length > 1 && (
-                    <div className="flex gap-2 overflow-x-auto w-full justify-center items-center">
+                    <div className="flex gap-1.5 sm:gap-2 overflow-x-auto w-full justify-center items-center pb-2">
                         {youtubeContents.map((content, index) => (
                             <button
                                 key={content.youtubeContentId}
                                 onClick={() => setSelectedIndex(index)}
-                                className={`px-4 py-2 rounded-lg text-subhead-5 transition whitespace-nowrap cursor-pointer ${
+                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-text-5 sm:text-subhead-5 transition whitespace-nowrap cursor-pointer ${
                                     selectedIndex === index
                                         ? 'bg-blue-800 text-white'
                                         : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -45,7 +45,7 @@ export const YoutubeContent = ({ learningItemDetail }) => {
                 
                 {/* Video youtube player */}
                 {videoId ? (
-                    <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-lg">
+                    <div className="w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
                         <iframe
                             width="100%"
                             height="100%"
@@ -57,17 +57,17 @@ export const YoutubeContent = ({ learningItemDetail }) => {
                         />
                     </div>
                 ) : (
-                    <div className="w-full aspect-video rounded-2xl bg-gray-100 flex items-center justify-center">
-                        <p className="text-text-4 text-gray-500">Không có video</p>
+                    <div className="w-full aspect-video rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center">
+                        <p className="text-text-5 sm:text-text-4 text-gray-500">Không có video</p>
                     </div>
                 )}
             </div>
 
             {/* Content text */}
             {currentContent?.content && (
-                <div className="flex flex-col gap-4">
-                    <h3 className="text-h3 text-gray-900 font-semibold">Nội dung video</h3>
-                    <div className="text-text-4 text-gray-700 whitespace-pre-wrap">
+                <div className="flex flex-col gap-3 sm:gap-4">
+                    <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900 font-semibold">Nội dung video</h3>
+                    <div className="text-text-5 sm:text-text-4 text-gray-700 whitespace-pre-wrap">
                         {currentContent.content}
                     </div>
                 </div>

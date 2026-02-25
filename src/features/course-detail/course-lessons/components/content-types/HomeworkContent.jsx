@@ -121,7 +121,7 @@ const TabButton = ({ tab, isActive, onClick, index, disabled }) => {
             type="button"
             onClick={disabled ? undefined : onClick}
             disabled={disabled}
-            className={`pb-4 flex flex-row gap-2 transition-all relative ${
+            className={`pb-3 sm:pb-4 flex flex-row gap-1.5 sm:gap-2 transition-all relative ${
                 disabled 
                     ? 'cursor-not-allowed opacity-50' 
                     : 'cursor-pointer hover:opacity-80'
@@ -129,8 +129,8 @@ const TabButton = ({ tab, isActive, onClick, index, disabled }) => {
             data-tab-index={index}
         >
             <Icon isActive={isActive && !disabled} />
-            <div className="p-0.5 flex flex-row gap-1.5 items-center">
-                <span className={`text-text-4 transition-colors duration-300 ${
+            <div className="p-0.5 flex flex-row gap-1 sm:gap-1.5 items-center">
+                <span className={`text-[10px] sm:text-text-5 lg:text-text-4 transition-colors duration-300 whitespace-nowrap ${
                     disabled 
                         ? 'text-gray-400' 
                         : isActive 
@@ -140,7 +140,7 @@ const TabButton = ({ tab, isActive, onClick, index, disabled }) => {
                     {tab.label}
                 </span>
                 {disabled && (
-                    <Lock className="w-4 h-4 text-gray-400" />
+                    <Lock className="w-3 h-3 sm:w-4 sm:h-4 text-gray-400" />
                 )}
             </div>
         </button>
@@ -249,13 +249,13 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         const currentTabConfig = TAB_CONFIG.find(t => t.id === activeTab);
         if (currentTabConfig && isTabDisabled(currentTabConfig)) {
             return (
-                <div className="py-12 flex flex-col gap-4 w-full justify-center items-center rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
-                    <Lock className="w-12 h-12 text-gray-400" />
-                    <div className="flex flex-col gap-2 items-center">
-                        <span className="text-subhead-4 text-gray-900 font-semibold">
+                <div className="py-8 sm:py-10 lg:py-12 flex flex-col gap-3 sm:gap-4 w-full justify-center items-center rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
+                    <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
+                    <div className="flex flex-col gap-1.5 sm:gap-2 items-center px-4">
+                        <span className="text-subhead-5 sm:text-subhead-4 text-gray-900 font-semibold text-center">
                             Nội dung bị khóa
                         </span>
-                        <span className="text-text-4 text-gray-500">
+                        <span className="text-text-5 sm:text-text-4 text-gray-500 text-center">
                             Bạn không có quyền truy cập nội dung này
                         </span>
                     </div>
@@ -269,13 +269,13 @@ export const HomeworkContent = ({ learningItemDetail }) => {
             case TABS.RANKING:
                 if (!competition?.allowLeaderboard) {
                     return (
-                        <div className="py-12 flex flex-col gap-4 w-full justify-center items-center rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
-                            <Lock className="w-12 h-12 text-gray-400" />
-                            <div className="flex flex-col gap-2 items-center">
-                                <span className="text-subhead-4 text-gray-900 font-semibold">
+                        <div className="py-8 sm:py-10 lg:py-12 flex flex-col gap-3 sm:gap-4 w-full justify-center items-center rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
+                            <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
+                            <div className="flex flex-col gap-1.5 sm:gap-2 items-center px-4">
+                                <span className="text-subhead-5 sm:text-subhead-4 text-gray-900 font-semibold text-center">
                                     Bảng xếp hạng bị khóa
                                 </span>
-                                <span className="text-text-4 text-gray-500">
+                                <span className="text-text-5 sm:text-text-4 text-gray-500 text-center">
                                     Cuộc thi này không cho phép xem bảng xếp hạng
                                 </span>
                             </div>
@@ -286,13 +286,13 @@ export const HomeworkContent = ({ learningItemDetail }) => {
             case TABS.REVIEW:
                 if (!competition?.allowViewExamContent) {
                     return (
-                        <div className="py-12 flex flex-col gap-4 w-full justify-center items-center rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
-                            <Lock className="w-12 h-12 text-gray-400" />
-                            <div className="flex flex-col gap-2 items-center">
-                                <span className="text-subhead-4 text-gray-900 font-semibold">
+                        <div className="py-8 sm:py-10 lg:py-12 flex flex-col gap-3 sm:gap-4 w-full justify-center items-center rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
+                            <Lock className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
+                            <div className="flex flex-col gap-1.5 sm:gap-2 items-center px-4">
+                                <span className="text-subhead-5 sm:text-subhead-4 text-gray-900 font-semibold text-center">
                                     Xem lại đề bị khóa
                                 </span>
-                                <span className="text-text-4 text-gray-500">
+                                <span className="text-text-5 sm:text-text-4 text-gray-500 text-center">
                                     Cuộc thi này không cho phép xem lại nội dung đề thi
                                 </span>
                             </div>
@@ -308,19 +308,19 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     };
 
     return (
-        <div className="w-full flex flex-col gap-8">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 lg:gap-8">
             {/* Header Card */}
-            <div className="flex flex-col pt-4 pb-2 rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] justify-center items-center gap-6 w-full">
+            <div className="flex flex-col pt-3 sm:pt-4 pb-1.5 sm:pb-2 rounded-2xl sm:rounded-3xl lg:rounded-4xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] justify-center items-center gap-4 sm:gap-5 lg:gap-6 w-full">
                 {/* Title and Action Button */}
-                <div className="flex w-full px-4 flex-row justify-between items-center">
-                    <div className="flex flex-col justify-between items-start gap-2">
+                <div className="flex w-full px-3 sm:px-4 flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
+                    <div className="flex flex-col justify-between items-start gap-1.5 sm:gap-2 flex-1 min-w-0">
                         <div className="p-0.5">
-                            <span className="text-[24px] font-semibold text-black">
+                            <h2 className="text-h4 sm:text-h3 lg:text-[24px] font-semibold text-black truncate">
                                 {currentContent?.content || 'Bài tập'}
-                            </span>
+                            </h2>
                         </div>
-                        <div className={`w-fit px-3 py-0.5 ${statusConfig.bgClass} rounded-lg`}>
-                            <span className={`${statusConfig.textClass} text-text-5`}>
+                        <div className={`w-fit px-2 sm:px-3 py-0.5 ${statusConfig.bgClass} rounded-lg`}>
+                            <span className={`${statusConfig.textClass} text-[10px] sm:text-text-5`}>
                                 {statusConfig.label}
                             </span>
                         </div>
@@ -329,21 +329,21 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                         type="button"
                         disabled={statusConfig.disabled}
                         onClick={statusConfig.disabled ? undefined : handleStartCompetition}
-                        className={`flex flex-row min-w-60 px-4 py-3 gap-2.5 rounded-lg justify-center items-center transition-all ${
+                        className={`flex flex-row w-full sm:w-auto sm:min-w-52 lg:min-w-60 px-3 sm:px-4 py-2.5 sm:py-3 gap-2 sm:gap-2.5 rounded-lg justify-center items-center transition-all shrink-0 ${
                             statusConfig.disabled 
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                                 : 'bg-blue-800 hover:bg-blue-900 cursor-pointer active:scale-95'
                         }`}
                     >
-                        <Play className={`w-5 h-5 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'}`} />
-                        <span className={`text-subhead-4 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'}`}>
+                        <Play className={`w-4 h-4 sm:w-5 sm:h-5 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'}`} />
+                        <span className={`text-text-5 sm:text-subhead-5 lg:text-subhead-4 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'} whitespace-nowrap`}>
                             {statusConfig.buttonText}
                         </span>
                     </button>
                 </div>
 
                 {/* Tabs Container with animated indicator */}
-                <div className="px-8 pt-1 pb-0 flex justify-between items-center w-full relative">
+                <div className="px-3 sm:px-6 lg:px-8 pt-1 pb-0 flex justify-between items-center w-full relative overflow-x-auto">
                     <div
                         className="tab-indicator"
                         style={{
@@ -353,7 +353,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                     />
                     <div
                         ref={tabsContainerRef}
-                        className="flex justify-between items-center w-full"
+                        className="flex justify-between items-center w-full min-w-max"
                     >
                         {TAB_CONFIG.map((tab, index) => (
                             <TabButton

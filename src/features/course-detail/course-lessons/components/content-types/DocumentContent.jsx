@@ -45,15 +45,15 @@ export const DocumentContent = ({ learningItemDetail }) => {
     };
 
     return (
-        <div className="w-full flex flex-col gap-8">
+        <div className="w-full flex flex-col gap-4 sm:gap-6 lg:gap-8">
             {/* Tabs để switch documents */}
             {documentContents.length > 1 && (
-                <div className="flex gap-2 overflow-x-auto w-full justify-center items-center">
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto w-full justify-center items-center pb-2">
                     {documentContents.map((content, index) => (
                         <button
                             key={content.documentContentId}
                             onClick={() => setSelectedIndex(index)}
-                            className={`px-4 py-2 rounded-lg text-subhead-5 transition whitespace-nowrap cursor-pointer ${selectedIndex === index
+                            className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-text-5 sm:text-subhead-5 transition whitespace-nowrap cursor-pointer ${selectedIndex === index
                                 ? 'bg-blue-800 text-white'
                                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                                 }`}
@@ -66,9 +66,9 @@ export const DocumentContent = ({ learningItemDetail }) => {
 
             {/* Content text */}
             {currentContent?.content && (
-                <div className="flex flex-col gap-4">
-                    <h3 className="text-h3 text-gray-900 font-semibold">Nội dung tài liệu</h3>
-                    <div className="text-text-4 text-gray-700 whitespace-pre-wrap">
+                <div className="flex flex-col gap-3 sm:gap-4">
+                    <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900 font-semibold">Nội dung tài liệu</h3>
+                    <div className="text-text-5 sm:text-text-4 text-gray-700 whitespace-pre-wrap">
                         {currentContent.content}
                     </div>
                 </div>
@@ -96,8 +96,8 @@ export const DocumentContent = ({ learningItemDetail }) => {
 
             {/* Empty state */}
             {!currentContent && (
-                <div className="w-full py-16 flex items-center justify-center">
-                    <p className="text-text-4 text-gray-500">Không có tài liệu</p>
+                <div className="w-full py-12 sm:py-16 flex items-center justify-center">
+                    <p className="text-text-5 sm:text-text-4 text-gray-500">Không có tài liệu</p>
                 </div>
             )}
 

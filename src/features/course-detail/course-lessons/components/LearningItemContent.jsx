@@ -53,19 +53,19 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
     };
     
     return (
-        <div className="h-full w-full overflow-y-auto custom-scrollbar p-6 bg-white rounded-[40px] shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30 flex justify-start items-center flex-col">
-            <div className="flex flex-col gap-4 w-full justify-center items-center">
+        <div className="h-full w-full overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6 bg-white rounded-2xl sm:rounded-3xl lg:rounded-[40px] shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30 flex justify-start items-center flex-col">
+            <div className="flex flex-col gap-3 sm:gap-4 w-full justify-center items-center">
                 {/* Header với title và nút quay về trang chủ */}
-                <div className="relative flex justify-between items-center flex-row w-full px-10">
-                    {/* Nút toggle sidebar */}
+                <div className="relative flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 w-full px-3 sm:px-6 lg:px-10">
+                    {/* Nút toggle sidebar - Hidden on mobile as we already have the main toggle */}
                     <button
                         type="button"
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                        className="absolute -left-5 top-1/2 -translate-y-1/2 translate-x-1/2
-                                w-9 h-9 flex items-center justify-center
-                                bg-white cursor-pointer
+                        className="hidden lg:flex absolute -left-5 top-1/2 -translate-y-1/2 translate-x-1/2
+                                w-9 h-9 items-center justify-center
+                                bg-white cursor-pointer hover:bg-gray-50 rounded-lg transition-colors
                                 "
-                                    >
+                    >
                         {isSidebarOpen ? (
                             <X className="active:scale-95 transition hover:scale-105" size={24} />
                         ) : (
@@ -73,12 +73,12 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
                         )}
                     </button>
 
-                    <div className="flex flex-col justify-start items-start">
-                        <div className="p-[2px]">
+                    <div className="flex flex-col justify-start items-start flex-1 min-w-0">
+                        <div className="p-0.5">
                             {loading ? (
-                                <div className="h-6 w-40 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-5 sm:h-6 w-32 sm:w-40 bg-gray-200 rounded animate-pulse" />
                             ) : (
-                                <span className="text-subhead-4 text-blue-800">
+                                <span className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-blue-800">
                                     {currentPosition > 0
                                         ? `Mục học tập ${currentPosition} / ${totalItems}`
                                         : "Mục học tập"
@@ -86,30 +86,30 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
                                 </span>
                             )}
                         </div>
-                        <div className="p-[2px]">
+                        <div className="p-0.5">
                             {loading ? (
-                                <div className="h-6 w-64 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-5 sm:h-6 w-48 sm:w-64 bg-gray-200 rounded animate-pulse" />
                             ) : (
-                                <span className="text-subhead-4 text-gray-900">
+                                <h1 className="text-subhead-5 sm:text-subhead-4 lg:text-h4 text-gray-900 truncate">
                                     {learningItemDetail?.title || "Tiêu đề mục học tập"}
-                                </span>
+                                </h1>
                             )}
                         </div>
                     </div>
                     <button
                         type="button"
                         onClick={handleGoHome}
-                        className="px-3 gap-1 justify-center items-center flex flex-row bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-500 active:scale-105 transition"
+                        className="px-3 py-2 gap-1 sm:gap-1.5 justify-center items-center flex flex-row bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-500 active:scale-105 transition shrink-0"
                     >
-                        <SvgIcon src={Home} width={20} height={20} />
-                        <div className="p-[2px]">
-                            <span className="text-subhead-5 text-blue-800">
+                        <SvgIcon src={Home} width={16} height={16} className="sm:w-5 sm:h-5" />
+                        <div className="p-0.5">
+                            <span className="text-[10px] sm:text-text-5 lg:text-subhead-5 text-blue-800 whitespace-nowrap">
                                 Quay lại trang chủ
                             </span>
                         </div>
                     </button>
                 </div>
-                <div className="ml-10 w-[calc(100%-40px)] h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div className="px-3 sm:px-6 lg:ml-10 w-full lg:w-[calc(100%-40px)] h-1 bg-gray-200 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-blue-800 rounded-full transition-all duration-300"
                         style={{ width: `${percentage}%` }}
@@ -118,12 +118,12 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
                 {/* Content */}
                 <div className="w-full flex-1">
                     {loading ? (
-                        <div className="w-full p-10">
-                            <div className="space-y-4">
-                                <div className="h-8 bg-gray-200 rounded animate-pulse w-3/4" />
-                                <div className="h-64 bg-gray-200 rounded animate-pulse" />
-                                <div className="h-4 bg-gray-200 rounded animate-pulse w-1/2" />
-                                <div className="h-4 bg-gray-200 rounded animate-pulse w-2/3" />
+                        <div className="w-full p-4 sm:p-6 lg:p-10">
+                            <div className="space-y-3 sm:space-y-4">
+                                <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse w-3/4" />
+                                <div className="h-48 sm:h-56 lg:h-64 bg-gray-200 rounded animate-pulse" />
+                                <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-1/2" />
+                                <div className="h-3 sm:h-4 bg-gray-200 rounded animate-pulse w-2/3" />
                             </div>
                         </div>
                     ) : (
