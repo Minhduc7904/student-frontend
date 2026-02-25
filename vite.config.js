@@ -6,6 +6,7 @@ export default defineConfig({
   plugins: [
     react(),
   ],
+  base: '/student/',
 
   server: {
     port: 3000,
