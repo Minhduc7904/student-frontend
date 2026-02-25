@@ -21,6 +21,7 @@ export default {
             fontWeight: {
                 '640': '640',
                 '680': '680',
+                '600': '600',
             },
             colors: {
                 blue: {
@@ -32,6 +33,7 @@ export default {
                     aqua: '#5BFAFF',
                     soft: '#D9FCFC',
                     light: '#80C7FD',
+                    lighter: '#E3F2FF',
                 },
 
                 yellow: {
@@ -43,6 +45,7 @@ export default {
                 red: {
                     600: '#F53C37',
                     500: '#FF4B1A',
+                    400: '#EB4335',
                     100: '#FDE3CF',
                 },
 
@@ -54,6 +57,10 @@ export default {
                 pink: {
                     500: '#FF5280',
                     100: '#FFDBE5',
+                },
+                purple: {
+                    500: '#9B51E0',
+                    100: '#EBEAFF',
                 },
 
                 gray: {
