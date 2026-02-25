@@ -1,31 +1,53 @@
 import { createBrowserRouter } from 'react-router-dom';
-import authRoutes from '../features/auth/routes';
-import homeRoutes from '../features/home/routes';
-import courseDetailRoutes from '../features/course-detail/route';
-import doCompetitionRoutes from '../features/do-competition/route';
-import { Navigate } from 'react-router-dom';
-import { ROUTES } from '../core/constants';
-import NotFoundPage from '../features/not-found';
+import MainLayout from '../shared/components/layout/MainLayout';
+import HomePage from '../pages/HomePage';
+import CoursesPage from '../pages/CoursesPage';
+import CourseDetailPage from '../pages/CourseDetailPage';
+import ExamsPage from '../pages/ExamsPage';
+import ProfilePage from '../pages/ProfilePage';
+import LoginPage from '../pages/LoginPage';
+import NotFoundPage from '../pages/NotFoundPage';
+import TypographyDemo from '../pages/TypographyDemo';
 
 const router = createBrowserRouter([
-    // Auth routes (login, register, forgot password, etc.)
-    ...authRoutes,
-    // Home routes (dashboard, profile, etc.)
-    ...homeRoutes,
-    // Course detail routes
-    ...courseDetailRoutes,
-    // Do competition routes
-    ...doCompetitionRoutes,
     {
-        index: true, // Default route at '/'
-        element: <Navigate to={ROUTES.LOGIN} replace />,
+        path: '/login',
+        element: <LoginPage />
     },
     {
-        path: '*',
-        element: <NotFoundPage />,
-    },
-], {
-    basename: '/student' // Đồng bộ với base trong vite.config.js
-});
+        path: '/',
+        element: <MainLayout />,
+        children: [
+            {
+                index: true,
+                element: <HomePage />
+            },
+            {
+                path: 'courses',
+                element: <CoursesPage />
+            },
+            {
+                path: 'courses/:id',
+                element: <CourseDetailPage />
+            },
+            {
+                path: 'exams',
+                element: <ExamsPage />
+            },
+            {
+                path: 'profile',
+                element: <ProfilePage />
+            },
+            {
+                path: 'typography-demo',
+                element: <TypographyDemo />
+            },
+            {
+                path: '*',
+                element: <NotFoundPage />
+            }
+        ]
+    }
+]);
 
 export default router;

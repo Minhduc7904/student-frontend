@@ -120,4 +120,21 @@ export const doCompetitionService = {
       body
     );
   },
+
+  /**
+   * Finish a competition submit
+   * Nộp bài và kết thúc lần làm bài
+   *
+   * @param {string|number} submitId - ID của competition submit
+   * @returns {Promise<Object>} Final result of the submission
+   *
+   * @example
+   * const result = await doCompetitionService.finishSubmit(1);
+   */
+  finishSubmit: async (submitId, body = {}) => {
+    return await axiosClient.post(
+      API_ENDPOINTS.DO_COMPETITION.FINISH_SUBMIT(submitId),
+      body
+    );
+  },
 };

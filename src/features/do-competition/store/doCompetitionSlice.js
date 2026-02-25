@@ -29,6 +29,10 @@ const initialState = {
     // Submit answer
     submitAnswerLoading: false,
     submitAnswerError: null,
+    // Finish submit
+    finishSubmitLoading: false,
+    finishSubmitError: null,
+    finishSubmitResult: null,
 };
 
 /**
@@ -100,6 +104,25 @@ export const submitCompetitionAnswer = createAsyncThunk(
                 showSuccess: false,
                 showError: true,
                 errorTitle: 'Nộp câu trả lời thất bại',
+            }
+        );
+    }
+);
+
+/**
+ * Finish a competition submit
+ */
+export const finishCompetition = createAsyncThunk(
+    'doCompetition/finishSubmit',
+    async ({ submitId, homeworkContentId }, thunkAPI) => {
+        const body = homeworkContentId ? { homeworkContentId } : {};
+        return handleAsyncThunk(
+            () => doCompetitionService.finishSubmit(submitId, body),
+            thunkAPI,
+            {
+                showSuccess: false,
+                showError: true,
+                errorTitle: 'Nộp bài thất bại',
             }
         );
     }
@@ -324,6 +347,19 @@ const doCompetitionSlice = createSlice({
                     questions: (section.questions ?? []).map(markError),
                 }));
                 state.unassignedQuestions = state.unassignedQuestions.map(markError);
+            })
+            // Finish Competition Submit
+            .addCase(finishCompetition.pending, (state) => {
+                state.finishSubmitLoading = true;
+                state.finishSubmitError = null;
+            })
+            .addCase(finishCompetition.fulfilled, (state, action) => {
+                state.finishSubmitLoading = false;
+                state.finishSubmitResult = action.payload.data;
+            })
+            .addCase(finishCompetition.rejected, (state, action) => {
+                state.finishSubmitLoading = false;
+                state.finishSubmitError = action.payload || action.error.message;
             });
     },
 });
@@ -364,5 +400,8 @@ export const selectAnswersLoading = (state) => state.doCompetition.answersLoadin
 export const selectAnswersError = (state) => state.doCompetition.answersError;
 export const selectSubmitAnswerLoading = (state) => state.doCompetition.submitAnswerLoading;
 export const selectSubmitAnswerError = (state) => state.doCompetition.submitAnswerError;
+export const selectFinishSubmitLoading = (state) => state.doCompetition.finishSubmitLoading;
+export const selectFinishSubmitError = (state) => state.doCompetition.finishSubmitError;
+export const selectFinishSubmitResult = (state) => state.doCompetition.finishSubmitResult;
 
 export default doCompetitionSlice.reducer;

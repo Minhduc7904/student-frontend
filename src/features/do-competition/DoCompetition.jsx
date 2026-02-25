@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PageLoading } from '../../shared/components/loading';
 import { useCompetitionTimer, useCompetitionExam, useCompetitionAnswers } from './hooks';
-import { selectCurrentAttempt, submitCompetitionAnswer, applyOptimisticAnswer } from './store/doCompetitionSlice';
+import { selectCurrentAttempt, submitCompetitionAnswer, applyOptimisticAnswer, finishCompetition, selectFinishSubmitLoading } from './store/doCompetitionSlice';
 import { ROUTES } from '../../core/constants';
 import { CompetitionHeader } from './layout/CompetitionHeader';
 import { CompetitionContent } from './layout/CompetitionContent';
@@ -14,8 +14,8 @@ import { Clock, AlertTriangle } from 'lucide-react';
  * Do Competition Page
  * Trang làm bài thi chính
  */
-export const DoCompetition = () => {
-    const { competitionId, submitId } = useParams();
+export const DoCompetition = ({ isHomeworkCompetition = false }) => {
+    const { competitionId, submitId, courseId, lessonId, learningItemId, homeworkContentId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -29,7 +29,11 @@ export const DoCompetition = () => {
         if (!currentAttempt || currentAttempt.competitionSubmitId !== submitIdNum) {
             // Redirect về trang start nếu không có attempt hoặc không khớp
             console.warn('Invalid attempt or submitId mismatch. Redirecting to start...');
-            navigate(ROUTES.DO_COMPETITION_START(competitionId), { replace: true });
+            if (isHomeworkCompetition) {
+                navigate(ROUTES.DO_HOMEWORK_COMPETITION_START(courseId, lessonId, learningItemId, homeworkContentId, competitionId), { replace: true });
+            } else {
+                navigate(ROUTES.DO_COMPETITION_START(competitionId), { replace: true });
+            }
         }
     }, [currentAttempt, submitId, competitionId, navigate]);
 
@@ -116,6 +120,39 @@ export const DoCompetition = () => {
     // Per-question debounce timers for API submission (avoid rapid-fire requests)
     const submitTimersRef = useRef({});
 
+    const finishLoading = useSelector(selectFinishSubmitLoading);
+
+    /**
+     * Nộp bài và điều hướng sau khi hoàn thành
+     */
+    const handleFinishCompetition = useCallback(async () => {
+        try {
+            await dispatch(finishCompetition({
+                submitId,
+                homeworkContentId: isHomeworkCompetition ? homeworkContentId : undefined,
+            })).unwrap();
+
+            if (isHomeworkCompetition) {
+                navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { replace: true });
+            } else {
+                navigate(ROUTES.DASHBOARD, { replace: true });
+            }
+        } catch {
+            // lỗi đã được toast bởi handleAsyncThunk
+        }
+    }, [dispatch, submitId, isHomeworkCompetition, homeworkContentId, courseId, lessonId, learningItemId, navigate]);
+
+    /**
+     * Quay về (header button)
+     */
+    const handleGoBack = useCallback(() => {
+        if (isHomeworkCompetition) {
+            navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
+        } else {
+            navigate(ROUTES.DASHBOARD);
+        }
+    }, [isHomeworkCompetition, courseId, lessonId, learningItemId, navigate]);
+
     // Called only from sidebar: select + scroll to question
     const handleSidebarQuestionClick = useCallback((questionId) => {
         setCurrentQuestionId(questionId);
@@ -166,8 +203,8 @@ export const DoCompetition = () => {
             // Optimistic update — patch UI immediately, no wait for API
             dispatch(applyOptimisticAnswer({ questionId, body }));
 
-            // SHORT_ANSWER / ESSAY already debounce inside ShortAnswerInput — call API directly
-            if (questionType === 'SHORT_ANSWER' || questionType === 'ESSAY') {
+            // SHORT_ANSWER / ESSAY / TRUE_FALSE — call API directly (no debounce)
+            if (questionType === 'SHORT_ANSWER' || questionType === 'ESSAY' || questionType === 'TRUE_FALSE') {
                 dispatch(submitCompetitionAnswer({ submitId, answerId, questionId, body }));
                 return;
             }
@@ -195,6 +232,8 @@ export const DoCompetition = () => {
                 competition={competition}
                 loading={examLoading && !competition}
                 onToggleSidebar={() => setSidebarOpen((v) => !v)}
+                onGoBack={handleGoBack}
+                backLabel={isHomeworkCompetition ? 'Khóa học' : 'Trang chủ'}
             />
             {/* Body: fill remaining height, no outer scroll */}
             {/* Mobile header = h-12 (row1) + h-8 (row2) = 80px = mt-20; md+ = mt-16; lg = mt-17 */}
@@ -221,6 +260,8 @@ export const DoCompetition = () => {
                     loading={examLoading && !hasExam}
                     isOpen={sidebarOpen}
                     onClose={() => setSidebarOpen(false)}
+                    onSubmit={handleFinishCompetition}
+                    submitLoading={finishLoading}
                 />
             </div>
         </div>

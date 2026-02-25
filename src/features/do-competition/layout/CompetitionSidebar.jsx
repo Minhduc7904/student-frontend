@@ -249,6 +249,8 @@ export const CompetitionSidebar = memo(({
     loading,
     isOpen,
     onClose,
+    onSubmit,
+    submitLoading = false,
 }) => {
     const totalMinutes = competition?.durationMinutes ?? 0;
     // elapsedMinutes tính từ durationMinutes và remainingSeconds
@@ -320,6 +322,8 @@ export const CompetitionSidebar = memo(({
                     </div>
                 )}
                 <button
+                    onClick={onSubmit}
+                    disabled={submitLoading}
                     className="
                         w-full flex items-center justify-center gap-2
                         px-4 py-2.5 rounded-2xl
@@ -330,7 +334,7 @@ export const CompetitionSidebar = memo(({
                     "
                 >
                     <Send className="w-4 h-4 shrink-0" />
-                    Nộp bài
+                    {submitLoading ? 'Đang nộp...' : 'Nộp bài'}
                 </button>
             </div>
             </aside>
@@ -351,6 +355,8 @@ CompetitionSidebar.propTypes = {
     loading: PropTypes.bool,
     isOpen: PropTypes.bool,
     onClose: PropTypes.func,
+    onSubmit: PropTypes.func,
+    submitLoading: PropTypes.bool,
 };
 
 CompetitionSidebar.displayName = 'CompetitionSidebar';

@@ -104,6 +104,7 @@ export const API_ENDPOINTS = {
         GET_EXAM: (competitionId) => `/do-competition/${competitionId}/exam`,
         GET_ANSWERS: (submitId) => `/do-competition/submit/${submitId}/answers`,
         SUBMIT_ANSWER: (submitId, answerId) => `/do-competition/submit/${submitId}/answer/${answerId}`,
+        FINISH_SUBMIT: (submitId) => `/do-competition/submit/${submitId}/finish`,
     },
 
     // Statistics

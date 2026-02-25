@@ -5,7 +5,7 @@ import { DetailTabContent } from "./DetailTabContent";
 import { RankingTabContent } from "./RankingTabContent";
 import { ReviewTabContent } from "./ReviewTabContent";
 import { HistoryTabContent } from "./HistoryTabContent";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../../../core/constants";
 // Status configuration - same as DetailTabContent for consistency
 const STATUS_CONFIG = {
@@ -154,6 +154,7 @@ const TabButton = ({ tab, isActive, onClick, index, disabled }) => {
  */
 export const HomeworkContent = ({ learningItemDetail }) => {
     const navigate = useNavigate();
+    const { courseId, lessonId } = useParams();
     const homeworkContents = learningItemDetail?.homeworkContents || [];
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [activeTab, setActiveTab] = useState(TABS.DETAIL);
@@ -208,7 +209,15 @@ export const HomeworkContent = ({ learningItemDetail }) => {
      */
     const handleStartCompetition = () => {
         if (competition?.competitionId) {
-            navigate(ROUTES.DO_COMPETITION_START(competition.competitionId));
+            const learningItemId = learningItemDetail?.learningItemId;
+            const homeworkContentId = currentContent?.homeworkContentId;
+            navigate(ROUTES.DO_HOMEWORK_COMPETITION_START(
+                courseId,
+                lessonId,
+                learningItemId,
+                homeworkContentId,
+                competition.competitionId
+            ));
         }
     };
 

@@ -3,10 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { PageLoading } from '../../shared/components/loading';
 import { ROUTES } from '../../core/constants';
-import { 
-    startCompetitionAttempt, 
+import {
+    startCompetitionAttempt,
     selectStartAttemptLoading,
-    selectCurrentAttempt 
+    selectCurrentAttempt
 } from './store/doCompetitionSlice';
 import { AlertCircle, CheckCircle, XCircle, Clock, Info } from 'lucide-react';
 
@@ -138,11 +138,10 @@ const StatusMessage = ({ type, title, message, onRetry, onClose }) => {
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className={`w-full px-6 py-3 rounded-lg text-subhead-4 transition-all active:scale-95 ${
-                                type === 'error' 
-                                    ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
-                                    : 'bg-blue-800 hover:bg-blue-900 text-white'
-                            }`}
+                            className={`w-full px-6 py-3 rounded-lg text-subhead-4 transition-all active:scale-95 ${type === 'error'
+                                ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
+                                : 'bg-blue-800 hover:bg-blue-900 text-white'
+                                }`}
                         >
                             Đóng
                         </button>
@@ -157,14 +156,14 @@ const StatusMessage = ({ type, title, message, onRetry, onClose }) => {
  * Do Competition Start Page
  * Trang bắt đầu làm bài thi - kiểm tra điều kiện và khởi tạo attempt
  */
-export const DoCompetitionStart = () => {
-    const { competitionId } = useParams();
+export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
+    const { competitionId, courseId, lessonId, learningItemId, homeworkContentId } = useParams();
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    
+
     const loading = useSelector(selectStartAttemptLoading);
     const currentAttempt = useSelector(selectCurrentAttempt);
-    
+
     const [showConfirmModal, setShowConfirmModal] = useState(true);
     const [status, setStatus] = useState({
         show: false,
@@ -175,18 +174,29 @@ export const DoCompetitionStart = () => {
 
     const handleStartAttempt = async () => {
         setShowConfirmModal(false); // Đóng modal xác nhận
-        
+
         try {
             const result = await dispatch(startCompetitionAttempt(competitionId)).unwrap();
-            
+
             // Success case
             if (result.success) {
                 const { data } = result;
-                
+
                 // Kiểm tra có competitionSubmitId và isInProgress
                 if (data?.competitionSubmitId && data?.isInProgress) {
                     // Navigate trực tiếp đến trang làm bài
-                    navigate(ROUTES.DO_COMPETITION_SUBMIT(data.competitionId, data.competitionSubmitId));
+                    if (isHomeworkCompetition) {
+                        navigate(ROUTES.DO_HOMEWORK_COMPETITION_SUBMIT(
+                            courseId,
+                            lessonId,
+                            learningItemId,
+                            homeworkContentId,
+                            data.competitionId,
+                            data.competitionSubmitId
+                        ));
+                    } else {
+                        navigate(ROUTES.DO_COMPETITION_SUBMIT(data.competitionId, data.competitionSubmitId));
+                    }
                 } else {
                     // Hiển thị thông báo nếu không có điều kiện để làm bài
                     setStatus({
@@ -208,7 +218,7 @@ export const DoCompetitionStart = () => {
         } catch (error) {
             // Error từ API hoặc network
             const errorMessage = error?.message || error?.data?.message || 'Không thể kết nối đến máy chủ';
-            
+
             setStatus({
                 show: true,
                 type: 'error',
@@ -225,18 +235,23 @@ export const DoCompetitionStart = () => {
 
     const handleClose = () => {
         // Quay về trang trước hoặc trang chủ
-        navigate(-1);
+        if (isHomeworkCompetition) {
+            navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
+        }
+        else navigate(-1);
     };
 
     const handleCancelConfirm = () => {
-        // Hủy và quay lại trang trước
-        navigate(-1);
+        if (isHomeworkCompetition) {
+            navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
+        }
+        else navigate(-1);
     };
 
     // Hiển thị confirmation modal
     if (showConfirmModal) {
         return (
-            <ConfirmationModal 
+            <ConfirmationModal
                 onConfirm={handleStartAttempt}
                 onCancel={handleCancelConfirm}
             />

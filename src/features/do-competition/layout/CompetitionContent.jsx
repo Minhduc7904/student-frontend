@@ -48,10 +48,9 @@ const SectionTabs = memo(({ tabs, activeIndex, onChange }) => (
                             relative shrink-0 flex items-center gap-1.5
                             px-4 py-3 text-text-5 font-semibold
                             transition-colors whitespace-nowrap
-                            ${
-                                isActive
-                                    ? 'text-blue-800'
-                                    : 'text-gray-500 hover:text-gray-800'
+                            ${isActive
+                                ? 'text-blue-800'
+                                : 'text-gray-500 hover:text-gray-800'
                             }
                         `}
                     >
@@ -61,10 +60,9 @@ const SectionTabs = memo(({ tabs, activeIndex, onChange }) => (
                             <span
                                 className={`
                                     text-[10px] font-semibold px-1.5 py-0.5 rounded-full
-                                    ${
-                                        isActive
-                                            ? 'bg-blue-100 text-blue-700'
-                                            : 'bg-gray-100 text-gray-500'
+                                    ${isActive
+                                        ? 'bg-blue-100 text-blue-700'
+                                        : 'bg-gray-100 text-gray-500'
                                     }
                                 `}
                             >

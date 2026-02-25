@@ -12,11 +12,15 @@ import { Home, LayoutList } from 'lucide-react';
  * - Giữa: Title và subtitle của competition
  * - Phải: Nút quay về trang chủ
  */
-export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar }) => {
+export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar, onGoBack, backLabel = 'Trang chủ' }) => {
     const navigate = useNavigate();
 
     const handleGoHome = () => {
-        navigate(ROUTES.DASHBOARD, { replace: true });
+        if (onGoBack) {
+            onGoBack();
+        } else {
+            navigate(ROUTES.DASHBOARD, { replace: true });
+        }
     };
 
     return (
@@ -107,10 +111,10 @@ export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar }
                     <button
                         onClick={handleGoHome}
                         className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
-                        title="Quay về trang chủ"
+                        title={backLabel}
                     >
                         <Home className="w-5 h-5 shrink-0" />
-                        <span className="text-text-4 font-medium">Trang chủ</span>
+                        <span className="text-text-4 font-medium">{backLabel}</span>
                     </button>
                 </div>
             </div>
@@ -131,6 +135,8 @@ CompetitionHeader.propTypes = {
     }),
     loading: PropTypes.bool,
     onToggleSidebar: PropTypes.func,
+    onGoBack: PropTypes.func,
+    backLabel: PropTypes.string,
 };
 
 CompetitionHeader.displayName = 'CompetitionHeader';
