@@ -24,19 +24,19 @@ const ConfirmationModal = ({ onConfirm, onCancel }) => {
     ];
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-            <div className="max-w-2xl w-full bg-white rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300">
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4">
+            <div className="max-w-2xl w-full bg-white rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300">
                 {/* Header */}
-                <div className="px-8 pt-8 pb-6 border-b border-gray-100">
-                    <div className="flex items-center gap-4">
-                        <div className="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                            <Info className="w-7 h-7 text-blue-800" />
+                <div className="px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-gray-100">
+                    <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+                            <Info className="w-6 h-6 sm:w-7 sm:h-7 text-blue-800" />
                         </div>
-                        <div className="flex flex-col gap-1">
-                            <h2 className="text-h2 text-gray-900">
+                        <div className="flex flex-col gap-0.5 sm:gap-1">
+                            <h2 className="text-h3 sm:text-h2 text-gray-900">
                                 Lưu ý trước khi làm bài
                             </h2>
-                            <p className="text-text-4 text-gray-600">
+                            <p className="text-text-5 sm:text-text-4 text-gray-600">
                                 Vui lòng đọc kỹ các lưu ý dưới đây
                             </p>
                         </div>
@@ -44,15 +44,15 @@ const ConfirmationModal = ({ onConfirm, onCancel }) => {
                 </div>
 
                 {/* Content */}
-                <div className="px-8 py-6">
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-6">
-                        <div className="flex flex-col gap-3">
+                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                    <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6">
+                        <div className="flex flex-col gap-2.5 sm:gap-3">
                             {warnings.map((warning, index) => (
-                                <div key={index} className="flex items-start gap-3">
-                                    <div className="w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="text-text-5 font-semibold">{index + 1}</span>
+                                <div key={index} className="flex items-start gap-2.5 sm:gap-3">
+                                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
+                                        <span className="text-[10px] sm:text-text-5 font-semibold">{index + 1}</span>
                                     </div>
-                                    <p className="text-text-4 text-gray-900 flex-1">
+                                    <p className="text-text-5 sm:text-text-4 text-gray-900 flex-1">
                                         {warning}
                                     </p>
                                 </div>
@@ -62,16 +62,16 @@ const ConfirmationModal = ({ onConfirm, onCancel }) => {
                 </div>
 
                 {/* Footer */}
-                <div className="px-8 pb-8 flex flex-col sm:flex-row gap-3">
+                <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
                     <button
                         onClick={onCancel}
-                        className="flex-1 px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-subhead-4 transition-all active:scale-95"
+                        className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
                     >
                         Hủy
                     </button>
                     <button
                         onClick={onConfirm}
-                        className="flex-1 px-6 py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-subhead-4 transition-all active:scale-95"
+                        className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
                     >
                         Bắt đầu làm bài
                     </button>
@@ -108,29 +108,34 @@ const StatusMessage = ({ type, title, message, onRetry, onClose }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-            <div className={`max-w-md w-full ${bgColors[type]} border-2 ${borderColors[type]} rounded-2xl shadow-2xl p-8 animate-in fade-in zoom-in duration-300`}>
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4">
+            <div className={`max-w-md w-full ${bgColors[type]} border-2 ${borderColors[type]} rounded-xl sm:rounded-2xl shadow-2xl p-6 sm:p-8 animate-in fade-in zoom-in duration-300`}>
                 {/* Icon */}
-                <div className="flex justify-center mb-6">
-                    {icons[type]}
+                <div className="flex justify-center mb-4 sm:mb-6">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16">
+                        {type === 'success' && <CheckCircle className="w-full h-full text-green-500" />}
+                        {type === 'error' && <XCircle className="w-full h-full text-red-500" />}
+                        {type === 'warning' && <AlertCircle className="w-full h-full text-yellow-500" />}
+                        {type === 'info' && <Clock className="w-full h-full text-blue-500" />}
+                    </div>
                 </div>
 
                 {/* Title */}
-                <h2 className="text-h2 text-gray-900 text-center mb-3">
+                <h2 className="text-h3 sm:text-h2 text-gray-900 text-center mb-2 sm:mb-3">
                     {title}
                 </h2>
 
                 {/* Message */}
-                <p className="text-text-4 text-gray-700 text-center mb-6">
+                <p className="text-text-5 sm:text-text-4 text-gray-700 text-center mb-5 sm:mb-6">
                     {message}
                 </p>
 
                 {/* Actions */}
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-2.5 sm:gap-3">
                     {onRetry && type === 'error' && (
                         <button
                             onClick={onRetry}
-                            className="w-full px-6 py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-subhead-4 transition-all active:scale-95"
+                            className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
                         >
                             Thử lại
                         </button>
@@ -138,7 +143,7 @@ const StatusMessage = ({ type, title, message, onRetry, onClose }) => {
                     {onClose && (
                         <button
                             onClick={onClose}
-                            className={`w-full px-6 py-3 rounded-lg text-subhead-4 transition-all active:scale-95 ${type === 'error'
+                            className={`w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95 ${type === 'error'
                                 ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
                                 : 'bg-blue-800 hover:bg-blue-900 text-white'
                                 }`}
