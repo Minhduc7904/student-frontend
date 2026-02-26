@@ -1,14 +1,22 @@
 import { memo } from "react";
 import { Clock, BookOpen, CheckCircle2, Circle } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
 import { SvgIcon } from "../../../../shared/components";
 import Video from '../../../../assets/icons/Video.svg';
 import Document from '../../../../assets/icons/Document.svg';
 import Task from '../../../../assets/icons/Task.svg';
+import Home from '../../../../assets/icons/Home.svg';
+import { ROUTES } from "../../../../core/constants";
 
 /**
  * LearningItemCard - Card hiển thị từng learning item
  */
-const LearningItemCard = memo(({ item, index }) => {
+const LearningItemCard = memo(({ item, index, courseId, lessonId }) => {
+    const navigate = useNavigate();
+
+    const handleClick = () => {
+        navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, item.learningItemId));
+    };
     const getIconByType = (type) => {
         switch (type) {
             case 'DOCUMENT':
@@ -66,11 +74,13 @@ const LearningItemCard = memo(({ item, index }) => {
     };
 
     return (
-        <button className="w-full bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] hover:shadow-[0px_6px_16px_0px_rgba(0,0,0,0.1)] transition-all duration-200 hover:scale-[1.01]">
+        <button 
+            onClick={handleClick}
+            className="w-full bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]">
             <div className="flex items-start gap-3 sm:gap-4">
                 {/* Icon & Status */}
                 <div className="flex flex-col items-center gap-2 sm:gap-3">
-                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getTypeBgColor(item.type)} rounded-lg flex items-center justify-center shrink-0`}>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 ${getTypeBgColor(item.type)} rounded-lg sm:rounded-xl flex items-center justify-center shrink-0 border border-gray-100`}>
                         <SvgIcon src={getIconByType(item.type)} width={20} height={20} className="sm:w-6 sm:h-6" />
                     </div>
                     {item.isLearned ? (
@@ -86,15 +96,15 @@ const LearningItemCard = memo(({ item, index }) => {
                         <span className="text-[10px] sm:text-text-5 text-gray-500 font-semibold">
                             Mục {index + 1}
                         </span>
-                        <span className={`text-[10px] sm:text-text-5 px-1.5 sm:px-2 py-0.5 ${getTypeBgColor(item.type)} ${getTypeTextColor(item.type)} rounded-full font-semibold`}>
+                        <span className={`text-[10px] sm:text-text-5 px-2 sm:px-2.5 py-0.5 sm:py-1 ${getTypeBgColor(item.type)} ${getTypeTextColor(item.type)} rounded-full font-semibold border border-current border-opacity-20`}>
                             {getTypeLabel(item.type)}
                         </span>
                     </div>
-                    <h4 className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-gray-900 mb-1 line-clamp-2">
+                    <h4 className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-gray-900 mb-1 line-clamp-2 font-semibold">
                         {item.learningItemName}
                     </h4>
                     {item.isLearned && (
-                        <span className="text-[10px] sm:text-text-5 text-green-600">
+                        <span className="text-[10px] sm:text-text-5 text-green-600 font-semibold">
                             ✓ Đã hoàn thành
                         </span>
                     )}
@@ -110,10 +120,22 @@ LearningItemCard.displayName = "LearningItemCard";
  * LessonContent - Hiển thị nội dung chi tiết của bài học
  */
 export const LessonContent = memo(({ lessonDetail }) => {
+    const navigate = useNavigate();
+    const { courseId, lessonId } = useParams();
+
+    const handleGoHome = () => {
+        navigate(ROUTES.DASHBOARD);
+    };
+
     if (!lessonDetail) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <p className="text-text-4 text-gray-500">Chọn một bài học để xem nội dung</p>
+            <div className="h-full w-full overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6 bg-white rounded-2xl sm:rounded-3xl lg:rounded-[40px] shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30 flex items-center justify-center">
+                <div className="text-center">
+                    <BookOpen size={40} className="sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
+                    <p className="text-text-5 sm:text-text-4 text-gray-500">
+                        Chọn một bài học để xem nội dung
+                    </p>
+                </div>
             </div>
         );
     }
@@ -129,38 +151,58 @@ export const LessonContent = memo(({ lessonDetail }) => {
     } = lessonDetail;
 
     return (
-        <div className="h-full overflow-y-auto custom-scrollbar">
-            <div className="p-3 sm:p-4 lg:p-6">
-                {/* Header Section */}
-                <div className="mb-6 sm:mb-8">
-                    <div className="flex items-center gap-1.5 sm:gap-2 mb-2 sm:mb-3">
-                        <BookOpen size={16} className="sm:w-5 sm:h-5 text-blue-800" />
-                        <span className="text-[10px] sm:text-text-5 text-blue-800 font-semibold uppercase">
-                            Bài học
-                        </span>
-                    </div>
-                    <h1 className="text-h3 sm:text-h2 lg:text-h1 text-gray-900 mb-2 sm:mb-3">
-                        {title}
-                    </h1>
-                    {teacherName && (
-                        <p className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-gray-600 mb-3 sm:mb-4">
-                            Giảng viên: {teacherName}
-                        </p>
-                    )}
-
-                    {/* Progress Bar */}
-                    <div className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-5 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
-                        <div className="flex justify-between items-center mb-2 sm:mb-3">
-                            <span className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-gray-900">Tiến độ học tập</span>
-                            <span className="text-subhead-5 sm:text-h4 text-blue-800">{completionPercentage}%</span>
+        <div className="h-full w-full overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6 bg-white rounded-2xl sm:rounded-3xl lg:rounded-[40px] shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30">
+            <div className="flex flex-col gap-4 sm:gap-6 w-full">
+                {/* Header với title và nút quay về trang chủ */}
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 w-full px-3 sm:px-6 lg:px-10">
+                    <div className="flex flex-col justify-start items-start flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 mb-1 sm:mb-2">
+                            <BookOpen size={16} className="sm:w-5 sm:h-5 text-blue-800" />
+                            <span className="text-[10px] sm:text-text-5 text-blue-800 font-semibold uppercase">
+                                Bài học
+                            </span>
                         </div>
-                        <div className="w-full h-1.5 sm:h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <h1 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900">
+                            {title}
+                        </h1>
+                        {teacherName && (
+                            <p className="text-text-5 sm:text-subhead-5 text-gray-600 mt-1">
+                                Giảng viên: {teacherName}
+                            </p>
+                        )}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={handleGoHome}
+                        className="px-3 py-2 gap-1 sm:gap-1.5 justify-center items-center flex flex-row bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-500 active:scale-105 transition shrink-0"
+                    >
+                        <SvgIcon src={Home} width={16} height={16} className="sm:w-5 sm:h-5" />
+                        <div className="p-0.5">
+                            <span className="text-[10px] sm:text-text-5 lg:text-subhead-5 text-blue-800 whitespace-nowrap">
+                                Quay lại trang chủ
+                            </span>
+                        </div>
+                    </button>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="px-3 sm:px-6 lg:px-10">
+                    <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-4 sm:p-5 lg:p-6 border border-gray-100">
+                        <div className="flex justify-between items-center mb-2 sm:mb-3">
+                            <span className="text-text-5 sm:text-subhead-5 lg:text-subhead-4 text-gray-900 font-semibold">
+                                Tiến độ học tập
+                            </span>
+                            <span className="text-subhead-5 sm:text-h4 text-blue-800 font-bold">
+                                {completionPercentage}%
+                            </span>
+                        </div>
+                        <div className="w-full h-2 sm:h-2.5 bg-gray-200 rounded-full overflow-hidden">
                             <div
                                 className="h-full bg-gradient-to-r from-blue-500 to-blue-700 transition-all duration-700 ease-out rounded-full"
                                 style={{ width: `${completionPercentage}%` }}
                             />
                         </div>
-                        <p className="text-[10px] sm:text-text-5 text-gray-600 mt-1.5 sm:mt-2">
+                        <p className="text-[10px] sm:text-text-5 text-gray-600 mt-2">
                             {completedLearningItems}/{totalLearningItems} mục đã hoàn thành
                         </p>
                     </div>
@@ -168,13 +210,15 @@ export const LessonContent = memo(({ lessonDetail }) => {
 
                 {/* Chapters Info */}
                 {chapters.length > 0 && (
-                    <div className="mb-6 sm:mb-8">
-                        <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900 mb-3 sm:mb-4">Chương học liên quan</h3>
-                        <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    <div className="px-3 sm:px-6 lg:px-10">
+                        <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900 mb-3 sm:mb-4">
+                            Chương học liên quan
+                        </h3>
+                        <div className="flex flex-wrap gap-2 sm:gap-2.5">
                             {chapters.map((chapter) => (
                                 <span
                                     key={chapter.chapterId}
-                                    className="px-2 sm:px-3 py-1 sm:py-1.5 bg-blue-50 text-blue-800 text-[10px] sm:text-text-5 rounded-lg font-semibold"
+                                    className="px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-50 text-blue-800 text-[10px] sm:text-text-5 rounded-lg font-semibold border border-blue-100"
                                 >
                                     {chapter.name}
                                 </span>
@@ -184,8 +228,8 @@ export const LessonContent = memo(({ lessonDetail }) => {
                 )}
 
                 {/* Learning Items */}
-                <div>
-                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className="px-3 sm:px-6 lg:px-10">
+                    <div className="flex items-center justify-between mb-4 sm:mb-5">
                         <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900">
                             Nội dung học tập ({learningItems.length})
                         </h3>
@@ -198,11 +242,13 @@ export const LessonContent = memo(({ lessonDetail }) => {
                                     key={item.learningItemId}
                                     item={item}
                                     index={index}
+                                    courseId={courseId}
+                                    lessonId={lessonId}
                                 />
                             ))}
                         </div>
                     ) : (
-                        <div className="bg-white rounded-lg sm:rounded-xl p-8 sm:p-10 lg:p-12 shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] text-center">
+                        <div className="bg-gray-50 rounded-xl sm:rounded-2xl p-8 sm:p-10 lg:p-12 border border-gray-100 text-center">
                             <BookOpen size={40} className="sm:w-12 sm:h-12 text-gray-300 mx-auto mb-3 sm:mb-4" />
                             <p className="text-text-5 sm:text-text-4 text-gray-500">
                                 Bài học này chưa có nội dung học tập
@@ -212,7 +258,7 @@ export const LessonContent = memo(({ lessonDetail }) => {
                 </div>
 
                 {/* Footer Info */}
-                <div className="mt-6 sm:mt-8 pt-4 sm:pt-6 border-t border-gray-200">
+                <div className="px-3 sm:px-6 lg:px-10 pt-4 sm:pt-6 border-t border-gray-200">
                     <div className="flex items-center gap-3 sm:gap-4 text-[10px] sm:text-text-5 text-gray-500">
                         <div className="flex items-center gap-1.5 sm:gap-2">
                             <Clock size={14} className="sm:w-4 sm:h-4" />

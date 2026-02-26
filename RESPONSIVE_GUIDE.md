@@ -164,7 +164,7 @@ fontSize: {
 
 ```jsx
 <main className="
-  relative flex flex-1 min-h-screen 
+  relative flex flex-1 min-h-dvh 
   justify-center sm:justify-end
   items-center 
   p-4 sm:p-6 md:p-8 lg:p-10

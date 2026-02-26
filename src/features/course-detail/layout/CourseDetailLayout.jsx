@@ -50,7 +50,7 @@ const CourseDetailLayout = () => {
     // Hiển thị loading khi đang tải
     if (loading) {
         return (
-            <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+            <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
                 <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                     <SvgIcon src={StartList} width={232} height={137} />
                 </div>
@@ -64,7 +64,7 @@ const CourseDetailLayout = () => {
     // Hiển thị 404 nếu có lỗi hoặc không tìm thấy course
     if (error || !courseDetail) {
         return (
-            <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+            <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
                 <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                     <SvgIcon src={StartList} width={232} height={137} />
                 </div>
@@ -74,7 +74,7 @@ const CourseDetailLayout = () => {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+        <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
             <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                 <SvgIcon src={StartList} width={232} height={137} />
             </div>

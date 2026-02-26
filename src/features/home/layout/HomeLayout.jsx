@@ -78,7 +78,7 @@ const HomeLayout = () => {
     }, [isMobileMenuOpen]);
 
     return (
-        <div className="h-screen flex bg-gray-50 overflow-hidden">
+        <div className="h-dvh flex bg-gray-50 overflow-hidden">
             {/* Mobile Menu Button - Hiển thị trên mobile */}
             <button
                 onClick={handleToggleMobileMenu}
@@ -104,7 +104,7 @@ const HomeLayout = () => {
             <div
                 className={`
                 fixed md:relative
-                h-screen z-50
+                h-dvh z-50
                 transform transition-transform duration-300 ease-in-out
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'}
                 md:translate-x-0

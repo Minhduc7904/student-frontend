@@ -102,7 +102,7 @@ export const CourseLessonsPage = () => {
                 className={`
                     flex flex-col
                     w-full md:w-80 lg:w-96 xl:w-106.75
-                    h-[calc(100vh-80px)]
+                    h-[calc(100dvh-80px)]
                     fixed md:relative
                     top-20 left-0
                     z-50
@@ -167,7 +167,7 @@ export const CourseLessonsPage = () => {
             </div>
 
             {/* Right content - Responsive */}
-            <div className="flex-1 h-[calc(100vh-80px)] overflow-y-auto custom-scrollbar p-3 sm:p-4 w-full md:w-[calc(100%-20rem)] lg:w-[calc(100%-24rem)] xl:w-[calc(100%-427px)]">
+            <div className="flex-1 h-[calc(100dvh-80px)] overflow-y-auto custom-scrollbar p-3 sm:p-4 w-full md:w-[calc(100%-20rem)] lg:w-[calc(100%-24rem)] xl:w-[calc(100%-427px)]">
                 {learningItemId ? (
                     // Nếu có learningItemId, hiển thị LearningItemContent
                     learningItemError || (!learningItemLoading && !learningItemDetail) ? (

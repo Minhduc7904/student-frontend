@@ -286,7 +286,7 @@ export const Sidebar = memo(({ isCollapsed, onToggleCollapse }) => {
         return (
             <aside className="
                 pt-3 px-3 pb-6 md:pt-4 md:px-4 md:pb-7 lg:pt-5 lg:px-6 lg:pb-9
-                h-screen
+                h-dvh
                 bg-background
                 w-[100px] md:w-[120px] lg:w-[132px]
                 flex flex-col
@@ -329,7 +329,7 @@ export const Sidebar = memo(({ isCollapsed, onToggleCollapse }) => {
     return (
         <aside className="
             pt-3 px-3 pb-3 md:pt-4 md:px-4 md:pb-16 lg:pt-5 lg:px-6 lg:pb-10
-            h-screen
+            h-dvh
             bg-background
             w-[240px] md:w-[260px] lg:w-[288px]
             flex flex-col

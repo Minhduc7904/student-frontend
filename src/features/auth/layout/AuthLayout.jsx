@@ -4,7 +4,7 @@ import { getBannerImageUrl } from '../../../shared/constants'
 function AuthLayout() {
     const bannerUrl = getBannerImageUrl('auth-banner-background.png')
     return (
-        <div className="relative overflow-hidden min-h-screen">
+        <div className="relative overflow-hidden min-h-dvh">
 
             {/* Background Image */}
             <div
@@ -13,7 +13,7 @@ function AuthLayout() {
             />
 
             {/* Main Content */}
-            <main className="relative flex flex-1 min-h-screen justify-center sm:justify-end items-center p-4 sm:p-6 md:p-8 lg:p-10">
+            <main className="relative flex flex-1 min-h-dvh justify-center sm:justify-end items-center p-4 sm:p-6 md:p-8 lg:p-10">
                 <Outlet />
             </main>
 

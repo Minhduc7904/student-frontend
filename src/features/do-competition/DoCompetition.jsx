@@ -227,7 +227,7 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
     }
 
     return (
-        <div className="h-screen flex flex-col bg-gray-50">
+        <div className="h-dvh flex flex-col bg-gray-50">
             <CompetitionHeader
                 competition={competition}
                 loading={examLoading && !competition}

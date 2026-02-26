@@ -276,7 +276,7 @@ export const CompetitionSidebar = memo(({
                 bg-white
                 flex flex-col
                 transition-transform duration-300 ease-in-out
-                fixed top-20 right-0 z-50 w-72 h-[calc(100vh-5rem)]
+                fixed top-20 right-0 z-50 w-72 h-[calc(100dvh-5rem)]
                 md:relative md:top-auto md:translate-x-0 md:w-60 md:h-full lg:w-75 xl:w-80
                 ${isOpen ? 'translate-x-0' : 'translate-x-full md:translate-x-0'}
             `}>
