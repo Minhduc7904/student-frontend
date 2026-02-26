@@ -22,7 +22,13 @@ export const LoadingRedirectPage = () => {
         }
 
         // Load profile
-        dispatch(getProfileAsync());
+        dispatch(getProfileAsync())
+            .unwrap()
+            .catch((error) => {
+                // On any error (network, server, etc.), redirect to login
+                console.error('Failed to load profile:', error);
+                navigate(ROUTES.LOGIN, { replace: true });
+            });
     }, [isAuthenticated]);
 
     useEffect(() => {
