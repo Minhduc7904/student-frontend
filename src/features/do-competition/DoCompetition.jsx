@@ -45,6 +45,9 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
         return <PageLoading message="Đang kiểm tra phiên làm bài..." />;
     }
 
+    // Ref để gọi handleFinishCompetition từ bên trong onTimeUp (tránh closure stale)
+    const autoSubmitRef = useRef(null);
+
     // Sử dụng custom hook để quản lý thời gian (chỉ khi đã validate)
     const {
         timeData,
@@ -60,8 +63,8 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
     } = useCompetitionTimer(submitId, {
         autoStart: true,
         onTimeUp: (data) => {
-            console.log('Time is up!', data);
-            // TODO: Auto submit hoặc show warning
+            console.log('Time is up! Auto submitting...', data);
+            autoSubmitRef.current?.();
         },
         onError: (error) => {
             console.error('Error fetching time:', error);
@@ -141,6 +144,9 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
             // lỗi đã được toast bởi handleAsyncThunk
         }
     }, [dispatch, submitId, isHomeworkCompetition, homeworkContentId, courseId, lessonId, learningItemId, navigate]);
+
+    // Cập nhật ref mỗi khi handleFinishCompetition thay đổi
+    autoSubmitRef.current = handleFinishCompetition;
 
     /**
      * Quay về (header button)

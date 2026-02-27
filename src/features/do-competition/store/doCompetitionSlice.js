@@ -1,4 +1,4 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, current } from '@reduxjs/toolkit';
 import { doCompetitionService } from '../../../core/services/modules/doCompetitionService';
 import { handleAsyncThunk } from '../../../shared/utils/asyncThunkHelper';
 
@@ -214,6 +214,7 @@ const doCompetitionSlice = createSlice({
             .addCase(startCompetitionAttempt.pending, (state) => {
                 state.startAttemptLoading = true;
                 state.startAttemptError = null;
+                state.currentAttempt = null;
             })
             .addCase(startCompetitionAttempt.fulfilled, (state, action) => {
                 state.startAttemptLoading = false;
@@ -223,11 +224,13 @@ const doCompetitionSlice = createSlice({
             .addCase(startCompetitionAttempt.rejected, (state, action) => {
                 state.startAttemptLoading = false;
                 state.startAttemptError = action.payload || action.error.message;
+                state.currentAttempt = null;
             })
             // Get Remaining Time
             .addCase(getRemainingTime.pending, (state) => {
                 state.remainingTimeLoading = true;
                 state.remainingTimeError = null;
+                state.remainingTime = null;
             })
             .addCase(getRemainingTime.fulfilled, (state, action) => {
                 state.remainingTimeLoading = false;
@@ -236,11 +239,16 @@ const doCompetitionSlice = createSlice({
             .addCase(getRemainingTime.rejected, (state, action) => {
                 state.remainingTimeLoading = false;
                 state.remainingTimeError = action.payload || action.error.message;
+                state.remainingTime = null;
             })
             // Get Competition Exam
             .addCase(getCompetitionExam.pending, (state) => {
                 state.examLoading = true;
                 state.examError = null;
+                state.competition = null;
+                state.exam = null;
+                state.sections = [];
+                state.unassignedQuestions = [];
             })
             .addCase(getCompetitionExam.fulfilled, (state, action) => {
                 state.examLoading = false;
@@ -263,11 +271,16 @@ const doCompetitionSlice = createSlice({
             .addCase(getCompetitionExam.rejected, (state, action) => {
                 state.examLoading = false;
                 state.examError = action.payload || action.error.message;
+                state.competition = null;
+                state.exam = null;
+                state.sections = [];
+                state.unassignedQuestions = [];
             })
             // Get Competition Answers
             .addCase(getCompetitionAnswers.pending, (state) => {
                 state.answersLoading = true;
                 state.answersError = null;
+                state.answers = [];
             })
             .addCase(getCompetitionAnswers.fulfilled, (state, action) => {
                 state.answersLoading = false;
@@ -298,6 +311,7 @@ const doCompetitionSlice = createSlice({
             .addCase(getCompetitionAnswers.rejected, (state, action) => {
                 state.answersLoading = false;
                 state.answersError = action.payload || action.error.message;
+                state.answers = [];
             })
             // Submit Competition Answer
             .addCase(submitCompetitionAnswer.pending, (state) => {
