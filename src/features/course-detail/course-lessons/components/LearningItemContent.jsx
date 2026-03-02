@@ -102,7 +102,7 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
                         className="px-3 py-2 gap-1 sm:gap-1.5 justify-center items-center flex flex-row bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-500 active:scale-105 transition shrink-0"
                     >
                         <SvgIcon src={Home} width={16} height={16} className="sm:w-5 sm:h-5" />
-                        <div className="p-0.5">
+                        <div className="p-0.5 flex justify-center items-center">
                             <span className="text-[10px] sm:text-text-5 lg:text-subhead-5 text-blue-800 whitespace-nowrap">
                                 Quay lại trang chủ
                             </span>

@@ -321,7 +321,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                 <div className="flex w-full px-3 sm:px-4 flex-col sm:flex-row gap-3 sm:gap-4 justify-between items-start sm:items-center">
                     <div className="flex flex-col justify-between items-start gap-1.5 sm:gap-2 flex-1 min-w-0">
                         <div className="p-0.5">
-                            <h2 className="text-h4 sm:text-h3 lg:text-[24px] font-semibold text-black truncate">
+                            <h2 className="text-h4 sm:text-h3 lg:text-[24px] font-semibold text-black">
                                 {currentContent?.content || 'Bài tập'}
                             </h2>
                         </div>

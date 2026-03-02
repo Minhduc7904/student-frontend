@@ -74,7 +74,7 @@ const LearningItemCard = memo(({ item, index, courseId, lessonId }) => {
     };
 
     return (
-        <button 
+        <button
             onClick={handleClick}
             className="w-full bg-gray-50 rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-5 border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-all duration-200 hover:scale-[1.01] active:scale-[0.99]">
             <div className="flex items-start gap-3 sm:gap-4">
@@ -177,7 +177,7 @@ export const LessonContent = memo(({ lessonDetail }) => {
                         className="px-3 py-2 gap-1 sm:gap-1.5 justify-center items-center flex flex-row bg-yellow-100 rounded-lg cursor-pointer hover:bg-yellow-500 active:scale-105 transition shrink-0"
                     >
                         <SvgIcon src={Home} width={16} height={16} className="sm:w-5 sm:h-5" />
-                        <div className="p-0.5">
+                        <div className="p-0.5 flex justify-center items-center">
                             <span className="text-[10px] sm:text-text-5 lg:text-subhead-5 text-blue-800 whitespace-nowrap">
                                 Quay lại trang chủ
                             </span>
