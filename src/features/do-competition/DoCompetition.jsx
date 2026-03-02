@@ -3,12 +3,12 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { PageLoading } from '../../shared/components/loading';
 import { useCompetitionTimer, useCompetitionExam, useCompetitionAnswers } from './hooks';
-import { selectCurrentAttempt, submitCompetitionAnswer, applyOptimisticAnswer, finishCompetition, selectFinishSubmitLoading } from './store/doCompetitionSlice';
+import { selectCurrentAttempt, submitCompetitionAnswer, applyOptimisticAnswer, finishCompetition, selectFinishSubmitLoading, selectTotalAnswered, selectTotalErrors } from './store/doCompetitionSlice';
 import { ROUTES } from '../../core/constants';
 import { CompetitionHeader } from './layout/CompetitionHeader';
 import { CompetitionContent } from './layout/CompetitionContent';
 import { CompetitionSidebar } from './layout/CompetitionSidebar';
-import { Clock, AlertTriangle } from 'lucide-react';
+import { ConfirmModal } from './layout/ConfirmModal';
 
 /**
  * Do Competition Page
@@ -124,11 +124,17 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
     const submitTimersRef = useRef({});
 
     const finishLoading = useSelector(selectFinishSubmitLoading);
+    const totalAnsweredCount = useSelector(selectTotalAnswered);
+    const totalErrorsCount = useSelector(selectTotalErrors);
+
+    // Confirmation modal state
+    const [confirmModal, setConfirmModal] = useState({ open: false, type: null });
 
     /**
      * Nộp bài và điều hướng sau khi hoàn thành
      */
     const handleFinishCompetition = useCallback(async () => {
+        setConfirmModal({ open: false, type: null });
         try {
             await dispatch(finishCompetition({
                 submitId,
@@ -145,6 +151,11 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
         }
     }, [dispatch, submitId, isHomeworkCompetition, homeworkContentId, courseId, lessonId, learningItemId, navigate]);
 
+    // Request submit confirmation (from header or sidebar)
+    const requestSubmit = useCallback(() => {
+        setConfirmModal({ open: true, type: 'submit' });
+    }, []);
+
     // Cập nhật ref mỗi khi handleFinishCompetition thay đổi
     autoSubmitRef.current = handleFinishCompetition;
 
@@ -158,6 +169,25 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
             navigate(ROUTES.DASHBOARD);
         }
     }, [isHomeworkCompetition, courseId, lessonId, learningItemId, navigate]);
+
+    // Request go-back confirmation
+    const requestGoBack = useCallback(() => {
+        setConfirmModal({ open: true, type: 'goback' });
+    }, []);
+
+    // Handle confirm modal actions
+    const handleConfirmAction = useCallback(() => {
+        if (confirmModal.type === 'submit') {
+            handleFinishCompetition();
+        } else if (confirmModal.type === 'goback') {
+            setConfirmModal({ open: false, type: null });
+            handleGoBack();
+        }
+    }, [confirmModal.type, handleFinishCompetition, handleGoBack]);
+
+    const handleCancelConfirm = useCallback(() => {
+        setConfirmModal({ open: false, type: null });
+    }, []);
 
     // Called only from sidebar: select + scroll to question
     const handleSidebarQuestionClick = useCallback((questionId) => {
@@ -238,7 +268,9 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
                 competition={competition}
                 loading={examLoading && !competition}
                 onToggleSidebar={() => setSidebarOpen((v) => !v)}
-                onGoBack={handleGoBack}
+                onGoBack={requestGoBack}
+                onSubmit={requestSubmit}
+                submitLoading={finishLoading}
                 backLabel={isHomeworkCompetition ? 'Khóa học' : 'Trang chủ'}
             />
             {/* Body: fill remaining height, no outer scroll */}
@@ -266,10 +298,25 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
                     loading={examLoading && !hasExam}
                     isOpen={sidebarOpen}
                     onClose={() => setSidebarOpen(false)}
-                    onSubmit={handleFinishCompetition}
+                    onSubmit={requestSubmit}
                     submitLoading={finishLoading}
+                    totalQuestions={totalQuestions}
+                    totalAnswered={totalAnsweredCount}
+                    totalErrors={totalErrorsCount}
                 />
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmModal
+                open={confirmModal.open}
+                type={confirmModal.type}
+                onConfirm={handleConfirmAction}
+                onCancel={handleCancelConfirm}
+                submitLoading={finishLoading}
+                totalQuestions={totalQuestions}
+                totalAnswered={totalAnsweredCount}
+                totalErrors={totalErrorsCount}
+            />
         </div>
     );
 };

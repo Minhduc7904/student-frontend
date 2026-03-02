@@ -26,4 +26,23 @@ export const competitionService = {
       { params }
     );
   },
+
+  /**
+   * Lấy lịch sử làm bài của học sinh theo competitionId (có phân trang)
+   * Chỉ bao gồm các lần thi đã nộp bài (SUBMITTED / GRADED)
+   *
+   * @param {string|number} competitionId - ID của cuộc thi
+   * @param {Object} params - Query parameters
+   * @param {number} params.page - Trang hiện tại (mặc định 1)
+   * @param {number} params.limit - Kích thước trang, tối đa 100 (mặc định 10)
+   * @param {string} params.sortBy - Trường sắp xếp (mặc định submittedAt)
+   * @param {string} params.sortOrder - Chiều sắp xếp: asc | desc (mặc định desc)
+   * @returns {Promise<Object>} { data: { history[], pagination } }
+   */
+  getCompetitionHistory: async (competitionId, params = {}) => {
+    return await axiosClient.get(
+      API_ENDPOINTS.DO_COMPETITION.HISTORY(competitionId),
+      { params }
+    );
+  },
 };

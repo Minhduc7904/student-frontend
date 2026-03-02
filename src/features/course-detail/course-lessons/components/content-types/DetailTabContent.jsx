@@ -48,6 +48,15 @@ const STATUS_CONFIG = {
         buttonText: 'Xem lại bài làm',
         buttonClass: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
         buttonIcon: false
+    },
+    RESUME: {
+        label: 'Đang làm dở',
+        color: 'purple',
+        bgClass: 'bg-purple-100',
+        textClass: 'text-purple-600',
+        buttonText: 'Tiếp tục làm bài',
+        buttonClass: 'bg-purple-600 text-white hover:bg-purple-700',
+        buttonIcon: true
     }
 };
 

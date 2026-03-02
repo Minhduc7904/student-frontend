@@ -2,157 +2,230 @@ import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { PageLoading } from '../../shared/components/loading';
+import { Logo } from '../../shared/components';
 import { ROUTES } from '../../core/constants';
 import {
     startCompetitionAttempt,
     selectStartAttemptLoading,
     selectCurrentAttempt
 } from './store/doCompetitionSlice';
-import { AlertCircle, CheckCircle, XCircle, Clock, Info } from 'lucide-react';
+import {
+    AlertCircle,
+    CheckCircle,
+    XCircle,
+    Clock,
+    ShieldAlert,
+    Wifi,
+    MonitorX,
+    Timer,
+    RefreshCcw,
+    ArrowLeft,
+    Play,
+    ChevronLeft
+} from 'lucide-react';
 
-/**
- * Confirmation Modal Component
- * Modal hiển thị lưu ý trước khi bắt đầu làm bài
- */
-const ConfirmationModal = ({ onConfirm, onCancel }) => {
+// ─── Warning Item ────────────────────────────────────────────────────────────
+const WarningItem = ({ icon: Icon, text, index }) => (
+    <div className="flex items-start gap-3 sm:gap-4 group">
+        <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 mt-0.5 group-hover:bg-blue-800 group-hover:text-white transition-colors">
+            <Icon className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-blue-800 group-hover:text-white transition-colors" />
+        </div>
+        <p className="text-text-5 sm:text-text-4 text-gray-800 flex-1 pt-1.5">
+            {text}
+        </p>
+    </div>
+);
+
+// ─── Confirmation Page ───────────────────────────────────────────────────────
+const ConfirmationPage = ({ onConfirm, onCancel, loading }) => {
     const warnings = [
-        'Không thoát trang hoặc tải lại trang khi đang làm bài',
-        'Không chuyển sang ứng dụng khác trong thời gian làm bài',
-        'Hệ thống có thể tự động nộp bài nếu phát hiện gián đoạn',
-        'Hãy đảm bảo kết nối mạng ổn định trước khi bắt đầu',
-        'Thời gian làm bài sẽ được tính ngay sau khi bắt đầu'
+        { icon: MonitorX, text: 'Không thoát trang hoặc tải lại trang khi đang làm bài' },
+        { icon: ShieldAlert, text: 'Không chuyển sang ứng dụng khác trong thời gian làm bài' },
+        { icon: AlertCircle, text: 'Hệ thống có thể tự động nộp bài nếu phát hiện gián đoạn' },
+        { icon: Wifi, text: 'Hãy đảm bảo kết nối mạng ổn định trước khi bắt đầu' },
+        { icon: Timer, text: 'Thời gian làm bài sẽ được tính ngay sau khi bắt đầu' },
     ];
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4">
-            <div className="max-w-2xl w-full bg-white rounded-xl sm:rounded-2xl shadow-2xl animate-in fade-in zoom-in duration-300">
-                {/* Header */}
-                <div className="px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 border-b border-gray-100">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
-                            <Info className="w-6 h-6 sm:w-7 sm:h-7 text-blue-800" />
-                        </div>
-                        <div className="flex flex-col gap-0.5 sm:gap-1">
-                            <h2 className="text-h3 sm:text-h2 text-gray-900">
-                                Lưu ý trước khi làm bài
-                            </h2>
-                            <p className="text-text-5 sm:text-text-4 text-gray-600">
-                                Vui lòng đọc kỹ các lưu ý dưới đây
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Content */}
-                <div className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
-                    <div className="bg-red-50 border border-red-200 rounded-lg sm:rounded-xl p-4 sm:p-5 lg:p-6">
-                        <div className="flex flex-col gap-2.5 sm:gap-3">
-                            {warnings.map((warning, index) => (
-                                <div key={index} className="flex items-start gap-2.5 sm:gap-3">
-                                    <div className="w-5 h-5 sm:w-6 sm:h-6 bg-red-500 text-white rounded-full flex items-center justify-center shrink-0 mt-0.5">
-                                        <span className="text-[10px] sm:text-text-5 font-semibold">{index + 1}</span>
-                                    </div>
-                                    <p className="text-text-5 sm:text-text-4 text-gray-900 flex-1">
-                                        {warning}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div className="px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+        <div className="min-h-dvh bg-background flex flex-col">
+            {/* Header bar */}
+            <header className="bg-white border-b border-gray-100 shadow-sm shrink-0">
+                <div className="max-w-3xl mx-auto flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+                    <Logo
+                        mode="default"
+                        containerClassName="flex items-center"
+                        className="h-8 sm:h-10 w-auto object-contain"
+                    />
                     <button
                         onClick={onCancel}
-                        className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
+                        className="flex cursor-pointer items-center gap-1.5 text-text-5 sm:text-subhead-5 text-gray-500 hover:text-gray-900 transition-colors"
                     >
-                        Hủy
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        className="flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
-                    >
-                        Bắt đầu làm bài
+                        <ChevronLeft className="w-4 h-4" />
+                        Quay lại
                     </button>
                 </div>
-            </div>
+            </header>
+
+            {/* Content */}
+            <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+                <div className="max-w-lg w-full flex flex-col gap-6 sm:gap-8">
+                    {/* Card */}
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        {/* Card header accent */}
+                        <div className="h-1.5 bg-linear-to-r from-blue-800 to-blue-cyan" />
+
+                        {/* Card body */}
+                        <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex flex-col gap-5 sm:gap-6">
+                            {/* Title area */}
+                            <div className="flex flex-col gap-1.5 sm:gap-2 text-center">
+                                <h1 className="text-h3 sm:text-h2 text-gray-900">
+                                    Lưu ý trước khi làm bài
+                                </h1>
+                                <p className="text-text-5 sm:text-text-4 text-gray-500">
+                                    Vui lòng đọc kỹ các lưu ý dưới đây trước khi bắt đầu
+                                </p>
+                            </div>
+
+                            {/* Divider */}
+                            <div className="h-px bg-gray-100" />
+
+                            {/* Warnings */}
+                            <div className="flex flex-col gap-3.5 sm:gap-4">
+                                {warnings.map((w, i) => (
+                                    <WarningItem key={i} icon={w.icon} text={w.text} index={i} />
+                                ))}
+                            </div>
+
+                            {/* Divider */}
+                            <div className="h-px bg-gray-100" />
+
+                            {/* Buttons */}
+                            <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3">
+                                <button
+                                    onClick={onCancel}
+                                    disabled={loading}
+                                    className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] disabled:opacity-50"
+                                >
+                                    <ArrowLeft className="w-4 h-4" />
+                                    Hủy
+                                </button>
+                                <button
+                                    onClick={onConfirm}
+                                    disabled={loading}
+                                    className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] shadow-sm disabled:opacity-70"
+                                >
+                                    <Play className="w-4 h-4" />
+                                    Bắt đầu làm bài
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
     );
 };
 
-/**
- * Status Message Component
- * Hiển thị thông báo kết quả (success/error) giữa màn hình
- */
-const StatusMessage = ({ type, title, message, onRetry, onClose }) => {
-    const icons = {
-        success: <CheckCircle className="w-16 h-16 text-green-500" />,
-        error: <XCircle className="w-16 h-16 text-red-500" />,
-        warning: <AlertCircle className="w-16 h-16 text-yellow-500" />,
-        info: <Clock className="w-16 h-16 text-blue-500" />
+// ─── Status Page ─────────────────────────────────────────────────────────────
+const StatusPage = ({ type, title, message, onRetry, onClose }) => {
+    const config = {
+        success: {
+            icon: CheckCircle,
+            iconColor: 'text-green-500',
+            accentBg: 'bg-green-100',
+            accentGradient: 'from-green-500 to-green-500',
+        },
+        error: {
+            icon: XCircle,
+            iconColor: 'text-red-600',
+            accentBg: 'bg-red-100',
+            accentGradient: 'from-red-500 to-red-400',
+        },
+        warning: {
+            icon: AlertCircle,
+            iconColor: 'text-yellow-500',
+            accentBg: 'bg-yellow-100',
+            accentGradient: 'from-yellow-500 to-yellow-500',
+        },
+        info: {
+            icon: Clock,
+            iconColor: 'text-blue-800',
+            accentBg: 'bg-blue-100',
+            accentGradient: 'from-blue-800 to-blue-cyan',
+        },
     };
 
-    const bgColors = {
-        success: 'bg-green-50',
-        error: 'bg-red-50',
-        warning: 'bg-yellow-50',
-        info: 'bg-blue-50'
-    };
-
-    const borderColors = {
-        success: 'border-green-200',
-        error: 'border-red-200',
-        warning: 'border-yellow-200',
-        info: 'border-blue-200'
-    };
+    const current = config[type] || config.info;
+    const IconComponent = current.icon;
 
     return (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4">
-            <div className={`max-w-md w-full ${bgColors[type]} border-2 ${borderColors[type]} rounded-xl sm:rounded-2xl shadow-2xl p-6 sm:p-8 animate-in fade-in zoom-in duration-300`}>
-                {/* Icon */}
-                <div className="flex justify-center mb-4 sm:mb-6">
-                    <div className="w-12 h-12 sm:w-16 sm:h-16">
-                        {type === 'success' && <CheckCircle className="w-full h-full text-green-500" />}
-                        {type === 'error' && <XCircle className="w-full h-full text-red-500" />}
-                        {type === 'warning' && <AlertCircle className="w-full h-full text-yellow-500" />}
-                        {type === 'info' && <Clock className="w-full h-full text-blue-500" />}
+        <div className="min-h-dvh bg-background flex flex-col">
+            {/* Header bar */}
+            <header className="bg-white border-b border-gray-100 shadow-sm shrink-0">
+                <div className="max-w-3xl mx-auto flex items-center h-14 sm:h-16 px-4 sm:px-6">
+                    <Logo
+                        mode="default"
+                        containerClassName="flex items-center"
+                        className="h-8 sm:h-10 w-auto object-contain"
+                    />
+                </div>
+            </header>
+
+            {/* Content */}
+            <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
+                <div className="max-w-md w-full">
+                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
+                        {/* Accent bar */}
+                        <div className={`h-1.5 bg-linear-to-r ${current.accentGradient}`} />
+
+                        <div className="px-5 sm:px-8 pt-8 sm:pt-10 pb-6 sm:pb-8 flex flex-col items-center gap-4 sm:gap-5">
+                            {/* Icon */}
+                            <div className={`w-14 h-14 sm:w-16 sm:h-16 rounded-2xl ${current.accentBg} flex items-center justify-center`}>
+                                <IconComponent className={`w-7 h-7 sm:w-8 sm:h-8 ${current.iconColor}`} />
+                            </div>
+
+                            {/* Title */}
+                            <h2 className="text-h3 sm:text-h2 text-gray-900 text-center">
+                                {title}
+                            </h2>
+
+                            {/* Message */}
+                            <p className="text-text-5 sm:text-text-4 text-gray-500 text-center leading-relaxed">
+                                {message}
+                            </p>
+
+                            {/* Divider */}
+                            <div className="w-full h-px bg-gray-100 mt-1" />
+
+                            {/* Actions */}
+                            <div className="flex flex-col sm:flex-row gap-2.5 sm:gap-3 w-full">
+                                {onRetry && type === 'error' && (
+                                    <button
+                                        onClick={onRetry}
+                                        className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] shadow-sm"
+                                    >
+                                        <RefreshCcw className="w-4 h-4" />
+                                        Thử lại
+                                    </button>
+                                )}
+                                {onClose && (
+                                    <button
+                                        onClick={onClose}
+                                        className={`flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] ${
+                                            type === 'error' && onRetry
+                                                ? 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+                                                : 'bg-blue-800 hover:bg-blue-900 text-white shadow-sm'
+                                        }`}
+                                    >
+                                        <ArrowLeft className="w-4 h-4" />
+                                        Quay lại
+                                    </button>
+                                )}
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                {/* Title */}
-                <h2 className="text-h3 sm:text-h2 text-gray-900 text-center mb-2 sm:mb-3">
-                    {title}
-                </h2>
-
-                {/* Message */}
-                <p className="text-text-5 sm:text-text-4 text-gray-700 text-center mb-5 sm:mb-6">
-                    {message}
-                </p>
-
-                {/* Actions */}
-                <div className="flex flex-col gap-2.5 sm:gap-3">
-                    {onRetry && type === 'error' && (
-                        <button
-                            onClick={onRetry}
-                            className="w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95"
-                        >
-                            Thử lại
-                        </button>
-                    )}
-                    {onClose && (
-                        <button
-                            onClick={onClose}
-                            className={`w-full px-4 sm:px-6 py-2.5 sm:py-3 rounded-lg text-text-5 sm:text-subhead-4 transition-all active:scale-95 ${type === 'error'
-                                ? 'bg-gray-200 hover:bg-gray-300 text-gray-700'
-                                : 'bg-blue-800 hover:bg-blue-900 text-white'
-                                }`}
-                        >
-                            Đóng
-                        </button>
-                    )}
-                </div>
-            </div>
+            </main>
         </div>
     );
 };
@@ -169,7 +242,7 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
     const loading = useSelector(selectStartAttemptLoading);
     const currentAttempt = useSelector(selectCurrentAttempt);
 
-    const [showConfirmModal, setShowConfirmModal] = useState(true);
+    const [showConfirmPage, setShowConfirmPage] = useState(true);
     const [status, setStatus] = useState({
         show: false,
         type: 'info',
@@ -178,7 +251,7 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
     });
 
     const handleStartAttempt = async () => {
-        setShowConfirmModal(false); // Đóng modal xác nhận
+        setShowConfirmPage(false);
 
         try {
             const result = await dispatch(startCompetitionAttempt(competitionId)).unwrap();
@@ -239,7 +312,6 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
     };
 
     const handleClose = () => {
-        // Quay về trang trước hoặc trang chủ
         if (isHomeworkCompetition) {
             navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
         }
@@ -253,12 +325,13 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
         else navigate(-1);
     };
 
-    // Hiển thị confirmation modal
-    if (showConfirmModal) {
+    // Hiển thị confirmation page
+    if (showConfirmPage) {
         return (
-            <ConfirmationModal
+            <ConfirmationPage
                 onConfirm={handleStartAttempt}
                 onCancel={handleCancelConfirm}
+                loading={loading}
             />
         );
     }
@@ -268,10 +341,10 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
         return <PageLoading message="Đang kiểm tra điều kiện làm bài..." />;
     }
 
-    // Hiển thị status message
+    // Hiển thị status page
     if (status.show) {
         return (
-            <StatusMessage
+            <StatusPage
                 type={status.type}
                 title={status.title}
                 message={status.message}

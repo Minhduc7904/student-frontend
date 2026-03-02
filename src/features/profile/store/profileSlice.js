@@ -32,6 +32,36 @@ export const updateProfileAsync = createAsyncThunk(
     }
 );
 
+export const changePasswordAsync = createAsyncThunk(
+    "profile/changePassword",
+    async ({ oldPassword, newPassword }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => profileService.changePassword({ oldPassword, newPassword }),
+            thunkAPI,
+            {
+                successTitle: "Đổi mật khẩu thành công",
+                successMessage: "Mật khẩu của bạn đã được cập nhật",
+                errorTitle: "Đổi mật khẩu thất bại",
+            }
+        );
+    }
+);
+
+export const uploadAvatarAsync = createAsyncThunk(
+    "profile/uploadAvatar",
+    async ({ file, onUploadProgress }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => profileService.uploadAvatar(file, { onUploadProgress }),
+            thunkAPI,
+            {
+                successTitle: "Cập nhật avatar thành công",
+                successMessage: "Ảnh đại diện của bạn đã được cập nhật",
+                errorTitle: "Upload avatar thất bại",
+            }
+        );
+    }
+);
+
 const profileSlice = createSlice({
     name: "profile",
     initialState,
@@ -88,6 +118,20 @@ const profileSlice = createSlice({
             })
             .addCase(updateProfileAsync.rejected, (state, action) => {
                 state.loading = false;
+                state.error = action.payload;
+            })
+            // Upload Avatar
+            .addCase(uploadAvatarAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(uploadAvatarAsync.fulfilled, (state, action) => {
+                const media = action.payload?.data;
+                if (state.profile && media?.viewUrl) {
+                    state.profile.avatarUrl = media.viewUrl;
+                }
+                state.error = null;
+            })
+            .addCase(uploadAvatarAsync.rejected, (state, action) => {
                 state.error = action.payload;
             })
     },

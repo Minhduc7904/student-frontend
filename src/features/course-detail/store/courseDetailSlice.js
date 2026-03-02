@@ -25,6 +25,9 @@ const initialState = {
     competitionRanking: null,
     competitionRankingLoading: false,
     competitionRankingError: null,
+    competitionHistory: null,
+    competitionHistoryLoading: false,
+    competitionHistoryError: null,
 };
 
 /**
@@ -118,6 +121,23 @@ export const fetchCompetitionRanking = createAsyncThunk(
 
 
 /**
+ * Fetch competition history by competition ID
+ */
+export const fetchCompetitionHistory = createAsyncThunk(
+    'courseDetail/fetchCompetitionHistory',
+    async ({ competitionId, params = {} }, thunkAPI) => {
+        return handleAsyncThunk(
+            () => competitionService.getCompetitionHistory(competitionId, params),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lấy lịch sử làm bài thất bại',
+            }
+        );
+    }
+);
+
+/**
  * Course Detail Slice
  */
 const courseDetailSlice = createSlice({
@@ -149,6 +169,10 @@ const courseDetailSlice = createSlice({
         clearCompetitionRanking: (state) => {
             state.competitionRanking = null;
             state.competitionRankingError = null;
+        },
+        clearCompetitionHistory: (state) => {
+            state.competitionHistory = null;
+            state.competitionHistoryError = null;
         },
     },
     extraReducers: (builder) => {
@@ -302,6 +326,20 @@ const courseDetailSlice = createSlice({
                 state.competitionRankingLoading = false;
                 state.competitionRankingError = action.payload || action.error.message;
                 state.competitionRanking = null;
+            })
+            // Fetch Competition History
+            .addCase(fetchCompetitionHistory.pending, (state) => {
+                state.competitionHistoryLoading = true;
+                state.competitionHistoryError = null;
+            })
+            .addCase(fetchCompetitionHistory.fulfilled, (state, action) => {
+                state.competitionHistoryLoading = false;
+                state.competitionHistory = action.payload.data;
+            })
+            .addCase(fetchCompetitionHistory.rejected, (state, action) => {
+                state.competitionHistoryLoading = false;
+                state.competitionHistoryError = action.payload || action.error.message;
+                state.competitionHistory = null;
             });
     },
 });
@@ -317,6 +355,7 @@ export const {
     clearLessonDetail,
     clearLearningItemDetail,
     clearCompetitionRanking,
+    clearCompetitionHistory,
 } = courseDetailSlice.actions;
 
 /**
@@ -338,5 +377,8 @@ export const selectLearningItemDetailError = (state) => state.courseDetail.learn
 export const selectCompetitionRanking = (state) => state.courseDetail.competitionRanking;
 export const selectCompetitionRankingLoading = (state) => state.courseDetail.competitionRankingLoading;
 export const selectCompetitionRankingError = (state) => state.courseDetail.competitionRankingError;
+export const selectCompetitionHistory = (state) => state.courseDetail.competitionHistory;
+export const selectCompetitionHistoryLoading = (state) => state.courseDetail.competitionHistoryLoading;
+export const selectCompetitionHistoryError = (state) => state.courseDetail.competitionHistoryError;
 
 export default courseDetailSlice.reducer;

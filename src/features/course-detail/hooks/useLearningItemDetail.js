@@ -24,7 +24,7 @@ export const useLearningItemDetail = () => {
 
     // Fetch learning item detail khi learningItemId thay đổi
     useEffect(() => {
-        if (learningItemId) {
+        if (learningItemId && learningItemId != learningItemDetail?.learningItemId) {
             dispatch(fetchLearningItemDetail(learningItemId));
         }
     }, [dispatch, learningItemId]);

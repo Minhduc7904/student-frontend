@@ -1,6 +1,6 @@
 import { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import { Clock, Send, AlertTriangle, ChevronDown, ChevronUp } from 'lucide-react';
+import { Clock, Send, AlertTriangle, ChevronDown, ChevronUp, CheckCircle, CircleDot, CircleAlert } from 'lucide-react';
 import { useState } from 'react';
 
 /**
@@ -44,7 +44,7 @@ const SectionNavigator = memo(({ title, questions, currentQuestionId, answeredId
             {/* Section header */}
             <button
                 type="button"
-                className="flex items-center justify-between gap-2 w-full group"
+                className="cursor-pointer flex items-center justify-between gap-2 w-full group"
                 onClick={() => setCollapsed(v => !v)}
             >
                 <span className="text-text-5 font-semibold text-gray-700 truncate text-left">
@@ -231,6 +231,67 @@ const TimerCard = memo(({ formattedTime, remainingSeconds, totalMinutes, elapsed
 TimerCard.displayName = 'TimerCard';
 
 /**
+ * StatsCard
+ * Hiển thị thống kê: đã trả lời / chưa trả lời / lỗi
+ */
+const StatsCard = memo(({ totalQuestions, totalAnswered, totalErrors }) => {
+    const unanswered = Math.max(0, (totalQuestions ?? 0) - (totalAnswered ?? 0));
+
+    const items = [
+        {
+            icon: CheckCircle,
+            label: 'Đã trả lời',
+            value: totalAnswered ?? 0,
+            iconColor: 'text-emerald-500',
+            bgColor: 'bg-emerald-50',
+            valueColor: 'text-emerald-700',
+        },
+        {
+            icon: CircleDot,
+            label: 'Chưa trả lời',
+            value: unanswered,
+            iconColor: 'text-gray-400',
+            bgColor: 'bg-gray-50',
+            valueColor: 'text-gray-600',
+        },
+        ...(totalErrors > 0
+            ? [{
+                icon: CircleAlert,
+                label: 'Lỗi',
+                value: totalErrors,
+                iconColor: 'text-red-500',
+                bgColor: 'bg-red-50',
+                valueColor: 'text-red-600',
+            }]
+            : []),
+    ];
+
+    return (
+        <div className="rounded-2xl border border-gray-200 bg-white p-3.5 flex flex-col gap-2.5">
+            <span className="text-text-5 font-semibold text-gray-500 uppercase tracking-wide">
+                Tiến độ
+            </span>
+            <div className="flex flex-col gap-1.5">
+                {items.map((item) => (
+                    <div
+                        key={item.label}
+                        className={`flex items-center gap-2.5 px-3 py-2 rounded-xl ${item.bgColor}`}
+                    >
+                        <item.icon className={`w-4 h-4 shrink-0 ${item.iconColor}`} />
+                        <span className="text-text-5 text-gray-700 flex-1">{item.label}</span>
+                        <span className={`text-subhead-5 ${item.valueColor}`}>
+                            {item.value}/{totalQuestions ?? 0}
+                        </span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+});
+
+StatsCard.displayName = 'StatsCard';
+
+/**
  * CompetitionSidebar
  * Thanh bên phải của trang làm bài thi
  * - Desktop (md+): luôn hiển thị dạng panel tĩnh
@@ -251,6 +312,9 @@ export const CompetitionSidebar = memo(({
     onClose,
     onSubmit,
     submitLoading = false,
+    totalQuestions = 0,
+    totalAnswered = 0,
+    totalErrors = 0,
 }) => {
     const totalMinutes = competition?.durationMinutes ?? 0;
     // elapsedMinutes tính từ durationMinutes và remainingSeconds
@@ -292,6 +356,15 @@ export const CompetitionSidebar = memo(({
                     loading={loading}
                 />
 
+                {/* Stats */}
+                {!loading && (
+                    <StatsCard
+                        totalQuestions={totalQuestions}
+                        totalAnswered={totalAnswered}
+                        totalErrors={totalErrors}
+                    />
+                )}
+
                 {/* Question navigator */}
                 {loading ? (
                     <div className="flex flex-col gap-3">
@@ -325,6 +398,7 @@ export const CompetitionSidebar = memo(({
                     onClick={onSubmit}
                     disabled={submitLoading}
                     className="
+                        cursor-pointer
                         w-full flex items-center justify-center gap-2
                         px-4 py-2.5 rounded-2xl
                         bg-blue-800 hover:bg-blue-900 active:scale-[0.98]
@@ -357,6 +431,9 @@ CompetitionSidebar.propTypes = {
     onClose: PropTypes.func,
     onSubmit: PropTypes.func,
     submitLoading: PropTypes.bool,
+    totalQuestions: PropTypes.number,
+    totalAnswered: PropTypes.number,
+    totalErrors: PropTypes.number,
 };
 
 CompetitionSidebar.displayName = 'CompetitionSidebar';

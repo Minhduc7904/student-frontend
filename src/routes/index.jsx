@@ -1,6 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { authRoutes } from '../features/auth/routes';
 import { homeRoutes } from '../features/home/routes';
+import { profileRoutes } from '../features/profile/route';
 import { courseDetailRoutes } from '../features/course-detail/route';
 import { doCompetitionRoutes } from '../features/do-competition/route';
 import NotFoundPage from '../features/not-found';
@@ -13,8 +14,10 @@ import { ROUTES } from '../core/constants';
 const router = createBrowserRouter([
     // Auth routes (login, register, forgot password, etc.)
     ...authRoutes,
-    // Home routes (dashboard, profile, etc.)
+    // Home routes (dashboard, etc.)
     ...homeRoutes,
+    // Profile routes (standalone layout)
+    ...profileRoutes,
     // Course detail routes
     ...courseDetailRoutes,
     // Do competition routes

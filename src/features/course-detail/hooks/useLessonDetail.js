@@ -24,7 +24,7 @@ export const useLessonDetail = () => {
 
     // Fetch lesson detail khi lessonId thay đổi
     useEffect(() => {
-        if (lessonId) {
+        if (lessonId && lessonDetail?.lessonId != lessonId) {
             dispatch(fetchLessonDetail(lessonId));
         }
     }, [dispatch, lessonId]);

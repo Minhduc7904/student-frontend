@@ -26,6 +26,9 @@ const initialState = {
     answers: [],
     answersLoading: false,
     answersError: null,
+    // Computed counts
+    totalAnswered: 0,
+    totalErrors: 0,
     // Submit answer
     submitAnswerLoading: false,
     submitAnswerError: null,
@@ -147,6 +150,22 @@ export const getCompetitionExam = createAsyncThunk(
 );
 
 /**
+ * Helper: tính totalAnswered & totalErrors từ sections + unassignedQuestions
+ */
+const recomputeCounts = (state) => {
+    let answered = 0;
+    let errors = 0;
+    const count = (q) => {
+        if (q.answer?.isAnswered) answered++;
+        if (q.isSubmitError) errors++;
+    };
+    state.sections.forEach((s) => (s.questions ?? []).forEach(count));
+    state.unassignedQuestions.forEach(count);
+    state.totalAnswered = answered;
+    state.totalErrors = errors;
+};
+
+/**
  * Do Competition Slice
  */
 const doCompetitionSlice = createSlice({
@@ -200,6 +219,7 @@ const doCompetitionSlice = createSlice({
                 questions: (s.questions ?? []).map(patch),
             }));
             state.unassignedQuestions = state.unassignedQuestions.map(patch);
+            recomputeCounts(state);
         },
         clearErrors: (state) => {
             state.error = null;
@@ -307,6 +327,8 @@ const doCompetitionSlice = createSlice({
                     ...q,
                     answer: answersMap[q.questionId] ?? null,
                 }));
+
+                recomputeCounts(state);
             })
             .addCase(getCompetitionAnswers.rejected, (state, action) => {
                 state.answersLoading = false;
@@ -344,6 +366,8 @@ const doCompetitionSlice = createSlice({
                     questions: (section.questions ?? []).map(patch),
                 }));
                 state.unassignedQuestions = state.unassignedQuestions.map(patch);
+
+                recomputeCounts(state);
             })
             .addCase(submitCompetitionAnswer.rejected, (state, action) => {
                 state.submitAnswerLoading = false;
@@ -361,6 +385,8 @@ const doCompetitionSlice = createSlice({
                     questions: (section.questions ?? []).map(markError),
                 }));
                 state.unassignedQuestions = state.unassignedQuestions.map(markError);
+
+                recomputeCounts(state);
             })
             // Finish Competition Submit
             .addCase(finishCompetition.pending, (state) => {
@@ -417,5 +443,7 @@ export const selectSubmitAnswerError = (state) => state.doCompetition.submitAnsw
 export const selectFinishSubmitLoading = (state) => state.doCompetition.finishSubmitLoading;
 export const selectFinishSubmitError = (state) => state.doCompetition.finishSubmitError;
 export const selectFinishSubmitResult = (state) => state.doCompetition.finishSubmitResult;
+export const selectTotalAnswered = (state) => state.doCompetition.totalAnswered;
+export const selectTotalErrors = (state) => state.doCompetition.totalErrors;
 
 export default doCompetitionSlice.reducer;

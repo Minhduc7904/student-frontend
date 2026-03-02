@@ -3,16 +3,16 @@ import { useNavigate } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { Logo } from '../../../shared/components';
 import { ROUTES } from '../../../core/constants';
-import { Home, LayoutList } from 'lucide-react';
+import { Home, LayoutList, Send } from 'lucide-react';
 
 /**
  * CompetitionHeader
  * Fixed header cho trang làm bài thi
  * - Trái: Logo (icon nhỏ dạng collapsed)
  * - Giữa: Title và subtitle của competition
- * - Phải: Nút quay về trang chủ
+ * - Phải: Nút nộp bài + Nút quay về
  */
-export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar, onGoBack, backLabel = 'Trang chủ' }) => {
+export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar, onGoBack, onSubmit, submitLoading = false, backLabel = 'Trang chủ' }) => {
     const navigate = useNavigate();
 
     const handleGoHome = () => {
@@ -38,16 +38,25 @@ export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar, 
                     </div>
                     <div className="flex items-center gap-2">
                         <button
+                            onClick={onSubmit}
+                            disabled={submitLoading}
+                            className="cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-800 hover:bg-blue-900 text-white text-text-5 font-semibold transition-colors disabled:opacity-50"
+                            title="Nộp bài"
+                        >
+                            <Send className="w-3.5 h-3.5 shrink-0" />
+                            <span>{submitLoading ? 'Nộp...' : 'Nộp bài'}</span>
+                        </button>
+                        <button
                             onClick={onToggleSidebar}
-                            className="flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
+                            className="cursor-pointer flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 transition-colors"
                             title="Danh sách câu hỏi"
                         >
                             <LayoutList className="w-4 h-4" />
                         </button>
                         <button
                             onClick={handleGoHome}
-                            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
-                            title="Quay về trang chủ"
+                            className="cursor-pointer flex items-center justify-center w-8 h-8 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
+                            title="Quay về"
                         >
                             <Home className="w-4 h-4 shrink-0" />
                         </button>
@@ -106,11 +115,20 @@ export const CompetitionHeader = memo(({ competition, loading, onToggleSidebar, 
                     ) : null}
                 </div>
 
-                {/* Right - Back to home button */}
-                <div className="shrink-0">
+                {/* Right - Submit + Back buttons */}
+                <div className="shrink-0 flex items-center gap-3">
+                    <button
+                        onClick={onSubmit}
+                        disabled={submitLoading}
+                        className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-800 hover:bg-blue-900 text-white transition-colors disabled:opacity-50"
+                        title="Nộp bài"
+                    >
+                        <Send className="w-4 h-4 shrink-0" />
+                        <span className="text-text-4 font-semibold">{submitLoading ? 'Đang nộp...' : 'Nộp bài'}</span>
+                    </button>
                     <button
                         onClick={handleGoHome}
-                        className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
+                        className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900 transition-colors"
                         title={backLabel}
                     >
                         <Home className="w-5 h-5 shrink-0" />
@@ -136,6 +154,8 @@ CompetitionHeader.propTypes = {
     loading: PropTypes.bool,
     onToggleSidebar: PropTypes.func,
     onGoBack: PropTypes.func,
+    onSubmit: PropTypes.func,
+    submitLoading: PropTypes.bool,
     backLabel: PropTypes.string,
 };
 

@@ -14,6 +14,8 @@ export const API_ENDPOINTS = {
     PROFILE: {
         GET: '/student/profile',
         UPDATE: '/student/profile',
+        UPLOAD_AVATAR: '/student/profile/avatar',
+        CHANGE_PASSWORD: '/student/profile/change-password',
     },
 
     // User/Profile
@@ -99,12 +101,18 @@ export const API_ENDPOINTS = {
 
     // Do Competition
     DO_COMPETITION: {
+        HISTORY: (competitionId) => `/do-competition/${competitionId}/history`,
         START_ATTEMPT: (competitionId) => `/do-competition/${competitionId}/start`,
         GET_REMAINING_TIME: (submitId) => `/do-competition/submit/${submitId}/remaining-time`,
         GET_EXAM: (competitionId) => `/do-competition/${competitionId}/exam`,
         GET_ANSWERS: (submitId) => `/do-competition/submit/${submitId}/answers`,
         SUBMIT_ANSWER: (submitId, answerId) => `/do-competition/submit/${submitId}/answer/${answerId}`,
         FINISH_SUBMIT: (submitId) => `/do-competition/submit/${submitId}/finish`,
+    },
+
+    // Media
+    MEDIA: {
+        UPLOAD: '/media/upload',
     },
 
     // Statistics

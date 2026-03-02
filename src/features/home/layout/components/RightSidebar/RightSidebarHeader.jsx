@@ -15,6 +15,7 @@ const RightSidebarHeader = memo(({ profile, notificationCount = 3 }) => {
             <UserAvatar
                 avatarUrl={profile?.avatarUrl}
                 fullName={profile?.fullName}
+                email={profile?.email}
             />
         </div>
     );

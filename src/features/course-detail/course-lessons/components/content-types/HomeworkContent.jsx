@@ -39,6 +39,12 @@ const STATUS_CONFIG = {
         bgClass: 'bg-green-100',
         textClass: 'text-green-600',
         buttonText: 'Xem lại bài làm'
+    },
+    RESUME: {
+        label: 'Đang làm dở',
+        bgClass: 'bg-purple-100',
+        textClass: 'text-purple-600',
+        buttonText: 'Tiếp tục làm bài'
     }
 };
 
@@ -301,7 +307,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                 }
                 return <ReviewTabContent />;
             case TABS.HISTORY:
-                return <HistoryTabContent />;
+                return <HistoryTabContent competitionId={competitionId} />;
             default:
                 return null;
         }

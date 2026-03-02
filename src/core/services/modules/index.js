@@ -12,3 +12,4 @@ export * from './lessonService';
 export * from './learningItemService';
 export * from './competitionService';
 export * from './doCompetitionService';
+export * from './mediaService';

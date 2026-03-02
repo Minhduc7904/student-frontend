@@ -7,6 +7,7 @@ import learningItemReducer from '../../features/learning-item/store/learningItem
 import classSessionReducer from '../../features/class-session/store/classSessionSlice'
 import courseDetailReducer from '../../features/course-detail/store/courseDetailSlice'
 import doCompetitionReducer from '../../features/do-competition/store/doCompetitionSlice'
+import mediaReducer from '../../features/media/store/mediaSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -20,6 +21,7 @@ export const store = configureStore({
     classSession: classSessionReducer,
     courseDetail: courseDetailReducer,
     doCompetition: doCompetitionReducer,
+    media: mediaReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

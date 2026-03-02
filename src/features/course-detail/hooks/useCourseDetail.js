@@ -34,7 +34,7 @@ export const useCourseDetail = () => {
 
     // Fetch course detail và lessons khi courseId thay đổi
     useEffect(() => {
-        if (courseId) {
+        if (courseId && (courseId != courseDetail?.courseId || !lessons.length)) {
             // Fetch course detail
             dispatch(fetchStudentCourseDetail(courseId));
             // Fetch lessons
