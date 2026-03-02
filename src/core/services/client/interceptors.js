@@ -129,9 +129,12 @@ export async function responseErrorInterceptor(error) {
 
 /**
  * Redirect to login page
+ * Use import.meta.env.BASE_URL to respect Vite base path (e.g. /student/)
+ * so we navigate to /student/login instead of /login
  */
 function redirectToLogin() {
     if (typeof window !== "undefined") {
-        window.location.href = ROUTES.LOGIN;
+        const base = import.meta.env.BASE_URL || '/';
+        window.location.href = base.replace(/\/$/, '') + ROUTES.LOGIN;
     }
 }
