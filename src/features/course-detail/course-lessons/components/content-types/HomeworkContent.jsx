@@ -298,7 +298,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         
         switch (activeTab) {
             case TABS.DETAIL:
-                return <DetailTabContent content={currentContent} onStartCompetition={handleStartCompetition} />;
+                return <DetailTabContent content={currentContent} onStartCompetition={handleActionButton} />;
             case TABS.RANKING:
                 if (!competition?.allowLeaderboard) {
                     return (
