@@ -1,8 +1,20 @@
-import { Play, Trophy, CheckCircle2, Youtube } from "lucide-react";
+import { Play, Trophy, CheckCircle2, Youtube, Eye } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/core/constants';
 import { formatDate } from '@/shared/utils';
 
 // Status configuration
 const STATUS_CONFIG = {
+    NOT_STARTED: {
+        label: 'Chưa bắt đầu',
+        color: 'blue',
+        bgClass: 'bg-blue-100',
+        textClass: 'text-blue-600',
+        buttonText: 'Chưa đến thời gian',
+        buttonClass: 'bg-gray-300 text-gray-500 cursor-not-allowed',
+        buttonIcon: false,
+        disabled: true
+    },
     DO_NOW: {
         label: 'Chưa làm',
         color: 'red',
@@ -120,12 +132,20 @@ const getDetailData = (content) => {
  * ScoreCard
  * Hiển thị điểm số và lịch sử các lần nộp bài khi competition.allowViewScore = true
  */
-const ScoreCard = ({ progress, homeworkSubmit }) => {
+const ScoreCard = ({ progress, homeworkSubmit, competition }) => {
+    const navigate = useNavigate();
     const submit = homeworkSubmit ?? progress?.homeworkSubmit ?? null;
 
     const isSubmitted = !!submit;
     const hasScore = submit?.points != null;
     const maxPoints = submit?.maxPoints ?? null;
+
+    const hasFullRules = !!(competition?.allowViewScore || competition?.showResultDetail || competition?.allowViewAnswer);
+
+    const handleViewResult = () => {
+        const submitId = submit?.competitionSubmitId;
+        if (submitId) navigate(ROUTES.COMPETITION_RESULT(submitId));
+    };
 
     return (
         <div className="w-full flex flex-col gap-4 px-8 py-6 bg-white rounded-[20px] shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)]">
@@ -178,6 +198,19 @@ const ScoreCard = ({ progress, homeworkSubmit }) => {
             ) : (
                 <div className="flex items-center justify-center py-6 text-gray-400 text-sm">
                     Bạn chưa nộp bài
+                </div>
+            )}
+
+            {isSubmitted && hasFullRules && submit?.competitionSubmitId && (
+                <div className="flex justify-end">
+                    <button
+                        type="button"
+                        onClick={handleViewResult}
+                        className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-blue-800 hover:bg-blue-900 text-white text-text-5 font-medium cursor-pointer transition active:scale-95"
+                    >
+                        <Eye className="w-3.5 h-3.5 shrink-0" />
+                        Xem chi tiết kết quả
+                    </button>
                 </div>
             )}
         </div>
@@ -273,6 +306,7 @@ export const DetailTabContent = ({ content, onStartCompetition }) => {
                 <ScoreCard
                     progress={content?.progress}
                     homeworkSubmit={content?.homeworkSubmit}
+                    competition={content?.competition}
                 />
             )}
 

@@ -4,6 +4,7 @@ import { homeRoutes } from '../features/home/routes';
 import { profileRoutes } from '../features/profile/route';
 import { courseDetailRoutes } from '../features/course-detail/route';
 import { doCompetitionRoutes } from '../features/do-competition/route';
+import { competitionResultRoutes } from '../features/competition-result/route';
 import NotFoundPage from '../features/not-found';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '../core/constants';
@@ -22,6 +23,8 @@ const router = createBrowserRouter([
     ...courseDetailRoutes,
     // Do competition routes
     ...doCompetitionRoutes,
+    // Competition result routes
+    ...competitionResultRoutes,
     {
         index: true, // Default route at '/'
         element: <Navigate to={ROUTES.LOGIN} replace />,

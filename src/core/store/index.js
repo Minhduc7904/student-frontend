@@ -8,6 +8,7 @@ import classSessionReducer from '../../features/class-session/store/classSession
 import courseDetailReducer from '../../features/course-detail/store/courseDetailSlice'
 import doCompetitionReducer from '../../features/do-competition/store/doCompetitionSlice'
 import mediaReducer from '../../features/media/store/mediaSlice'
+import competitionResultReducer from '../../features/competition-result/store/competitionResultSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -22,6 +23,7 @@ export const store = configureStore({
     courseDetail: courseDetailReducer,
     doCompetition: doCompetitionReducer,
     media: mediaReducer,
+    competitionResult: competitionResultReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

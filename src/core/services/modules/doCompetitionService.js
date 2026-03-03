@@ -137,4 +137,20 @@ export const doCompetitionService = {
       body
     );
   },
+
+  /**
+   * Get result of a competition submit
+   * Lấy kết quả sau khi nộp bài
+   *
+   * @param {string|number} submitId - ID của competition submit
+   * @returns {Promise<Object>} Submit result data
+   *
+   * @example
+   * const result = await doCompetitionService.getSubmitResult(1);
+   */
+  getSubmitResult: async (submitId) => {
+    return await axiosClient.get(
+      API_ENDPOINTS.DO_COMPETITION.GET_SUBMIT_RESULT(submitId)
+    );
+  },
 };

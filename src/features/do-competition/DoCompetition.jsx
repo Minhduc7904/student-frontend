@@ -142,7 +142,7 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
             })).unwrap();
 
             if (isHomeworkCompetition) {
-                navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { replace: true });
+                navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { replace: true, state: { resetAll: true } });
             } else {
                 navigate(ROUTES.DASHBOARD, { replace: true });
             }
@@ -164,7 +164,7 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
      */
     const handleGoBack = useCallback(() => {
         if (isHomeworkCompetition) {
-            navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
+            navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { state: { resetAll: true } });
         } else {
             navigate(ROUTES.DASHBOARD);
         }

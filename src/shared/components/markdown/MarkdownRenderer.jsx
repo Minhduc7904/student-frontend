@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -22,7 +23,7 @@ import './markdown-styles.css';
  * @param {object} components - Custom component renderers
  * @param {string} imgClassNameSize - Tailwind size classes for images
  */
-export const MarkdownRenderer = ({
+export const MarkdownRenderer = memo(({
     content,
     className = '',
     components: customComponents,
@@ -119,7 +120,9 @@ export const MarkdownRenderer = ({
             </ReactMarkdown>
         </div>
     );
-};
+});
+
+MarkdownRenderer.displayName = 'MarkdownRenderer';
 
 MarkdownRenderer.propTypes = {
     content: PropTypes.string,

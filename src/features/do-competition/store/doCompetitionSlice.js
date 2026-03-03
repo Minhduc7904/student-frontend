@@ -36,6 +36,10 @@ const initialState = {
     finishSubmitLoading: false,
     finishSubmitError: null,
     finishSubmitResult: null,
+    // Submit result
+    submitResult: null,
+    submitResultLoading: false,
+    submitResultError: null,
 };
 
 /**
@@ -107,6 +111,24 @@ export const submitCompetitionAnswer = createAsyncThunk(
                 showSuccess: false,
                 showError: true,
                 errorTitle: 'Nộp câu trả lời thất bại',
+            }
+        );
+    }
+);
+
+/**
+ * Get result of a competition submit
+ */
+export const getSubmitResult = createAsyncThunk(
+    'doCompetition/getSubmitResult',
+    async (submitId, thunkAPI) => {
+        return handleAsyncThunk(
+            () => doCompetitionService.getSubmitResult(submitId),
+            thunkAPI,
+            {
+                showSuccess: false,
+                showError: true,
+                errorTitle: 'Tải kết quả bài thi thất bại',
             }
         );
     }
@@ -400,6 +422,21 @@ const doCompetitionSlice = createSlice({
             .addCase(finishCompetition.rejected, (state, action) => {
                 state.finishSubmitLoading = false;
                 state.finishSubmitError = action.payload || action.error.message;
+            })
+            // Get Submit Result
+            .addCase(getSubmitResult.pending, (state) => {
+                state.submitResultLoading = true;
+                state.submitResultError = null;
+                state.submitResult = null;
+            })
+            .addCase(getSubmitResult.fulfilled, (state, action) => {
+                state.submitResultLoading = false;
+                state.submitResult = action.payload.data;
+            })
+            .addCase(getSubmitResult.rejected, (state, action) => {
+                state.submitResultLoading = false;
+                state.submitResultError = action.payload || action.error.message;
+                state.submitResult = null;
             });
     },
 });
@@ -443,6 +480,9 @@ export const selectSubmitAnswerError = (state) => state.doCompetition.submitAnsw
 export const selectFinishSubmitLoading = (state) => state.doCompetition.finishSubmitLoading;
 export const selectFinishSubmitError = (state) => state.doCompetition.finishSubmitError;
 export const selectFinishSubmitResult = (state) => state.doCompetition.finishSubmitResult;
+export const selectSubmitResult = (state) => state.doCompetition.submitResult;
+export const selectSubmitResultLoading = (state) => state.doCompetition.submitResultLoading;
+export const selectSubmitResultError = (state) => state.doCompetition.submitResultError;
 export const selectTotalAnswered = (state) => state.doCompetition.totalAnswered;
 export const selectTotalErrors = (state) => state.doCompetition.totalErrors;
 

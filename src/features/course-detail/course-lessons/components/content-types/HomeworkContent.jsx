@@ -9,6 +9,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../../../core/constants";
 // Status configuration - same as DetailTabContent for consistency
 const STATUS_CONFIG = {
+    NOT_STARTED: {
+        label: 'Chưa bắt đầu',
+        bgClass: 'bg-blue-100',
+        textClass: 'text-blue-600',
+        buttonText: 'Chưa đến thời gian',
+        disabled: true
+    },
     DO_NOW: {
         label: 'Chưa làm',
         bgClass: 'bg-red-100',
@@ -174,6 +181,10 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const currentStatus = currentContent?.progress?.status || 'DO_NOW';
     const statusConfig = STATUS_CONFIG[currentStatus] || STATUS_CONFIG.DO_NOW;
 
+    // COMPLETED: chỉ cho phép bấm nếu competition có ít nhất 1 rule xem kết quả
+    const hasViewRules = !!(competition?.allowViewScore || competition?.showResultDetail || competition?.allowViewAnswer);
+    const isButtonDisabled = statusConfig.disabled || (currentStatus === 'COMPLETED' && !hasViewRules);
+
     /**
      * Check if a tab is disabled based on competition permissions
      */
@@ -225,6 +236,22 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                 competition.competitionId
             ));
         }
+    };
+
+    /**
+     * Handle action button:
+     * - COMPLETED + có rule → xem kết quả
+     * - Các trạng thái khác → bắt đầu / tiếp tục làm bài
+     */
+    const handleActionButton = () => {
+        if (currentStatus === 'COMPLETED' && hasViewRules) {
+            const submitId = currentContent?.progress?.homeworkSubmit?.competitionSubmitId;
+            if (submitId) {
+                navigate(ROUTES.COMPETITION_RESULT(submitId));
+            }
+            return;
+        }
+        handleStartCompetition();
     };
 
     const handleTabChange = (tabId) => {
@@ -307,7 +334,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                 }
                 return <ReviewTabContent />;
             case TABS.HISTORY:
-                return <HistoryTabContent competitionId={competitionId} />;
+                return <HistoryTabContent competitionId={competitionId} competition={competition} />;
             default:
                 return null;
         }
@@ -333,16 +360,16 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                     </div>
                     <button
                         type="button"
-                        disabled={statusConfig.disabled}
-                        onClick={statusConfig.disabled ? undefined : handleStartCompetition}
+                        disabled={isButtonDisabled}
+                        onClick={isButtonDisabled ? undefined : handleActionButton}
                         className={`flex flex-row w-full sm:w-auto sm:min-w-52 lg:min-w-60 px-3 sm:px-4 py-2.5 sm:py-3 gap-2 sm:gap-2.5 rounded-lg justify-center items-center transition-all shrink-0 ${
-                            statusConfig.disabled 
+                            isButtonDisabled 
                                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed' 
                                 : 'bg-blue-800 hover:bg-blue-900 cursor-pointer active:scale-95'
                         }`}
                     >
-                        <Play className={`w-4 h-4 sm:w-5 sm:h-5 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'}`} />
-                        <span className={`text-text-5 sm:text-subhead-5 lg:text-subhead-4 ${statusConfig.disabled ? 'text-gray-500' : 'text-white'} whitespace-nowrap`}>
+                        <Play className={`w-4 h-4 sm:w-5 sm:h-5 ${isButtonDisabled ? 'text-gray-500' : 'text-white'}`} />
+                        <span className={`text-text-5 sm:text-subhead-5 lg:text-subhead-4 ${isButtonDisabled ? 'text-gray-500' : 'text-white'} whitespace-nowrap`}>
                             {statusConfig.buttonText}
                         </span>
                     </button>

@@ -32,6 +32,7 @@ export const ROUTES = {
     DO_HOMEWORK_COMPETITION_START: (courseId, lessonId, learningItemId, homeworkContentId, competitionId) => `/do-competition/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}/homework-contents/${homeworkContentId}/${competitionId}/start`,
     DO_COMPETITION_SUBMIT: (competitionId, submitId) => `/do-competition/${competitionId}/submit/${submitId}`,
     DO_HOMEWORK_COMPETITION_SUBMIT: (courseId, lessonId, learningItemId, homeworkContentId, competitionId, submitId) => `/do-competition/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}/homework-contents/${homeworkContentId}/${competitionId}/submit/${submitId}`,
+    COMPETITION_RESULT: (submitId) => `/do-competition/submit/${submitId}/result`,
     // User Routes
     PROFILE: '/profile',
     PROFILE_EDIT: '/profile/edit',

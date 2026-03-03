@@ -108,6 +108,7 @@ export const API_ENDPOINTS = {
         GET_ANSWERS: (submitId) => `/do-competition/submit/${submitId}/answers`,
         SUBMIT_ANSWER: (submitId, answerId) => `/do-competition/submit/${submitId}/answer/${answerId}`,
         FINISH_SUBMIT: (submitId) => `/do-competition/submit/${submitId}/finish`,
+        GET_SUBMIT_RESULT: (submitId) => `/do-competition/submit/${submitId}/result`,
     },
 
     // Media

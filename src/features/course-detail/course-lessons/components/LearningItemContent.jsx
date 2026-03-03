@@ -109,7 +109,7 @@ export const LearningItemContent = ({ learningItemDetail, lessonDetail, loading 
                         </div>
                     </button>
                 </div>
-                <div className="px-3 sm:px-6 lg:ml-10 w-full lg:w-[calc(100%-40px)] h-1 bg-gray-200 rounded-full overflow-hidden">
+                <div className="mx-3 sm:mx-6 lg:ml-10 w-full lg:w-[calc(100%-40px)] h-1 bg-gray-200 rounded-full overflow-hidden">
                     <div
                         className="h-full bg-blue-800 rounded-full transition-all duration-300"
                         style={{ width: `${percentage}%` }}

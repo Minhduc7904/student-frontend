@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
     fetchLearningItemDetail,
     selectLearningItemDetail,
@@ -16,11 +16,24 @@ import {
 export const useLearningItemDetail = () => {
     const dispatch = useDispatch();
     const { learningItemId } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
 
     // Selectors
     const learningItemDetail = useSelector(selectLearningItemDetail);
     const loading = useSelector(selectLearningItemDetailLoading);
     const error = useSelector(selectLearningItemDetailError);
+
+    // Nếu được điều hướng về với resetAll=true, xoá data cũ và fetch lại
+    useEffect(() => {
+        if (location.state?.resetAll) {
+            dispatch(clearLearningItemDetail());
+            if (learningItemId) {
+                dispatch(fetchLearningItemDetail(learningItemId));
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Fetch learning item detail khi learningItemId thay đổi
     useEffect(() => {

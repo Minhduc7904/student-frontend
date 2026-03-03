@@ -8,7 +8,10 @@ import {
     AlertCircle,
     CheckCircle2,
     Hourglass,
+    Eye,
 } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/core/constants';
 import { formatDateTime } from "@/shared/utils";
 import { useCompetitionHistory } from "../../../hooks/useCompetitionHistory";
 
@@ -66,7 +69,7 @@ const StatusBadge = ({ status }) => {
 /**
  * HistoryRow — 1 hàng trong bảng lịch sử (desktop)
  */
-const HistoryRow = ({ item, index }) => (
+const HistoryRow = ({ item, index, onViewResult }) => (
     <tr className="border-b border-gray-100 hover:bg-gray-50/60 transition">
         {/* Lần thi */}
         <td className="py-3.5 px-4">
@@ -107,13 +110,29 @@ const HistoryRow = ({ item, index }) => (
                 {item.submittedAt ? formatDateTime(item.submittedAt) : "N/A"}
             </span>
         </td>
+
+        {/* Xem kết quả */}
+        <td className="py-3.5 px-4">
+            {onViewResult && item.competitionSubmitId ? (
+                <button
+                    type="button"
+                    onClick={() => onViewResult(item.competitionSubmitId)}
+                    className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-text-5 font-medium cursor-pointer transition active:scale-95 whitespace-nowrap"
+                >
+                    <Eye className="w-3.5 h-3.5 shrink-0" />
+                    Xem kết quả
+                </button>
+            ) : (
+                <span className="text-text-5 text-gray-400">—</span>
+            )}
+        </td>
     </tr>
 );
 
 /**
  * HistoryCard — 1 card cho mobile view
  */
-const HistoryCard = ({ item, index }) => (
+const HistoryCard = ({ item, index, onViewResult }) => (
     <div className="flex flex-col gap-3 p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
         {/* Header: attempt number + status */}
         <div className="flex items-center justify-between">
@@ -159,6 +178,18 @@ const HistoryCard = ({ item, index }) => (
                 {item.submittedAt ? formatDateTime(item.submittedAt) : "N/A"}
             </span>
         </div>
+
+        {/* Xem kết quả button */}
+        {onViewResult && item.competitionSubmitId && (
+            <button
+                type="button"
+                onClick={() => onViewResult(item.competitionSubmitId)}
+                className="flex items-center justify-center gap-1.5 w-full py-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-800 text-text-5 font-medium cursor-pointer transition active:scale-95"
+            >
+                <Eye className="w-3.5 h-3.5 shrink-0" />
+                Xem chi tiết kết quả
+            </button>
+        )}
     </div>
 );
 
@@ -206,9 +237,15 @@ const Pagination = ({ pagination, onPageChange, loading }) => {
  * HistoryTabContent
  * Hiển thị lịch sử các lần thi đã nộp (SUBMITTED / GRADED) với phân trang
  */
-export const HistoryTabContent = ({ competitionId }) => {
+export const HistoryTabContent = ({ competitionId, competition }) => {
+    const navigate = useNavigate();
     const { history, pagination, loading, error, fetchPage, refresh } =
         useCompetitionHistory(competitionId);
+
+    const hasFullRules = !!(competition?.allowViewScore || competition?.showResultDetail || competition?.allowViewAnswer);
+    const onViewResult = hasFullRules
+        ? (submitId) => navigate(ROUTES.COMPETITION_RESULT(submitId))
+        : null;
 
     /* ── Loading state ──────────────────────────────── */
     if (loading && history.length === 0) {
@@ -314,6 +351,9 @@ export const HistoryTabContent = ({ competitionId }) => {
                                 <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">
                                     Thời gian nộp
                                 </th>
+                                <th className="text-left py-3 px-4 text-text-4 font-semibold text-gray-900">
+                                    Kết quả
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -322,6 +362,7 @@ export const HistoryTabContent = ({ competitionId }) => {
                                     key={item.competitionSubmitId ?? i}
                                     item={item}
                                     index={i}
+                                    onViewResult={onViewResult}
                                 />
                             ))}
                         </tbody>
@@ -336,6 +377,7 @@ export const HistoryTabContent = ({ competitionId }) => {
                         key={item.competitionSubmitId ?? i}
                         item={item}
                         index={i}
+                        onViewResult={onViewResult}
                     />
                 ))}
             </div>

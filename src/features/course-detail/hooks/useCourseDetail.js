@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 import {
     fetchStudentCourseDetail,
     fetchCourseLessons,
@@ -22,6 +22,8 @@ import {
 export const useCourseDetail = () => {
     const dispatch = useDispatch();
     const { courseId } = useParams();
+    const location = useLocation();
+    const navigate = useNavigate();
 
     // Selectors
     const courseDetail = useSelector(selectCourseDetail);
@@ -31,6 +33,25 @@ export const useCourseDetail = () => {
     const lessons = useSelector(selectCourseLessons);
     const lessonsLoading = useSelector(selectCourseLessonsLoading);
     const lessonsError = useSelector(selectCourseLessonsError);
+
+    // Nếu được điều hướng về với resetAll=true, xoá toàn bộ data cũ và fetch lại
+    useEffect(() => {
+        if (location.state?.resetAll) {
+            // Xoá state trước để tránh re-trigger
+            navigate(location.pathname + location.search, {
+                replace: true,
+                state: { ...location.state, resetAll: false },
+            });
+            dispatch(clearCourseDetail());
+            dispatch(clearLessons());
+            dispatch(clearChapters());
+            if (courseId) {
+                dispatch(fetchStudentCourseDetail(courseId));
+                dispatch(fetchCourseLessons(courseId));
+            }
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     // Fetch course detail và lessons khi courseId thay đổi
     useEffect(() => {
