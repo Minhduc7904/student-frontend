@@ -9,6 +9,7 @@ import {
     requestErrorInterceptor,
     responseInterceptor,
     responseErrorInterceptor,
+    injectAxiosClient,
 } from "./interceptors";
 
 /**
@@ -33,5 +34,8 @@ axiosClient.interceptors.response.use(
     responseInterceptor,
     responseErrorInterceptor
 );
+
+// Inject axiosClient into interceptors to avoid circular dependency
+injectAxiosClient(axiosClient);
 
 export default axiosClient;

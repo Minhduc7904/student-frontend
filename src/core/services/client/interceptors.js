@@ -3,10 +3,23 @@
  */
 
 import axios from 'axios';
-import { API_BASE_URL, ROUTES, HTTP_STATUS } from '../../constants';
+import { API_BASE_URL, ROUTES, HTTP_STATUS, STORAGE_KEYS } from '../../constants';
 import { handleApiError, logError } from '../errors';
-import { getAccessToken, getRefreshToken, setAccessToken, clearAuthData } from '../../../shared/utils';
-import { API_ENDPOINTS } from '../../constants';
+import { getAccessToken } from '../../../shared/utils';
+
+/**
+ * Lazy-injected references to avoid circular dependencies
+ */
+let _store = null;
+let _axiosClient = null;
+
+export function injectStore(store) {
+    _store = store;
+}
+
+export function injectAxiosClient(client) {
+    _axiosClient = client;
+}
 /**
  * Request interceptor - Add auth token and log requests
  */
@@ -81,39 +94,43 @@ export async function responseErrorInterceptor(error) {
         console.groupEnd();
     }
 
-    // Handle 401 Unauthorized - Try to refresh token
+    // Handle 401 Unauthorized
     if (error.response?.status === HTTP_STATUS.UNAUTHORIZED && !originalRequest._retry) {
         originalRequest._retry = true;
+        console.warn("⚠️ 401 Unauthorized - Attempting token refresh...");
 
         try {
-            const refreshToken = getRefreshToken();
+            const refreshToken = localStorage.getItem(STORAGE_KEYS.REFRESH_TOKEN);
 
             if (!refreshToken) {
                 throw new Error("No refresh token");
             }
 
-            // Call refresh token API
-            const response = await axios.post(`${API_BASE_URL}${API_ENDPOINTS.AUTH.REFRESH}`, {
+            const response = await axios.post(`${API_BASE_URL}/auth/refresh`, {
                 refreshToken,
             });
+            console.log('Refresh response:', response.data);
 
-            const { accessToken } = response.data;
+            const { accessToken, refreshToken: newRefreshToken } =
+                response.data?.data ? response.data.data : response.data;
 
-            // Update stored token
-            setAccessToken(accessToken);
+            localStorage.setItem(STORAGE_KEYS.ACCESS_TOKEN, accessToken);
+            if (newRefreshToken) {
+                localStorage.setItem(STORAGE_KEYS.REFRESH_TOKEN, newRefreshToken);
+            }
 
-            // Retry original request with new token
+            // Sync tokens into Redux store
+            _store?.dispatch({
+                type: 'auth/setCredentials',
+                payload: { accessToken, refreshToken: newRefreshToken || refreshToken },
+            });
+
             originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-
-            // Get the axios instance to retry
-            const axiosClient = error.config.baseURL
-                ? axios.create({ baseURL: error.config.baseURL })
-                : axios;
-
-            return axiosClient(originalRequest);
+            return _axiosClient(originalRequest);
         } catch (refreshError) {
             // Clear tokens and redirect to login
-            clearAuthData();
+            localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
+            localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
             redirectToLogin();
             return Promise.reject(refreshError);
         }
