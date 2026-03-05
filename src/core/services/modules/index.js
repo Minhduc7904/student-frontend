@@ -13,3 +13,4 @@ export * from './learningItemService';
 export * from './competitionService';
 export * from './doCompetitionService';
 export * from './mediaService';
+export * from './tuitionPaymentService';

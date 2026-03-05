@@ -21,14 +21,14 @@ const SessionList = memo(({ sessions, loading }) => {
 
     if (!sessions || sessions.length === 0) {
         return (
-            <div className="text-gray-subtle text-text-5">
+            <div className="text-blue-950 text-text-5 flex justify-center items-center py-4">
                 Không có buổi học trong tháng này
             </div>
         );
     }
 
     return (
-        <div className="flex flex-col gap-4 flex-1 overflow-y-auto custom-scrollbar">
+        <div className="flex flex-col gap-4 flex-1 overflow-y-auto custom-scrollbar py-4">
             {sessions.map((item) => (
                 <SessionItem key={item.id} item={item} />
             ))}

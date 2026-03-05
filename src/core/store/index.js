@@ -9,6 +9,7 @@ import courseDetailReducer from '../../features/course-detail/store/courseDetail
 import doCompetitionReducer from '../../features/do-competition/store/doCompetitionSlice'
 import mediaReducer from '../../features/media/store/mediaSlice'
 import competitionResultReducer from '../../features/competition-result/store/competitionResultSlice'
+import tuitionPaymentReducer from '../../features/tuition-payment/store/tuitionPaymentSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -24,6 +25,7 @@ export const store = configureStore({
     doCompetition: doCompetitionReducer,
     media: mediaReducer,
     competitionResult: competitionResultReducer,
+    tuitionPayment: tuitionPaymentReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

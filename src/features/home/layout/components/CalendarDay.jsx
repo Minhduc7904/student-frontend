@@ -29,8 +29,8 @@ const CalendarDay = ({ day, session, loading }) => {
                 ref={ref}
                 onMouseEnter={() => session && setHovered(true)}
                 onMouseLeave={() => setHovered(false)}
-                className={`w-6 h-6 flex items-center justify-center rounded-full cursor-pointer
-                ${session ? `${color.bg} ${color.text} font-semibold` : "hover:bg-blue-100 text-blue-800"}`}
+                className={`w-6 h-6 p-0.5 flex items-center uppercase text-subhead-4 justify-center rounded-full cursor-pointer
+                ${session ? `${color.bg} ${color.text} font-semibold` : "hover:bg-blue-100 text-blue-950"}`}
             >
                 {day}
             </div>

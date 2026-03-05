@@ -99,6 +99,13 @@ export const API_ENDPOINTS = {
         STUDENT_RANKING: (id) => `/competitions/${id}/student/ranking`,
     },
 
+    // Tuition Payments
+    TUITION_PAYMENTS: {
+        MY: '/tuition-payments/my',
+        MY_STATS_STATUS: '/tuition-payments/my/stats/status',
+        MY_STATS_MONEY: '/tuition-payments/my/stats/money',
+    },
+
     // Do Competition
     DO_COMPETITION: {
         HISTORY: (competitionId) => `/do-competition/${competitionId}/history`,

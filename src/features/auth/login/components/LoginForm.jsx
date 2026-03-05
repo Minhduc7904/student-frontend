@@ -144,7 +144,7 @@ const InputUserName = ({ value, onChange, error }) => {
                 name="username"
                 value={value}
                 onChange={onChange}
-                className={`py-3 px-[10px] w-full lg:w-[500px] text-start text-text-5 sm:text-text-4 text-gray-700 rounded-lg outline-1 outline-offset-[-0.50px] ${error ? 'outline-red-500 focus:outline-red-500' : 'outline-gray-700 focus:outline-blue-800'}`}
+                className={`py-3 px-[10px] w-full text-start text-text-5 sm:text-text-4 text-gray-700 rounded-lg outline-1 outline-offset-[-0.50px] ${error ? 'outline-red-500 focus:outline-red-500' : 'outline-gray-700 focus:outline-blue-800'}`}
                 placeholder="Nhập tài khoản của bạn"
             />
             {error && (
@@ -169,7 +169,7 @@ const InputPassword = ({ value, onChange, error }) => {
                 name="password"
                 value={value}
                 onChange={onChange}
-                className={`py-3 px-[10px] w-full lg:w-[500px] text-start text-text-5 sm:text-text-4 text-gray-700 rounded-lg outline-1 outline-offset-[-0.50px] ${error ? 'outline-red-500 focus:outline-red-500' : 'outline-gray-700 focus:outline-blue-800'}`}
+                className={`py-3 px-[10px] w-full text-start text-text-5 sm:text-text-4 text-gray-700 rounded-lg outline-1 outline-offset-[-0.50px] ${error ? 'outline-red-500 focus:outline-red-500' : 'outline-gray-700 focus:outline-blue-800'}`}
                 placeholder="Nhập mật khẩu của bạn"
             />
             {error && (

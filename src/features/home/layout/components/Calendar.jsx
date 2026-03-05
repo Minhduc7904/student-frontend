@@ -33,9 +33,9 @@ const mapSessionToCalendarFormat = (session) => {
         day: sessionDate.getDate(),
         title: session.title || session.class?.name || "Buổi học",
         subject: session.class?.name || "Lớp học",
-        deadline: sessionDate.toLocaleTimeString('vi-VN', { 
-            hour: '2-digit', 
-            minute: '2-digit' 
+        deadline: sessionDate.toLocaleTimeString('vi-VN', {
+            hour: '2-digit',
+            minute: '2-digit'
         }),
         color: randomColor,
         sessionData: session, // Giữ lại data gốc nếu cần
@@ -56,7 +56,7 @@ const Calendar = () => {
     useEffect(() => {
         // Ngày đầu tiên trong tháng
         const sessionDateFrom = new Date(year, month, 1).toISOString();
-        
+
         // Ngày cuối cùng trong tháng
         const lastDay = new Date(year, month + 1, 0).getDate();
         const sessionDateTo = new Date(year, month, lastDay, 23, 59, 59).toISOString();
@@ -99,21 +99,25 @@ const Calendar = () => {
 
     return (
         <div className="flex flex-col gap-6 lg:w-fit w-full">
-            <div className="lg:w-[330px] flex flex-col rounded-2xl shadow-sm">
+            <div className="lg:w-[330px] flex flex-col rounded-2xl shadow-sm border border-gray-100">
                 <CalendarHeader
                     month={month}
                     year={year}
                     onPrevMonth={handlePrevMonth}
                     onNextMonth={handleNextMonth}
                 />
-                <CalendarGrid 
-                    paddedDays={paddedDays} 
+                <div className=" flex justify-center items-center w-full px-6 my-1">
+                    <div className=" w-full h-0 outline outline-[0.80px] outline-offset-[-0.40px] outline-zinc-200"></div>
+
+                </div>
+                <CalendarGrid
+                    paddedDays={paddedDays}
                     sessions={calendarSessions}
                     loading={loading}
                 />
             </div>
 
-            <SessionList 
+            <SessionList
                 sessions={calendarSessions}
                 loading={loading}
             />

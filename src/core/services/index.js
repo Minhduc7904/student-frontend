@@ -13,6 +13,9 @@ export * from './errors';
 // Export service modules
 export * from './modules';
 
+// Export socket service
+export { socketService } from './socket/socket.service';
+
 // Export constants for backward compatibility
 export * from '../constants';
 

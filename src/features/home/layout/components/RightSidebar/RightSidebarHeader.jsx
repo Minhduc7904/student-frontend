@@ -7,11 +7,11 @@ import UserAvatar from "./UserAvatar";
  * RightSidebarHeader Component
  * Header của right sidebar chứa Points, Notification, User Avatar
  */
-const RightSidebarHeader = memo(({ profile, notificationCount = 3 }) => {
+const RightSidebarHeader = memo(({ profile }) => {
     return (
         <div className="w-full flex flex-row lg:justify-between justify-end gap-8 items-center">
             <Points points={profile?.points || 0} />
-            <NotificationBell count={notificationCount} />
+            <NotificationBell />
             <UserAvatar
                 avatarUrl={profile?.avatarUrl}
                 fullName={profile?.fullName}

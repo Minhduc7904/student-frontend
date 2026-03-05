@@ -13,7 +13,7 @@ function LoginPage() {
     } = useLogin();
 
     return (
-        <div className="animate-slide-up h-full lg:w-auto w-full px-6 py-8 sm:px-10 sm:py-16 md:px-12 md:py-20 bg-white flex items-center justify-center rounded-2xl sm:rounded-3xl lg:rounded-[40px]">
+        <div className="animate-slide-up h-full lg:w-125 w-full px-6 pt-8 pb-6 sm:px-10 sm:pt-16 sm:pb-10 md:px-12 md:pt-20 md:pb-12 bg-white flex items-center justify-center rounded-2xl sm:rounded-3xl lg:rounded-[36px]">
             <LoginForm
                 formData={formData}
                 rememberMe={rememberMe}

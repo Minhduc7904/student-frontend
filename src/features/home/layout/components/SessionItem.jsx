@@ -34,17 +34,17 @@ const SessionItem = memo(({ item }) => {
                     </span>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                    <span className="text-subhead-4 text-gray-900">
+                <div className="flex flex-col gap-1 min-w-0">
+                    <span className="text-subhead-4 text-blue-950 truncate max-w-[120px]">
                         {sessionData.name || "Chưa có tên"}
                     </span>
-                    <span className="text-text-5 text-gray-subtle">
+                    <span className="text-text-5 text-blue-950/60 truncate max-w-[120px]">
                         {className}
                     </span>
                 </div>
             </div>
 
-            <div className="text-gray-900 text-text-4">
+            <div className="text-blue-950 text-text-4">
                 {formatTime(sessionData.startTime) || "--:--"} - {formatTime(sessionData.endTime) || "--:--"}
             </div>
         </div>

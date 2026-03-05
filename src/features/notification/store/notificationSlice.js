@@ -137,6 +137,12 @@ const notificationSlice = createSlice({
             if (!state.myNotifications) {
                 state.myNotifications = [];
             }
+            // Chỉ thêm nếu chưa tồn tại notificationId
+            const alreadyExists = state.myNotifications.some(
+                (n) => n.notificationId === action.payload.notificationId
+            );
+            if (alreadyExists) return;
+
             state.myNotifications.unshift(action.payload);
             state.stats.total += 1;
             state.stats.unread += 1;
@@ -285,6 +291,7 @@ export const {
     clearMyNotifications,
     clearUserNotifications,
     addRealtimeNotification,
+    updateStatsFromSocket,
 } = notificationSlice.actions;
 
 // Selectors
