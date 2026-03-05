@@ -151,7 +151,7 @@ export const LessonContent = memo(({ lessonDetail }) => {
     } = lessonDetail;
 
     return (
-        <div className="h-full w-full overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6 bg-white rounded-2xl sm:rounded-3xl lg:rounded-[40px] shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30">
+        <div className="h-full w-full overflow-y-auto custom-scrollbar p-3 sm:p-4 lg:p-6 bg-white rounded-2xl shadow-[1px_-1px_4px_4px_rgba(138,138,138,0.25)] border border-[#E1E1E1]/30">
             <div className="flex flex-col gap-4 sm:gap-6 w-full">
                 {/* Header với title và nút quay về trang chủ */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 sm:gap-4 w-full px-3 sm:px-6 lg:px-10">
