@@ -2,7 +2,7 @@ import { Outlet } from 'react-router-dom'
 import { getBannerImageUrl } from '../../../shared/constants'
 
 function AuthLayout() {
-    const bannerUrl = getBannerImageUrl('auth-banner-background.png')
+    const bannerUrl = getBannerImageUrl('office-tools-blue-surface.jpg')
     return (
         <div className="relative overflow-hidden min-h-dvh">
 

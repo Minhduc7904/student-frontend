@@ -1,7 +1,7 @@
 import { useState } from "react";
 import Eye from "../../../../assets/icons/Eye.svg";
 import EyeHide from "../../../../assets/icons/EyeHide.svg";
-import { SvgIcon, ButtonLoading } from "../../../../shared/components";
+import { SvgIcon, ButtonLoading, ComingSoonModal } from "../../../../shared/components";
 import CheckBox from "../../../../assets/icons/CheckBox.svg";
 import CheckBoxOutline from "../../../../assets/icons/CheckBoxOutline.svg";
 import GoogleLogo from "../../../../assets/icons/GoogleLogo.svg";
@@ -190,6 +190,10 @@ function LoginForm({
     handleChange,
     handleRememberMeChange
 }) {
+    const [showComingSoon, setShowComingSoon] = useState(false);
+    const openComingSoon = () => setShowComingSoon(true);
+    const closeComingSoon = () => setShowComingSoon(false);
+
     return (
         <div className="bg-white flex flex-col items-center justify-center w-full">
             <h1 className="w-full text-start text-h3 sm:text-h2 lg:text-h1 text-blue-800 mb-4 sm:mb-6 lg:mb-8">
@@ -203,7 +207,7 @@ function LoginForm({
                     <div className="w-full flex flex-col">
                         <div className="w-full flex flex-col justify-center items-center gap-2">
                             <div className="w-full flex flex-col justify-center items-center gap-1">
-                                <EmailLoginButton />
+                                <EmailLoginButton onClick={openComingSoon} />
 
                                 <div className="w-full flex flex-col justify-center items-center gap-4 sm:gap-5 lg:gap-6">
                                     <InputUserName
@@ -218,7 +222,7 @@ function LoginForm({
                                     />
                                 </div>
                             </div>
-                            <ForgotPasswordLink />
+                            <ForgotPasswordLink onClick={openComingSoon} />
                         </div>
                         <RememberMeCheckbox
                             checked={rememberMe}
@@ -235,9 +239,18 @@ function LoginForm({
 
                         <div className="flex-1 h-px bg-gray-300" />
                     </div>
-                    <GoogleLoginButton />
+                    <GoogleLoginButton onClick={openComingSoon} />
                 </div>
             </form>
+
+            <p className="mt-6 text-center text-text-5 text-gray-700">
+                Nếu bạn chưa có tài khoản, hãy liên hệ với{' '}
+                <span className="font-semibold text-blue-800">thầy giáo</span> hoặc{' '}
+                <span className="font-semibold text-blue-800">trợ giảng</span>{' '}
+                để được hỗ trợ sớm nhất.
+            </p>
+
+            <ComingSoonModal isOpen={showComingSoon} onClose={closeComingSoon} />
         </div>
     );
 }

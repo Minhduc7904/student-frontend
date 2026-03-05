@@ -4,3 +4,4 @@ export * from './svg';
 export * from './loading';
 export * from './logo';
 export * from './markdown';
+export * from './modal/ComingSoonModal';
