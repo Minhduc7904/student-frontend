@@ -5,3 +5,5 @@ export * from './loading';
 export * from './logo';
 export * from './markdown';
 export * from './modal/ComingSoonModal';
+export * from './pagination';
+export * from './podium';

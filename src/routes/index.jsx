@@ -2,9 +2,10 @@ import { createBrowserRouter } from 'react-router-dom';
 import { authRoutes } from '../features/auth/routes';
 import { homeRoutes } from '../features/home/routes';
 import { profileRoutes } from '../features/profile/route';
+import { practiceRoutes } from '../features/practice/routes';
+import { competitionRoutes } from '../features/competition/routes';
 import { courseDetailRoutes } from '../features/course-detail/route';
 import { doCompetitionRoutes } from '../features/do-competition/route';
-import { competitionResultRoutes } from '../features/competition-result/route';
 import NotFoundPage from '../features/not-found';
 import { Navigate } from 'react-router-dom';
 import { ROUTES } from '../core/constants';
@@ -19,12 +20,14 @@ const router = createBrowserRouter([
     ...homeRoutes,
     // Profile routes (standalone layout)
     ...profileRoutes,
+    // Practice routes (standalone layout)
+    ...practiceRoutes,
+    // Competition routes (standalone layout)
+    ...competitionRoutes,
     // Course detail routes
     ...courseDetailRoutes,
     // Do competition routes
     ...doCompetitionRoutes,
-    // Competition result routes
-    ...competitionResultRoutes,
     {
         index: true, // Default route at '/'
         element: <Navigate to={ROUTES.LOGIN} replace />,

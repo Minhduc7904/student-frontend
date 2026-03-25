@@ -8,8 +8,13 @@ import classSessionReducer from '../../features/class-session/store/classSession
 import courseDetailReducer from '../../features/course-detail/store/courseDetailSlice'
 import doCompetitionReducer from '../../features/do-competition/store/doCompetitionSlice'
 import mediaReducer from '../../features/media/store/mediaSlice'
-import competitionResultReducer from '../../features/competition-result/store/competitionResultSlice'
+import competitionResultReducer from '../../features/competition/result/store/competitionResultSlice'
 import tuitionPaymentReducer from '../../features/tuition-payment/store/tuitionPaymentSlice'
+import competitionReducer from '../../features/competition/store/competitionSlice'
+import competitionDetailReducer from '../../features/competition/competitionDetail/store/competitionDetailSlice'
+import competitionExamReducer from '../../features/competition/exam/store/competitionExamSlice'
+import competitionRankingReducer from '../../features/competition/ranking/store/competitionRankingSlice'
+import competitionHistoryReducer from '../../features/competition/history/store/competitionHistorySlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -26,6 +31,11 @@ export const store = configureStore({
     media: mediaReducer,
     competitionResult: competitionResultReducer,
     tuitionPayment: tuitionPaymentReducer,
+    competition: competitionReducer,
+    competitionDetail: competitionDetailReducer,
+    competitionExam: competitionExamReducer,
+    competitionRanking: competitionRankingReducer,
+    competitionHistory: competitionHistoryReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

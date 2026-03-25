@@ -6,6 +6,7 @@ import {
     LayoutDashboard,
     BookOpen,
     FileText,
+    Trophy,
     Library,
     TrendingUp,
     CalendarDays,
@@ -118,11 +119,12 @@ MenuItem.displayName = "MenuItem";
 const MENU_ITEMS = [
     { icon: LayoutDashboard, label: "Tổng quan", path: ROUTES.DASHBOARD },
     { icon: BookOpen, label: "Khóa học", path: ROUTES.COURSE_ENROLLMENTS },
-    { icon: FileText, label: "Phòng luyện đề", path: ROUTES.USER_BOOK },
-    { icon: Library, label: "Thư viện", path: ROUTES.LIBRARY },
-    { icon: TrendingUp, label: "Tiến độ học tập", path: ROUTES.PROGRESS },
-    { icon: CalendarDays, label: "Lịch học", path: ROUTES.CALENDAR },
-    { icon: CreditCard, label: "Thanh toán", path: ROUTES.PAYMENT },
+    // { icon: FileText, label: "Phòng luyện đề", path: ROUTES.PRACTICE },
+    { icon: Trophy, label: "Cuộc thi", path: ROUTES.COMPETITION },
+    // { icon: Library, label: "Thư viện", path: ROUTES.LIBRARY },
+    // { icon: TrendingUp, label: "Tiến độ học tập", path: ROUTES.PROGRESS },
+    // { icon: CalendarDays, label: "Lịch học", path: ROUTES.CALENDAR },
+    // { icon: CreditCard, label: "Thanh toán", path: ROUTES.PAYMENT },
 ];
 
 const BOTTOM_MENU_ITEMS = [

@@ -97,6 +97,11 @@ export const API_ENDPOINTS = {
     // Competitions
     COMPETITIONS: {
         STUDENT_RANKING: (id) => `/competitions/${id}/student/ranking`,
+        STUDENT_EXAM: (id) => `/competitions/${id}/student/exam`,
+        STUDENT_HISTORY: (id) => `/competitions/${id}/student/history`,
+        RANKING: (id) => `/competitions/${id}/ranking`,
+        PUBLIC_STUDENT: '/competitions/public/student',
+        PUBLIC_STUDENT_DETAIL: (id) => `/competitions/public/student/${id}`,
     },
 
     // Tuition Payments

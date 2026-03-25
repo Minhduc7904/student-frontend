@@ -14,10 +14,20 @@ export const LoadingRedirectPage = () => {
     const profile = useSelector(selectProfile);
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const loading = useSelector(selectProfileLoading);
+    const from = location.state?.from;
+    const getFromPath = () => {
+        if (!from) return '';
+        if (typeof from === 'string') return from;
+
+        const pathname = from.pathname || '';
+        const search = from.search || '';
+        const hash = from.hash || '';
+        return `${pathname}${search}${hash}`;
+    };
 
     useEffect(() => {
         if (!isAuthenticated) {
-            navigate(ROUTES.LOGIN);
+            navigate(ROUTES.LOGIN, { state: { from }, replace: true });
             return;
         }
 
@@ -27,24 +37,23 @@ export const LoadingRedirectPage = () => {
             .catch((error) => {
                 // On any error (network, server, etc.), redirect to login
                 console.error('Failed to load profile:', error);
-                navigate(ROUTES.LOGIN, { replace: true });
+                navigate(ROUTES.LOGIN, { state: { from }, replace: true });
             });
-    }, [isAuthenticated]);
+    }, [dispatch, from, isAuthenticated, navigate]);
 
     useEffect(() => {
         if (profile && !loading) {
-            // Get the previous page from location state
-            const from = location.state?.from?.pathname;
-
             // const rolePath = rolePathMap[profile.roleId];
-            if (from) {
-                navigate(from, { replace: true });
+            const fromPath = getFromPath();
+
+            if (fromPath) {
+                navigate(fromPath, { replace: true });
             } else {
                 navigate(ROUTES.DASHBOARD, { replace: true });
             }
             // const roles = profile.roles.map((role) => role.);
         }
-    }, [profile, loading]);
+    }, [profile, loading, navigate]);
 
     return <PageLoading message="Đang tải thông tin..." />;
 };

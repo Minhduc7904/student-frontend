@@ -25,15 +25,15 @@ import {
 /**
  * BellButton - Nút chuông thông báo với badge
  */
-const BellButton = memo(({ unread, onClick }) => (
+const BellButton = memo(({ unread, onClick, compact = false }) => (
     <button
         onClick={onClick}
-        className="relative inline-flex items-center justify-center p-2 hover:bg-gray-100 rounded-lg transition-all duration-200 cursor-pointer active:scale-90"
+        className={`relative inline-flex items-center justify-center rounded-lg transition-all duration-200 cursor-pointer active:scale-90 hover:bg-gray-100 ${compact ? 'p-1.5' : 'p-2'}`}
         aria-label="Thông báo"
     >
-        <Bell size={22} className="text-gray-800" />
+        <Bell size={compact ? 18 : 22} className="text-gray-800" />
         {unread > 0 && (
-            <span className="absolute -top-0.5 -right-0.5 min-w-4.5 h-4.5 px-1 bg-red-500 rounded-full flex items-center justify-center text-white text-h5">
+            <span className={`absolute -top-0.5 -right-0.5 rounded-full bg-red-500 px-1 text-white flex items-center justify-center ${compact ? 'min-w-4 h-4 text-[10px]' : 'min-w-4.5 h-4.5 text-h5'}`}>
                 {unread > 99 ? "99+" : unread}
             </span>
         )}
@@ -178,7 +178,7 @@ DropdownFooter.displayName = "DropdownFooter";
  * Hiển thị icon chuông thông báo với dropdown danh sách thông báo.
  * Tự động load notifications & stats, lắng nghe socket real-time.
  */
-const NotificationBell = memo(() => {
+const NotificationBell = memo(({ compact = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
@@ -235,10 +235,14 @@ const NotificationBell = memo(() => {
             <BellButton
                 unread={stats.unread}
                 onClick={() => setIsOpen(!isOpen)}
+                compact={compact}
             />
 
             {isOpen && (
-                <div className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white border border-gray-100 rounded-2xl shadow-lg z-50 overflow-hidden">
+                <div className={compact
+                    ? "fixed left-1/2 top-[100px] z-60 w-[min(92vw,24rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
+                    : "absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg sm:w-96"
+                }>
                     <DropdownHeader
                         unread={stats.unread}
                         onMarkAllRead={handleMarkAllRead}
@@ -270,6 +274,15 @@ const NotificationBell = memo(() => {
                         <DropdownFooter onViewAll={handleViewAll} />
                     )}
                 </div>
+            )}
+
+            {isOpen && compact && (
+                <button
+                    type="button"
+                    className="fixed inset-0 z-50 bg-black/20"
+                    onClick={() => setIsOpen(false)}
+                    aria-label="Đóng thông báo"
+                />
             )}
         </div>
     );

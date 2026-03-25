@@ -21,7 +21,7 @@ export const IMAGE_PATHS = {
 
 // Default/Placeholder images
 export const DEFAULT_IMAGES = {
-    USER_AVATAR: '/student/images/users/default-avatar.svg',
+    USER_AVATAR: '/student/images/users/DefaultAvatar.jpg',
     COURSE_THUMBNAIL: '/student/images/courses/default-course.svg',
     NO_IMAGE: '/student/images/no-image.svg',
 };

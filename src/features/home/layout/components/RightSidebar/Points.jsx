@@ -6,14 +6,14 @@ import PointIcon from "../../../../../assets/icons/Point.svg";
  * Points Component
  * Hiển thị điểm của user
  */
-const Points = memo(({ points = 0 }) => {
+const Points = memo(({ points = 0, compact = false }) => {
     return (
         <div className="flex flex-row items-center justify-center">
-            <div className="flex items-center justify-center p-[2px]">
-                <SvgIcon src={PointIcon} />
+            <div className="flex items-center justify-center p-0.5">
+                <SvgIcon src={PointIcon} size={compact ? 16 : 24} />
             </div>
-            <div className="flex items-center justify-center p-[2px]">
-                <span className="text-gray-900 font-680 text-h4">
+            <div className="flex items-center justify-center p-0.5">
+                <span className={`text-gray-900 font-680 ${compact ? 'text-xs' : 'text-h4'}`}>
                     {points}
                 </span>
             </div>

@@ -1,0 +1,26 @@
+@keyframes podiumSprout {
+    0% {
+        opacity: 0;
+        transform: translateY(18px) scaleY(0.2);
+    }
+
+    55% {
+        opacity: 1;
+        transform: translateY(-6px) scaleY(1.08);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0) scaleY(1);
+    }
+}
+
+.podium-sprout {
+    transform-origin: bottom center;
+    animation-name: podiumSprout;
+    animation-duration: 780ms;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    animation-fill-mode: both;
+    animation-delay: var(--podium-sprout-delay, 0ms);
+    will-change: transform, opacity;
+}

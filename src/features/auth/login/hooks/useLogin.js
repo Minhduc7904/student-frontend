@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { loginAsync, selectAuthLoading, selectAuthError } from '../../store/authSlice';
 import { getItem, setItem, removeItem } from '../../../../shared/utils/storage';
 import { STORAGE_KEYS } from '../../../../core/constants';
@@ -12,6 +12,7 @@ import { ROUTES } from '../../../../core/constants';
 export const useLogin = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const loading = useSelector(selectAuthLoading);
     const error = useSelector(selectAuthError);
@@ -125,7 +126,10 @@ export const useLogin = () => {
                 }
 
                 // Đăng nhập thành công, chuyển hướng
-                navigate(ROUTES.LOADING_REDIRECT);
+                navigate(ROUTES.LOADING_REDIRECT, {
+                    state: { from: location.state?.from },
+                    replace: true,
+                });
             } else if (loginAsync.rejected.match(resultAction)) {
                 // Đăng nhập thất bại, error đã được xử lý trong slice
                 console.error('Login failed:', resultAction.payload);

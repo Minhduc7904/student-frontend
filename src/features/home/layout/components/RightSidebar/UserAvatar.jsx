@@ -12,7 +12,7 @@ import { ROUTES } from "../../../../../core/constants/routes";
  * - Học phí
  * - Đăng xuất
  */
-const UserAvatar = memo(({ avatarUrl, fullName, email }) => {
+const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
@@ -64,20 +64,24 @@ const UserAvatar = memo(({ avatarUrl, fullName, email }) => {
                     <img
                         src={avatarUrl}
                         alt={fullName}
-                        className="w-[60px] h-[60px] object-cover rounded-full ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200"
+                        className={`object-cover rounded-full ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
+                            compact ? 'h-9 w-9' : 'h-10 w-10 lg:h-15 lg:w-15'
+                        }`}
                     />
                 ) : (
-                    <div className="rounded-full p-2 w-[60px] h-[60px] bg-blue-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200">
+                    <div className={`rounded-full bg-blue-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
+                        compact ? 'h-9 w-9 p-1.5' : 'h-10 w-10 p-1.5 lg:h-15 lg:w-15 lg:p-2'
+                    }`}>
                         <User className="text-blue-800 w-full h-full" />
                     </div>
                 )}
 
-                <div className="absolute -right-1 -bottom-1 w-6 h-6 bg-white p-[2px] rounded-full">
+                <div className={`absolute -right-1 -bottom-1 bg-white p-0.5 rounded-full ${compact ? 'h-5 w-5' : 'h-5 w-5 lg:h-6 lg:w-6'}`}>
                     <div
                         className={`w-full h-full bg-blue-100 flex items-center justify-center rounded-full overflow-hidden transition-transform duration-200 ${isOpen ? "rotate-180" : ""
                             }`}
                     >
-                        <ChevronDown size={16} className="text-blue-800" />
+                        <ChevronDown size={compact ? 12 : 14} className="text-blue-800" />
                     </div>
                 </div>
             </button>

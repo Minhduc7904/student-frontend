@@ -81,7 +81,6 @@ const CourseList = memo(() => {
                 onClick={handleNext}
                 disabled={!pagination.hasNext}
                 className="cursor-pointer absolute -right-4 z-10 p-3 rounded-full bg-white shadow-md hover:scale-105 active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed"
-
             >
                 <ChevronRight size={24} />
             </button>

@@ -14,12 +14,17 @@ export const ROUTES = {
 
     // Dashboard
     DASHBOARD: '/dashboard',
+    PRACTICE: '/practice',
+    COMPETITION: '/competition',
+    COMPETITION_DETAIL: (competitionId) => `/competition/${competitionId}`,
 
     // Course Routes
     COURSE_ENROLLMENTS: '/courses/enrollments',
     COURSE_DETAIL: (id) => `/courses/${id}`,
     COURSE_LESSON: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
     COURSE_LEARNING_ITEM: (courseId, lessonId, learningItemId) => `/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}`,
+    COURSE_LEARNING_ITEM_RESULT: (courseId, lessonId, learningItemId, competitionSubmitId) =>
+        `/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}/result/${competitionSubmitId}`,
 
     // Exam Routes
     EXAMS: '/exams',
@@ -32,7 +37,7 @@ export const ROUTES = {
     DO_HOMEWORK_COMPETITION_START: (courseId, lessonId, learningItemId, homeworkContentId, competitionId) => `/do-competition/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}/homework-contents/${homeworkContentId}/${competitionId}/start`,
     DO_COMPETITION_SUBMIT: (competitionId, submitId) => `/do-competition/${competitionId}/submit/${submitId}`,
     DO_HOMEWORK_COMPETITION_SUBMIT: (courseId, lessonId, learningItemId, homeworkContentId, competitionId, submitId) => `/do-competition/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}/homework-contents/${homeworkContentId}/${competitionId}/submit/${submitId}`,
-    COMPETITION_RESULT: (submitId) => `/do-competition/submit/${submitId}/result`,
+    COMPETITION_RESULT: (competitionId, submitId) => `/competition/${competitionId}/result/${submitId}`,
     // User Routes
     PROFILE: '/profile',
     PROFILE_EDIT: '/profile/edit',

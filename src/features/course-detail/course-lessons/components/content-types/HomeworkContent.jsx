@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Play, Lock, Info, Trophy, FileSearch, History, ChevronRight } from "lucide-react";
-import { DetailTabContent } from "./DetailTabContent";
-import { RankingTabContent } from "./RankingTabContent";
-import { ReviewTabContent } from "./ReviewTabContent";
-import { HistoryTabContent } from "./HistoryTabContent";
+import CompetitionDetailInfoTab from "../../../../competition/competitionDetail/component/CompetitionDetailInfoTab";
+import CompetitionRankingPage from "../../../../competition/ranking";
+import CompetitionExamPage from "../../../../competition/exam";
+import CompetitionHistoryPage from "../../../../competition/history";
+import CompetitionResultPage from "../../../../competition/result";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../../../core/constants";
 
@@ -67,7 +68,8 @@ const TABS = {
     DETAIL: 'detail',
     RANKING: 'ranking',
     REVIEW: 'review',
-    HISTORY: 'history'
+    HISTORY: 'history',
+    RESULT: 'result'
 };
 
 const TAB_CONFIG = [
@@ -128,7 +130,7 @@ const TabButton = ({ tab, isActive, onClick, disabled }) => {
  */
 export const HomeworkContent = ({ learningItemDetail }) => {
     const navigate = useNavigate();
-    const { courseId, lessonId } = useParams();
+    const { courseId, lessonId, learningItemId, competitionSubmitId } = useParams();
     const homeworkContents = learningItemDetail?.homeworkContents || [];
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [activeTab, setActiveTab] = useState(TABS.DETAIL);
@@ -145,6 +147,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const isButtonDisabled = statusConfig.disabled || (currentStatus === 'COMPLETED' && !hasViewRules);
 
     const isTabDisabled = (tab) => {
+        if (!tab) return false;
         if (!tab.requirePermission || !competition) return false;
         return !competition[tab.requirePermission];
     };
@@ -160,6 +163,41 @@ export const HomeworkContent = ({ learningItemDetail }) => {
             setActiveTab(firstAvailable);
         }
     }, [competition]);
+
+    useEffect(() => {
+        if (!competitionSubmitId) {
+            setActiveTab(prev => (prev === TABS.RESULT ? TABS.DETAIL : prev));
+            return;
+        }
+
+        setActiveTab(TABS.RESULT);
+    }, [competitionSubmitId]);
+
+    useEffect(() => {
+        if (!competitionSubmitId || !homeworkContents.length) return;
+
+        const foundIndex = homeworkContents.findIndex(
+            (item) => String(item?.progress?.homeworkSubmit?.competitionSubmitId) === String(competitionSubmitId)
+        );
+
+        if (foundIndex >= 0 && foundIndex !== selectedIndex) {
+            setSelectedIndex(foundIndex);
+        }
+    }, [competitionSubmitId, homeworkContents, selectedIndex]);
+
+    const goToHomeworkResult = (submitId) => {
+        if (!courseId || !lessonId || !learningItemId || !submitId) return;
+
+        navigate(ROUTES.COURSE_LEARNING_ITEM_RESULT(courseId, lessonId, learningItemId, submitId));
+        setActiveTab(TABS.RESULT);
+    };
+
+    const backToHomeworkTabs = (nextTab = TABS.DETAIL) => {
+        if (!courseId || !lessonId || !learningItemId) return;
+
+        navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId));
+        setActiveTab(nextTab);
+    };
 
     /**
      * Handle start competition navigation
@@ -187,7 +225,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         if (currentStatus === 'COMPLETED' && hasViewRules) {
             const submitId = currentContent?.progress?.homeworkSubmit?.competitionSubmitId;
             if (submitId) {
-                navigate(ROUTES.COMPETITION_RESULT(submitId));
+                goToHomeworkResult(submitId);
             }
             return;
         }
@@ -197,6 +235,12 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const handleTabChange = (tabId) => {
         const tab = TAB_CONFIG.find(t => t.id === tabId);
         if (tab && isTabDisabled(tab)) return;
+
+        if (competitionSubmitId) {
+            backToHomeworkTabs(tabId);
+            return;
+        }
+
         setActiveTab(tabId);
     };
 
@@ -215,6 +259,30 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const renderTabContent = () => {
         const competitionId = currentContent?.competition?.competitionId;
         const studentId = currentContent?.progress?.studentId;
+        const attemptStatusMap = {
+            NOT_STARTED: 'NOT_STARTED',
+            DO_NOW: 'NOT_ATTEMPTED',
+            REDO: 'NOT_ATTEMPTED',
+            LATE_SUBMIT: 'NOT_ATTEMPTED',
+            RESUME: 'IN_PROGRESS',
+            COMPLETED: 'ATTEMPTED',
+            OVERDUE: 'EXPIRED',
+        };
+
+        const timelineStatusMap = {
+            NOT_STARTED: 'UPCOMING',
+            OVERDUE: 'ENDED',
+        };
+
+        const mappedDetail = {
+            timelineStatus: competition?.timelineStatus ?? timelineStatusMap[currentStatus] ?? 'ONGOING',
+            attemptStatus: competition?.attemptStatus ?? attemptStatusMap[currentStatus] ?? 'NOT_ATTEMPTED',
+            attemptedCount: currentContent?.progress?.attemptedCount ?? (currentContent?.progress?.homeworkSubmit ? 1 : 0),
+            durationMinutes: competition?.durationMinutes ?? competition?.duration ?? '--',
+            maxAttempts: competition?.maxAttempts ?? 1,
+            canAttempt: typeof competition?.canAttempt === 'boolean' ? competition.canAttempt : !statusConfig.disabled,
+            policies: competition?.policies,
+        };
 
         const currentTabConfig = TAB_CONFIG.find(t => t.id === activeTab);
         if (currentTabConfig && isTabDisabled(currentTabConfig)) {
@@ -223,19 +291,35 @@ export const HomeworkContent = ({ learningItemDetail }) => {
 
         switch (activeTab) {
             case TABS.DETAIL:
-                return <DetailTabContent content={currentContent} onStartCompetition={handleActionButton} />;
+                return <CompetitionDetailInfoTab detail={mappedDetail} />;
             case TABS.RANKING:
                 if (!competition?.allowLeaderboard) {
                     return <LockedContent title="Bảng xếp hạng bị khóa" desc="Cuộc thi này không cho phép xem bảng xếp hạng" />;
                 }
-                return <RankingTabContent competitionId={competitionId} studentId={studentId} />;
+                return <CompetitionRankingPage competitionId={competitionId} detail={competition} studentId={studentId} />;
             case TABS.REVIEW:
                 if (!competition?.allowViewExamContent) {
                     return <LockedContent title="Xem lại đề bị khóa" desc="Cuộc thi này không cho phép xem lại nội dung đề thi" />;
                 }
-                return <ReviewTabContent />;
+                return <CompetitionExamPage competitionId={competitionId} />;
             case TABS.HISTORY:
-                return <HistoryTabContent competitionId={competitionId} competition={competition} />;
+                return (
+                    <CompetitionHistoryPage
+                        competitionId={competitionId}
+                        onViewResult={({ submitId }) => goToHomeworkResult(submitId)}
+                    />
+                );
+            case TABS.RESULT:
+                if (!competitionSubmitId || !competitionId) {
+                    return <LockedContent title="Không tìm thấy kết quả" desc="Thiếu thông tin để hiển thị kết quả bài làm" />;
+                }
+                return (
+                    <CompetitionResultPage
+                        submitId={competitionSubmitId}
+                        competitionId={competitionId}
+                        onBack={() => backToHomeworkTabs(TABS.HISTORY)}
+                    />
+                );
             default:
                 return null;
         }

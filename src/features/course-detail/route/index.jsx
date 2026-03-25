@@ -44,6 +44,14 @@ export const courseDetailRoutes = [
                             description: 'Trang mục học tập',
                         },
                     },
+                    {
+                        path: ROUTES.COURSE_LEARNING_ITEM_RESULT(':courseId', ':lessonId', ':learningItemId', ':competitionSubmitId'),
+                        element: <CourseLessonsPage />,
+                        meta: {
+                            title: 'Kết quả bài tập',
+                            description: 'Trang kết quả bài tập',
+                        },
+                    },
                 ],
             },
         ]

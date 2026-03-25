@@ -17,7 +17,13 @@ export const ProtectedRoute = ({ permission }) => {
 
     // 1️⃣ Chưa đăng nhập
     if (!isAuthenticated) {
-        return <Navigate to={ROUTES.LOGIN} replace />;
+        return (
+            <Navigate
+                to={ROUTES.LOGIN}
+                state={{ from: location }}
+                replace
+            />
+        );
     }
 
     // 2️⃣ Đã login nhưng chưa load profile
