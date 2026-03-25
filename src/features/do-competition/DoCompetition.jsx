@@ -136,20 +136,44 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
     const handleFinishCompetition = useCallback(async () => {
         setConfirmModal({ open: false, type: null });
         try {
-            await dispatch(finishCompetition({
+            const finishResult = await dispatch(finishCompetition({
                 submitId,
                 homeworkContentId: isHomeworkCompetition ? homeworkContentId : undefined,
             })).unwrap();
 
+            const finishedSubmitId =
+                finishResult?.data?.competitionSubmitId ??
+                finishResult?.competitionSubmitId ??
+                currentAttempt?.competitionSubmitId ??
+                submitId;
+
             if (isHomeworkCompetition) {
-                navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { replace: true, state: { resetAll: true } });
+                const canShowHomeworkResultDetail = Boolean(competition?.showResultDetail);
+
+                if (canShowHomeworkResultDetail && finishedSubmitId) {
+                    navigate(
+                        ROUTES.COURSE_LEARNING_ITEM_RESULT(courseId, lessonId, learningItemId, finishedSubmitId),
+                        { replace: true, state: { resetAll: true } }
+                    );
+                } else {
+                    navigate(ROUTES.COURSE_LEARNING_ITEM(courseId, lessonId, learningItemId), { replace: true, state: { resetAll: true } });
+                }
             } else {
-                navigate(ROUTES.DASHBOARD, { replace: true });
+                const canShowResultDetail = Boolean(competition?.showResultDetail);
+                const canViewScore = Boolean(competition?.allowViewScore);
+
+                if (canShowResultDetail && finishedSubmitId) {
+                    navigate(ROUTES.COMPETITION_RESULT(competitionId, finishedSubmitId), { replace: true });
+                } else if (canViewScore) {
+                    navigate(`${ROUTES.COMPETITION_DETAIL(competitionId)}/history`, { replace: true });
+                } else {
+                    navigate(ROUTES.COMPETITION_DETAIL(competitionId), { replace: true });
+                }
             }
         } catch {
             // lỗi đã được toast bởi handleAsyncThunk
         }
-    }, [dispatch, submitId, isHomeworkCompetition, homeworkContentId, courseId, lessonId, learningItemId, navigate]);
+    }, [dispatch, submitId, isHomeworkCompetition, homeworkContentId, courseId, lessonId, learningItemId, navigate, competition, currentAttempt, competitionId]);
 
     // Request submit confirmation (from header or sidebar)
     const requestSubmit = useCallback(() => {
