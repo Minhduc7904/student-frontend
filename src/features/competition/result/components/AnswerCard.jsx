@@ -172,6 +172,9 @@ const AnswerCard = ({ answer, index, rules }) => {
 
     // Build selectedStatementIds set for O(1) lookup
     const selectedSet = new Set(answer?.selectedStatementIds ?? []);
+    const trueFalseMap = new Map(
+        (answer?.trueFalseAnswers ?? []).map((item) => [item.statementId, item.isTrue])
+    );
 
     return (
         <div className={`rounded-xl border bg-white p-4 ${accentClass}`}>
@@ -228,7 +231,11 @@ const AnswerCard = ({ answer, index, rules }) => {
                             <TrueFalseRow
                                 key={stmt.statementId}
                                 statement={stmt}
-                                selectedAnswer={selectedSet.has(stmt.statementId) ? { isTrue: true } : null}
+                                selectedAnswer={
+                                    trueFalseMap.has(stmt.statementId)
+                                        ? { isTrue: trueFalseMap.get(stmt.statementId) }
+                                        : null
+                                }
                                 showAnswer={allowViewAnswer}
                             />
                         ))}
