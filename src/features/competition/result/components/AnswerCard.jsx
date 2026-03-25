@@ -16,6 +16,61 @@ const DIFFICULTY_LABEL = {
     HARD: { label: 'Khó', className: 'text-red-600 bg-red-50 border-red-200' },
 };
 
+const parseBooleanValue = (value) => {
+    if (value === true || value === false) return value;
+    if (typeof value !== 'string') return undefined;
+
+    const normalized = value.trim().toLowerCase();
+    if (normalized === 'true') return true;
+    if (normalized === 'false') return false;
+    return undefined;
+};
+
+const buildTrueFalseMap = (answer) => {
+    const map = new Map();
+
+    const pushEntry = (statementId, isTrue) => {
+        const parsed = parseBooleanValue(isTrue);
+        if (statementId == null || parsed == null) return;
+        map.set(String(statementId), parsed);
+    };
+
+    const fromArray = answer?.trueFalseAnswers;
+    if (Array.isArray(fromArray)) {
+        fromArray.forEach((item) => {
+            pushEntry(item?.statementId, item?.isTrue);
+        });
+    } else if (fromArray && typeof fromArray === 'object') {
+        Object.entries(fromArray).forEach(([statementId, isTrue]) => {
+            pushEntry(statementId, isTrue);
+        });
+    }
+
+    if (map.size > 0) return map;
+
+    const rawAnswer = answer?.answer;
+    if (!rawAnswer) return map;
+
+    let parsedAnswer = rawAnswer;
+    if (typeof rawAnswer === 'string') {
+        try {
+            parsedAnswer = JSON.parse(rawAnswer);
+        } catch {
+            return map;
+        }
+    }
+
+    if (!parsedAnswer || typeof parsedAnswer !== 'object' || Array.isArray(parsedAnswer)) {
+        return map;
+    }
+
+    Object.entries(parsedAnswer).forEach(([statementId, isTrue]) => {
+        pushEntry(statementId, isTrue);
+    });
+
+    return map;
+};
+
 // ─── Correctness icon ────────────────────────────────────────────────────────
 const CorrectnessIcon = ({ isCorrect }) => {
     if (isCorrect === true)
@@ -172,9 +227,7 @@ const AnswerCard = ({ answer, index, rules }) => {
 
     // Build selectedStatementIds set for O(1) lookup
     const selectedSet = new Set(answer?.selectedStatementIds ?? []);
-    const trueFalseMap = new Map(
-        (answer?.trueFalseAnswers ?? []).map((item) => [item.statementId, item.isTrue])
-    );
+    const trueFalseMap = buildTrueFalseMap(answer);
 
     return (
         <div className={`rounded-xl border bg-white p-4 ${accentClass}`}>
@@ -232,8 +285,8 @@ const AnswerCard = ({ answer, index, rules }) => {
                                 key={stmt.statementId}
                                 statement={stmt}
                                 selectedAnswer={
-                                    trueFalseMap.has(stmt.statementId)
-                                        ? { isTrue: trueFalseMap.get(stmt.statementId) }
+                                    trueFalseMap.has(String(stmt.statementId))
+                                        ? { isTrue: trueFalseMap.get(String(stmt.statementId)) }
                                         : null
                                 }
                                 showAnswer={allowViewAnswer}
