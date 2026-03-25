@@ -240,7 +240,7 @@ const NotificationBell = memo(({ compact = false }) => {
 
             {isOpen && (
                 <div className={compact
-                    ? "fixed left-1/2 top-[100px] z-60 w-[min(92vw,24rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
+                    ? "fixed inset-x-4 top-16 z-60 max-h-[calc(100vh-5.5rem)] w-auto overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg sm:left-1/2 sm:right-auto sm:top-25 sm:w-[min(92vw,24rem)] sm:-translate-x-1/2"
                     : "absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg sm:w-96"
                 }>
                     <DropdownHeader
