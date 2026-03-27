@@ -75,23 +75,23 @@ const CourseDetailLayout = () => {
     }
 
     return (
-        <AuthenticatedLayout>
+        <div>
             <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                 <SvgIcon src={StartList} width={232} height={137} />
             </div>
             {/* Main Content Area */}
-                <Suspense fallback={<ContentLoading />}>
-                    <Outlet context={{ 
-                        courseId,
-                        courseDetail, 
-                        loading, 
-                        error,
-                        lessons,
-                        lessonsLoading,
-                        lessonsError,
-                    }} />
-                </Suspense>
-        </AuthenticatedLayout>
+            <Suspense fallback={<ContentLoading />}>
+                <Outlet context={{
+                    courseId,
+                    courseDetail,
+                    loading,
+                    error,
+                    lessons,
+                    lessonsLoading,
+                    lessonsError,
+                }} />
+            </Suspense>
+        </div>
     );
 };
 
