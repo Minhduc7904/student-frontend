@@ -7,6 +7,8 @@ import { Card } from "../../../shared/components";
 import {
     getActivityYearStatsAsync,
     selectActivityYearStats,
+    selectMyProfile,
+    selectProfile,
     selectPublicStudentExamAttempts,
     selectPublicStudentQuestionAnswers,
     selectPublicStudentSubmittedHistory,
@@ -33,6 +35,8 @@ const HistoryLayout = () => {
     const [searchParams] = useSearchParams();
     const studentId = searchParams.get("studentId") || undefined;
     const activityStats = useSelector(selectActivityYearStats);
+    const myProfile = useSelector(selectMyProfile);
+    const viewedProfile = useSelector(selectProfile);
     const submittedHistory = useSelector(selectPublicStudentSubmittedHistory);
     const questionHistory = useSelector(selectPublicStudentQuestionAnswers);
     const examHistory = useSelector(selectPublicStudentExamAttempts);
@@ -62,6 +66,33 @@ const HistoryLayout = () => {
         };
     }, [activityStats, examHistory, questionHistory, submittedHistory]);
 
+    const historyViewMeta = useMemo(() => {
+        const normalizedStudentId = studentId ? String(studentId) : "";
+        const myIds = [
+            myProfile?.studentId,
+            myProfile?.id,
+            myProfile?.userId,
+            myProfile?.student?.id,
+        ]
+            .filter((value) => value !== undefined && value !== null && value !== "")
+            .map((value) => String(value));
+
+        const isOwnHistory = !normalizedStudentId || myIds.includes(normalizedStudentId);
+        const displayName = viewedProfile?.fullName || viewedProfile?.fullname || viewedProfile?.name || "";
+
+        const title = isOwnHistory
+            ? "Lịch sử"
+            : displayName
+                ? `Lịch sử của ${displayName}`
+                : `Lịch sử của học sinh ${normalizedStudentId}`;
+
+        return {
+            isOwnHistory,
+            isOtherStudentHistory: !isOwnHistory,
+            title,
+        };
+    }, [myProfile, studentId, viewedProfile]);
+
     return (
         <AuthenticatedLayout>
             <main className="flex-1 bg-[#F7F8FA] overflow-y-auto custom-scrollbar">
@@ -69,7 +100,7 @@ const HistoryLayout = () => {
                     <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
                         <section className="flex min-w-0 flex-col gap-4">
                             <div className="text-2xl font-semibold text-gray-600">
-                                <p>Lịch sử</p>
+                                <p>{historyViewMeta.title}</p>
                             </div>
 
                             <Card className="flex-1 space-y-4 ">
@@ -90,7 +121,7 @@ const HistoryLayout = () => {
                                         </NavLink>
                                     ))}
                                 </div>
-                                <Outlet />
+                                <Outlet context={{ isOtherStudentHistory: historyViewMeta.isOtherStudentHistory }} />
                             </Card>
                         </section>
 

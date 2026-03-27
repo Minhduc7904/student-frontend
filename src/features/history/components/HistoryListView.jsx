@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { Lock } from "lucide-react";
 import { HISTORY_TYPES } from "../constants";
 
 const pickFirstDefined = (obj, keys) => {
@@ -106,7 +107,7 @@ const getHistoryRowModel = (item, index, type) => {
     };
 };
 
-const HistoryListView = ({ data, loading, type, emptyText }) => {
+const HistoryListView = ({ data, loading, type, emptyText, isOtherStudentHistory = false }) => {
     const items = normalizeHistoryItems(data);
 
     if (loading) {
@@ -128,14 +129,26 @@ const HistoryListView = ({ data, loading, type, emptyText }) => {
             {items.map((item, index) => {
                 const rowModel = getHistoryRowModel(item, index, type);
                 const rowKey = pickFirstDefined(item, ["id", "submitId", "attemptId", "questionAnswerId"]);
+                const showCompetitionLock =
+                    isOtherStudentHistory && type === HISTORY_TYPES.COMPETITION;
 
                 return (
                     <div
                         key={rowKey || `${rowModel.title}-${index}`}
-                        className={`flex flex-col items-start justify-between gap-2 rounded-lg px-3 py-2 sm:flex-row sm:items-center ${
+                        className={`group relative flex flex-col items-start justify-between gap-2 rounded-lg px-3 py-2 sm:flex-row sm:items-center ${
                             index % 2 === 0 ? "bg-[#F7F7F8]" : "bg-white"
                         }`}
                     >
+                        {showCompetitionLock ? (
+                            <span
+                                className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700 opacity-0 transition-opacity duration-200 group-hover:opacity-100"
+                                title="Lịch sử của học sinh khác"
+                            >
+                                <Lock size={12} />
+                                Khóa
+                            </span>
+                        ) : null}
+
                         <div className="min-w-0 w-full sm:w-auto">
                             <p className="line-clamp-2 text-sm font-medium text-gray-900 sm:truncate">{rowModel.title}</p>
                             <p className="mt-0.5 text-xs text-gray-500">{rowModel.timeText || "Vừa xong"}</p>

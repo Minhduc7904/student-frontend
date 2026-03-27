@@ -1,6 +1,6 @@
 import { memo, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useOutletContext, useSearchParams } from "react-router-dom";
 import {
     getPublicStudentExamAttemptsAsync,
     selectPublicStudentExamAttempts,
@@ -12,6 +12,7 @@ import { HISTORY_QUERY, HISTORY_TYPES } from "../constants";
 const ExamHistoryPage = () => {
     const dispatch = useDispatch();
     const [searchParams] = useSearchParams();
+    const { isOtherStudentHistory = false } = useOutletContext() || {};
     const studentId = searchParams.get("studentId") || undefined;
     const historyData = useSelector(selectPublicStudentExamAttempts);
     const loading = useSelector(selectPublicStudentExamAttemptsLoading);
@@ -30,6 +31,7 @@ const ExamHistoryPage = () => {
             data={historyData}
             loading={loading}
             type={HISTORY_TYPES.EXAM}
+            isOtherStudentHistory={isOtherStudentHistory}
             emptyText="Bạn chưa có lịch sử làm đề mẫu nào."
         />
     );

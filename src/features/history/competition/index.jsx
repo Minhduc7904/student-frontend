@@ -1,6 +1,6 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useNavigate, useOutletContext, useSearchParams } from "react-router-dom";
 import { ArrowRight, ArrowUpDown, Eye, Lock, RefreshCw } from "lucide-react";
 import { ROUTES } from "../../../core/constants";
 import { Pagination } from "../../../shared/components";
@@ -71,6 +71,7 @@ const getFieldItems = (item) => [
 const CompetitionHistoryPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const { isOtherStudentHistory = false } = useOutletContext() || {};
     const [searchParams] = useSearchParams();
     const studentId = searchParams.get("studentId") || undefined;
     const historyData = useSelector(selectPublicStudentSubmittedHistory);
@@ -330,7 +331,10 @@ const CompetitionHistoryPage = () => {
                         </div>
 
                         <div className="mt-2 flex flex-col gap-0.5">
-                            {historyItems.map((item, index) => (
+                            {historyItems.map((item, index) => {
+                                const canViewResult = !isOtherStudentHistory && Boolean(item?.canViewDetail);
+
+                                return (
                                 <div
                                     key={item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}
                                     className="group relative overflow-hidden rounded-xl"
@@ -350,24 +354,28 @@ const CompetitionHistoryPage = () => {
 
                                     <button
                                         type="button"
-                                        onClick={() => item?.canViewDetail && navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
-                                        disabled={!item?.canViewDetail}
+                                        onClick={() => canViewResult && navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
+                                        disabled={!canViewResult}
                                         className={`absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${
-                                            item?.canViewDetail
+                                            canViewResult
                                                 ? "cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95"
                                                 : "cursor-not-allowed bg-gray-400"
                                         }`}
-                                        aria-label={item?.canViewDetail ? "Xem kết quả" : "Không thể xem kết quả"}
+                                        aria-label={canViewResult ? "Xem kết quả" : "Không thể xem kết quả"}
                                     >
-                                        {item?.canViewDetail ? <ArrowRight size={20} /> : <Lock size={18} />}
+                                        {canViewResult ? <ArrowRight size={20} /> : <Lock size={18} />}
                                     </button>
                                 </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
                     <div className="space-y-2 md:hidden">
-                        {historyItems.map((item, index) => (
+                        {historyItems.map((item, index) => {
+                            const canViewResult = !isOtherStudentHistory && Boolean(item?.canViewDetail);
+
+                            return (
                             <article
                                 key={`mobile-${item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}`}
                                 className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(index)}`}
@@ -396,7 +404,7 @@ const CompetitionHistoryPage = () => {
                                     </div>
                                 </div>
 
-                                {item?.canViewDetail ? (
+                                {canViewResult ? (
                                     <button
                                         type="button"
                                         onClick={() => navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
@@ -405,9 +413,15 @@ const CompetitionHistoryPage = () => {
                                         <Eye size={15} />
                                         Xem kết quả
                                     </button>
-                                ) : null}
+                                ) : (
+                                    <div className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-500">
+                                        <Lock size={15} />
+                                        Đã khóa
+                                    </div>
+                                )}
                             </article>
-                        ))}
+                            );
+                        })}
                     </div>
 
                     <div className="mt-4">

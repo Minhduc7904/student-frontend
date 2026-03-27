@@ -71,7 +71,7 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
                     />
                 ) : (
                     <div className={`rounded-full bg-blue-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
-                        compact ? 'h-9 w-9 p-1.5' : 'h-6 w-6 p-1.5 lg:p-2'
+                        compact ? 'h-9 w-9 p-1.5' : 'h-6 w-6 p-1'
                     }`}>
                         <User className="text-blue-800 w-full h-full" />
                     </div>

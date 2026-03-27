@@ -20,7 +20,7 @@ const CompetitionLayout = () => {
                 </div>
                 <div className="pointer-events-none absolute inset-0 z-1 bg-slate-900/5" />
 
-                <main className="relative z-10 flex-1 flex items-center flex-col px-4 xl:px-6 2xl:px-15 pt-14.5 md:pt-4 lg:pt-10 lg:overflow-y-auto overflow-x-hidden custom-scrollbar">
+                <main className="relative z-10 flex-1 flex items-center flex-col px-4 xl:px-6 2xl:px-15 py-4 lg:overflow-y-auto overflow-x-hidden custom-scrollbar">
                     <div className="w-full max-w-7xl flex items-center justify-center mb-6">
                         <Suspense fallback={<ContentLoading />}>
                             <Outlet />

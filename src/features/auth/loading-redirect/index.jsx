@@ -4,7 +4,7 @@ import { getMyProfileAsync } from '../../profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 import { PageLoading } from '../../../shared/components/loading';
 import { selectMyProfileLoading, selectMyProfile } from '../../profile/store/profileSlice';
-import { selectIsAuthenticated } from '../store/authSlice';
+import { selectIsAuthenticated, clearAuth } from '../store/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 export const LoadingRedirectPage = () => {
@@ -37,6 +37,7 @@ export const LoadingRedirectPage = () => {
             .catch((error) => {
                 // On any error (network, server, etc.), redirect to login
                 console.error('Failed to load profile:', error);
+                dispatch(clearAuth());
                 navigate(ROUTES.LOGIN, { state: { from }, replace: true });
             });
     }, [dispatch, from, isAuthenticated, navigate]);

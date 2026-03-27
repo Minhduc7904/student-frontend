@@ -98,7 +98,9 @@ const PaymentLayout = () => {
                             <div className="text-2xl font-semibold text-gray-600">
                                 <p>Thanh toán</p>
                             </div>
-                            <Outlet />
+                            <Card className="p-0">
+                                <Outlet />
+                            </Card>
                         </section>
 
                         <aside className="lg:sticky lg:top-6 lg:self-start">
