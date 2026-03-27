@@ -85,6 +85,7 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
                     email={email}
                     onNavigate={handleNavigate}
                     onLogout={handleLogout}
+                    onClose={() => setIsOpen(false)}
                 />
             )}
         </div>

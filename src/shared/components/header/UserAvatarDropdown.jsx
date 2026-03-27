@@ -7,7 +7,7 @@ import { ComingSoonModal } from "../modal/ComingSoonModal";
  * UserAvatarDropdown
  * Menu dropdown của avatar người dùng.
  */
-const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout }) => {
+const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout, onClose }) => {
     const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
 
     const quickMenus = [
@@ -44,7 +44,9 @@ const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLog
     ];
 
     const handleQuickMenuClick = (item) => {
+        
         if (item.key === "points") {
+            onClose();
             setIsComingSoonOpen(true);
             return;
         }
