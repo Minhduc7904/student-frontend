@@ -12,5 +12,7 @@ export * from './lessonService';
 export * from './learningItemService';
 export * from './competitionService';
 export * from './doCompetitionService';
+export * from './questionAnswerService';
+export * from './examAttemptService';
 export * from './mediaService';
 export * from './tuitionPaymentService';

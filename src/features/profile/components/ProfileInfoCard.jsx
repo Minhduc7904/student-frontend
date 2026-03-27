@@ -12,13 +12,23 @@ import {
  * InfoRow - Single row of profile information
  */
 const InfoRow = memo(({ icon: Icon, label, value, iconColor = "text-blue-800" }) => (
-    <div className="flex items-start gap-3 py-3">
-        <div className="w-9 h-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
-            <Icon size={18} className={iconColor} />
+    <div className="flex gap-3 pt-3">
+        {/* Icon */}
+        <div className="flex items-start justify-center shrink-0">
+            <Icon size={16} className={iconColor} />
         </div>
+
+        {/* Content */}
         <div className="flex-1 min-w-0">
-            <p className="text-text-5 text-gray-500">{label}</p>
-            <p className="text-text-4 text-gray-900 truncate">{value || "Chưa cập nhật"}</p>
+            {/* Row: icon + label */}
+            <p className="text-[14px] leading-[14px] font-medium text-gray-800">
+                {label}
+            </p>
+
+            {/* Value */}
+            <p className="text-text-5  truncate  text-gray-500">
+                {value || "Chưa cập nhật"}
+            </p>
         </div>
     </div>
 ));
@@ -78,9 +88,9 @@ const ProfileInfoCard = memo(({ profile }) => {
     ];
 
     return (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h3 className="text-h3 text-gray-900 mb-2">Thông tin cá nhân</h3>
-            <div className="divide-y divide-gray-100">
+        <div className="">
+            <h3 className="text-subhead-4 text-gray-900 mb-2">Thông tin cá nhân</h3>
+            <div className="">
                 {infoItems.map((item, index) => (
                     <InfoRow
                         key={index}

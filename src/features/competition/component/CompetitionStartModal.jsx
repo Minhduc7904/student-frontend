@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle, Lock, Play, X } from 'lucide-react';
 import { ROUTES } from '../../../core/constants';
+import { Modal } from '../../../shared/components/modal/Modal';
 import {
     selectStartAttemptLoading,
     startCompetitionAttempt,
@@ -63,8 +64,11 @@ const CompetitionStartModal = ({ isOpen, competitionId, onClose }) => {
     const isWarning = status?.type === 'warning';
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm p-4">
-            <div className="w-full max-w-md rounded-2xl bg-[#f5f7fb] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-200 p-5">
+        <Modal isOpen={isOpen} onClose={onClose} overlayClassName="bg-black/30 backdrop-blur-sm">
+            <div
+                className="w-full max-w-md rounded-2xl bg-[#f5f7fb] shadow-[0_10px_30px_rgba(0,0,0,0.08)] border border-gray-200 p-5"
+                onClick={(e) => e.stopPropagation()}
+            >
 
                 {/* Header */}
                 <div className="flex items-start justify-between">
@@ -110,14 +114,14 @@ const CompetitionStartModal = ({ isOpen, competitionId, onClose }) => {
                     <button
                         onClick={handleStartNow}
                         disabled={loading}
-                        className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg text-white bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition flex items-center gap-1.5"
+                        className="cursor-pointer px-4 py-2 text-sm font-semibold rounded-lg text-white bg-linear-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 transition flex items-center gap-1.5"
                     >
                         <Play size={14} />
                         {loading ? 'Đang xử lý...' : 'Bắt đầu'}
                     </button>
                 </div>
             </div>
-        </div>
+        </Modal>
     );
 };
 

@@ -1,14 +1,14 @@
 import { memo } from "react";
 import { useSelector } from "react-redux";
-import { selectProfile } from "../../profile/store/profileSlice";
-import RightSidebarHeader from "../../home/layout/components/RightSidebar/RightSidebarHeader";
+import { selectMyProfile } from "../../profile/store/profileSlice";
+import RightSidebarHeader from "../../../shared/components/header";
 
 /**
  * PracticeRightSidebar Component
  * Sidebar bên phải hiển thị thông tin user, lịch, thời gian học
  */
 const PracticeRightSidebar = memo(() => {
-    const profile = useSelector(selectProfile);
+    const profile = useSelector(selectMyProfile);
 
     return (
         <div className="lg:h-dvh px-4 lg:py-0 lg:pr-8 xl:pr-11 pt-4 lg:pt-5 flex flex-col items-center border-l border-gray-100">

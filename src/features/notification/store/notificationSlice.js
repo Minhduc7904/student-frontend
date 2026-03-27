@@ -20,6 +20,8 @@ const initialState = {
         total: 0,
         totalPages: 0,
     },
+    myNotificationsFetched: false,
+    statsFetched: false,
     loadingMyNotifications: false,
     loadingUserNotifications: false,
     loadingStats: false,
@@ -131,6 +133,7 @@ const notificationSlice = createSlice({
         },
         clearMyNotifications: (state) => {
             state.myNotifications = [];
+            state.myNotificationsFetched = false;
         },
         // Real-time notification from socket
         addRealtimeNotification: (state, action) => {
@@ -162,6 +165,7 @@ const notificationSlice = createSlice({
                 if (state.pagination.page === 1) {
                     state.myNotifications = [];
                 }
+                state.myNotificationsFetched = true;
                 state.loadingMyNotifications = true;
                 state.error = null;
             })
@@ -185,6 +189,7 @@ const notificationSlice = createSlice({
 
             // Get my stats
             .addCase(getMyStatsAsync.pending, (state) => {
+                state.statsFetched = true;
                 state.loadingStats = true;
             })
             .addCase(getMyStatsAsync.fulfilled, (state, action) => {
@@ -302,6 +307,8 @@ export const selectToastNotifications = (state) => state.notification.notificati
 export const selectMyNotifications = (state) => state.notification.myNotifications;
 export const selectNotificationStats = (state) => state.notification.stats;
 export const selectNotificationPagination = (state) => state.notification.pagination;
+export const selectMyNotificationsFetched = (state) => state.notification.myNotificationsFetched;
+export const selectNotificationStatsFetched = (state) => state.notification.statsFetched;
 export const selectLoadingMyNotifications = (state) => state.notification.loadingMyNotifications;
 export const selectLoadingStats = (state) => state.notification.loadingStats;
 export const selectLoadingMarkRead = (state) => state.notification.loadingMarkRead;

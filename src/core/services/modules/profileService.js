@@ -6,8 +6,10 @@ export const profileService = {
      * Get current student profile
      * @returns {Promise<Object>} Student profile data
      */
-    getProfile: () => {
-        return axiosClient.get(API_ENDPOINTS.PROFILE.GET);
+    getProfile: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.PROFILE.GET, {
+            params,
+        });
     },
 
     /**
@@ -52,6 +54,32 @@ export const profileService = {
                       onUploadProgress(percent);
                   }
                 : undefined,
+        });
+    },
+
+    /**
+     * Get student progress stats by difficulty
+     * GET /student/profile/stats/difficulty
+     * @returns {Promise<Object>} Difficulty progress stats
+     */
+    getDifficultyStats: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.PROFILE.STATS_DIFFICULTY, {
+            params,
+        });
+    },
+
+    /**
+     * Get student daily activity totals in a year
+     * GET /student/profile/stats/activity-year?year=YYYY
+     * @param {number} year
+     * @returns {Promise<Object>} Activity stats in year
+     */
+    getActivityYearStats: (year, params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.PROFILE.STATS_ACTIVITY_YEAR, {
+            params: {
+                year,
+                ...params,
+            },
         });
     },
 };

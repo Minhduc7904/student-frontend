@@ -16,6 +16,8 @@ export const API_ENDPOINTS = {
         UPDATE: '/student/profile',
         UPLOAD_AVATAR: '/student/profile/avatar',
         CHANGE_PASSWORD: '/student/profile/change-password',
+        STATS_DIFFICULTY: '/student/profile/stats/difficulty',
+        STATS_ACTIVITY_YEAR: '/student/profile/stats/activity-year',
     },
 
     // User/Profile
@@ -101,6 +103,7 @@ export const API_ENDPOINTS = {
         STUDENT_HISTORY: (id) => `/competitions/${id}/student/history`,
         RANKING: (id) => `/competitions/${id}/ranking`,
         PUBLIC_STUDENT: '/competitions/public/student',
+        PUBLIC_STUDENT_SUBMITS: '/competitions/public/student-submits',
         PUBLIC_STUDENT_DETAIL: (id) => `/competitions/public/student/${id}`,
     },
 
@@ -121,6 +124,16 @@ export const API_ENDPOINTS = {
         SUBMIT_ANSWER: (submitId, answerId) => `/do-competition/submit/${submitId}/answer/${answerId}`,
         FINISH_SUBMIT: (submitId) => `/do-competition/submit/${submitId}/finish`,
         GET_SUBMIT_RESULT: (submitId) => `/do-competition/submit/${submitId}/result`,
+    },
+
+    // Question Answers
+    QUESTION_ANSWERS: {
+        PUBLIC_STUDENT: '/question-answers/public/student',
+    },
+
+    // Exam Attempts
+    EXAM_ATTEMPTS: {
+        PUBLIC_STUDENT: '/exam-attempts/public/student',
     },
 
     // Media

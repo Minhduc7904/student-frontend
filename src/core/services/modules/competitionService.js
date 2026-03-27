@@ -83,6 +83,23 @@ export const competitionService = {
   },
 
   /**
+   * Get current student's submitted attempts across all public competitions.
+   *
+   * @route GET /competitions/public/student-submits
+   * @param {Object} query - Pagination query (page, limit, sortBy, sortOrder)
+   * @returns {Promise<Object>} StudentCompetitionHistoryListResponseDto
+   *
+   * @example
+   * competitionService.getPublicStudentSubmittedHistory({ page: 1, limit: 10 })
+   */
+  getPublicStudentSubmittedHistory: async (query = {}) => {
+    return await axiosClient.get(
+      API_ENDPOINTS.COMPETITIONS.PUBLIC_STUDENT_SUBMITS,
+      { params: query }
+    );
+  },
+
+  /**
    * Get competition ranking (leaderboard) for students
    * Lấy bảng xếp hạng của cuộc thi
    * 

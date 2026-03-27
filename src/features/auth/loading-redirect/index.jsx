@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { getProfileAsync } from '../../profile/store/profileSlice';
+import { getMyProfileAsync } from '../../profile/store/profileSlice';
 import { ROUTES } from '../../../core/constants';
 import { PageLoading } from '../../../shared/components/loading';
-import { selectProfile, selectProfileLoading } from '../../profile/store/profileSlice';
+import { selectMyProfileLoading, selectMyProfile } from '../../profile/store/profileSlice';
 import { selectIsAuthenticated } from '../store/authSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -11,9 +11,9 @@ export const LoadingRedirectPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const location = useLocation();
-    const profile = useSelector(selectProfile);
+    const profile = useSelector(selectMyProfile);
     const isAuthenticated = useSelector(selectIsAuthenticated);
-    const loading = useSelector(selectProfileLoading);
+    const loading = useSelector(selectMyProfileLoading);
     const from = location.state?.from;
     const getFromPath = () => {
         if (!from) return '';
@@ -32,7 +32,7 @@ export const LoadingRedirectPage = () => {
         }
 
         // Load profile
-        dispatch(getProfileAsync())
+        dispatch(getMyProfileAsync())
             .unwrap()
             .catch((error) => {
                 // On any error (network, server, etc.), redirect to login

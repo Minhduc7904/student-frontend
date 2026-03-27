@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { Crown, Lock, Percent, RefreshCw, Users } from 'lucide-react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { Crown, Eye, Lock, Percent, RefreshCw, Users } from 'lucide-react';
 import { Pagination } from '../../../shared/components';
 import { DEFAULT_IMAGES } from '../../../shared/constants';
+import { ROUTES } from '../../../core/constants';
 import { selectCompetitionDetail } from '../competitionDetail/store';
 import './ranking-loading.css';
 import {
@@ -19,6 +20,7 @@ import {
 
 const CompetitionRankingPage = ({ competitionId: competitionIdProp, detail: detailProp }) => {
     const dispatch = useDispatch();
+    const navigate = useNavigate();
     const { competitionId: competitionIdFromParams } = useParams();
     const detailFromStore = useSelector(selectCompetitionDetail);
     const leaderboard = useSelector(selectCompetitionRankingLeaderboard);
@@ -109,6 +111,16 @@ const CompetitionRankingPage = ({ competitionId: competitionIdProp, detail: deta
 
         if (totalPoints == null || maxPoints == null) return '--';
         return `${totalPoints}/${maxPoints}`;
+    };
+
+    const getStudentId = (student) => {
+        return student?.studentId ?? student?.id ?? student?.userId ?? null;
+    };
+
+    const handleOpenStudentProfile = (student) => {
+        const studentId = getStudentId(student);
+        if (!studentId) return;
+        navigate(ROUTES.STUDENT_PROFILE_DETAIL(studentId));
     };
 
     const RANK_CROWN_STYLE = {
@@ -317,31 +329,45 @@ const CompetitionRankingPage = ({ competitionId: competitionIdProp, detail: deta
                                 return (
                                     <div
                                         key={item?.competitionSubmitId ?? `${item?.rank ?? index}-${index}`}
-                                        className={`ranking-wave-row flex items-center rounded-xl border px-4 py-2 transition-colors duration-200 ${getRowHighlightClass(rankValue, index)}`}
-                                        style={{ animationDelay: `${Math.min(index, 19) * 55}ms` }}
+                                        className="group relative overflow-hidden rounded-xl"
                                     >
-                                        <div className="w-20 text-sm font-medium text-gray-600">{renderRankCell(rankValue)}</div>
-                                        <div className="w-[40%]">
-                                            <div className="flex items-center gap-2">
-                                                <div className="shrink-0 rounded-full bg-linear-to-r from-yellow-400 via-yellow-300 to-yellow-500 p-px">
-                                                    <div className="rounded-full bg-white p-px">
-                                                        <img
-                                                            src={student?.avatarUrl || DEFAULT_IMAGES.USER_AVATAR}
-                                                            alt={getStudentName(student)}
-                                                            loading="lazy"
-                                                            className="h-8 w-8 min-h-8 min-w-8 rounded-full object-cover"
-                                                        />
+                                        <div
+                                            className={`ranking-wave-row flex cursor-pointer items-center border px-4 py-2 transition-all duration-300 md:group-hover:-translate-x-14 md:group-hover:mr-1 ${getRowHighlightClass(rankValue, index)}`}
+                                            style={{ animationDelay: `${Math.min(index, 19) * 55}ms` }}
+                                            onClick={() => handleOpenStudentProfile(student)}
+                                        >
+                                            <div className="w-20 text-sm font-medium text-gray-600">{renderRankCell(rankValue)}</div>
+                                            <div className="w-[40%]">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="shrink-0 rounded-full bg-linear-to-r from-yellow-400 via-yellow-300 to-yellow-500 p-px">
+                                                        <div className="rounded-full bg-white p-px">
+                                                            <img
+                                                                src={student?.avatarUrl || DEFAULT_IMAGES.USER_AVATAR}
+                                                                alt={getStudentName(student)}
+                                                                loading="lazy"
+                                                                className="h-8 w-8 min-h-8 min-w-8 rounded-full object-cover"
+                                                            />
+                                                        </div>
                                                     </div>
+                                                    <span className="whitespace-normal wrap-break-word text-sm text-gray-700">{getStudentName(student)}</span>
                                                 </div>
-                                                <span className="whitespace-normal wrap-break-word text-sm text-gray-700">{getStudentName(student)}</span>
+                                            </div>
+                                            <div className="w-[14%] text-start text-sm font-semibold text-gray-900">{getPointWithMaxLabel(item)}</div>
+                                            <div className="w-[12%] text-start text-sm font-semibold text-gray-900">{getPercentageLabel(item)}</div>
+                                            <div className="w-[14%] text-start text-sm text-gray-700">{item?.attemptNumber ?? '-'}</div>
+                                            <div className="flex-1 text-start text-sm text-gray-700">
+                                                {formatTimeSpent(item?.timeSpentSeconds)}
                                             </div>
                                         </div>
-                                        <div className="w-[14%] text-start text-sm font-semibold text-gray-900">{getPointWithMaxLabel(item)}</div>
-                                        <div className="w-[12%] text-start text-sm font-semibold text-gray-900">{getPercentageLabel(item)}</div>
-                                        <div className="w-[14%] text-start text-sm text-gray-700">{item?.attemptNumber ?? '-'}</div>
-                                        <div className="flex-1 text-start text-sm text-gray-700">
-                                            {formatTimeSpent(item?.timeSpentSeconds)}
-                                        </div>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleOpenStudentProfile(student)}
+                                            className="cursor-pointer absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center bg-blue-600 text-white opacity-0 scale-95 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 hover:bg-blue-700 active:scale-95"
+                                            aria-label="Xem trang cá nhân"
+                                        >
+                                            <Eye size={20} />
+                                        </button>
                                     </div>
                                 );
                             })}
@@ -356,7 +382,7 @@ const CompetitionRankingPage = ({ competitionId: competitionIdProp, detail: deta
                             return (
                                 <article
                                     key={`mobile-${item?.competitionSubmitId ?? `${item?.rank ?? index}-${index}`}`}
-                                    className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(rankValue, index)}`}
+                                    className={`cursor-pointer rounded-xl border px-3 py-3 ${getRowHighlightClass(rankValue, index)}`}
                                 >
                                     <div className="flex items-center gap-2">
                                         <div className="text-sm font-semibold text-gray-700">{renderRankCell(rankValue)}</div>
@@ -383,6 +409,14 @@ const CompetitionRankingPage = ({ competitionId: competitionIdProp, detail: deta
                                             TG: <span className="font-semibold text-slate-900">{formatTimeSpent(item?.timeSpentSeconds)}</span>
                                         </div>
                                     </div>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => handleOpenStudentProfile(student)}
+                                        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                                    >
+                                        Xem trang cá nhân
+                                    </button>
                                 </article>
                             );
                         })}

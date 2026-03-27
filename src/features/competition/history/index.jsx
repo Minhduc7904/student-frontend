@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
-import { ArrowRight, Eye, Lock, RefreshCw, Users } from 'lucide-react';
+import { ArrowRight, ArrowUpDown, Eye, Lock, RefreshCw, Users } from 'lucide-react';
 import { Pagination } from '../../../shared/components';
 import { ROUTES } from '../../../core/constants';
 import '../ranking/ranking-loading.css';
@@ -24,7 +24,9 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
     const error = useSelector(selectCompetitionStudentHistoryError);
     const pagination = useSelector(selectCompetitionStudentHistoryPagination);
     const [page, setPage] = useState(1);
-    const limit = 10;
+    const limit = 20;
+    const [sortBy, setSortBy] = useState('createdAt');
+    const [sortOrder, setSortOrder] = useState('desc');
 
     useEffect(() => {
         setPage(1);
@@ -42,8 +44,8 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                 query: {
                     page,
                     limit,
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc',
+                    sortBy,
+                    sortOrder,
                 },
             })
         );
@@ -51,7 +53,7 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
         return () => {
             dispatch(clearCompetitionStudentHistory());
         };
-    }, [dispatch, competitionId, page]);
+    }, [dispatch, competitionId, page, sortBy, sortOrder]);
 
     const total = pagination?.total ?? history.length;
     const currentPage = pagination?.page ?? page;
@@ -104,11 +106,27 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                 query: {
                     page,
                     limit,
-                    sortBy: 'createdAt',
-                    sortOrder: 'desc',
+                    sortBy,
+                    sortOrder,
                 },
             })
         );
+    };
+
+    const toggleSort = (field) => {
+        setPage(1);
+        if (sortBy === field) {
+            setSortOrder((prev) => (prev === 'asc' ? 'desc' : 'asc'));
+            return;
+        }
+
+        setSortBy(field);
+        setSortOrder('desc');
+    };
+
+    const getSortLabel = (field) => {
+        if (sortBy !== field) return 'Chưa sắp xếp';
+        return sortOrder === 'asc' ? 'Tăng dần' : 'Giảm dần';
     };
 
     const handleViewResult = (submitId) => {
@@ -154,13 +172,45 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                 <div className="w-full overflow-hidden">
                     <div className="hidden w-full md:block">
                         <div className="flex w-full border-b border-gray-100 px-3 py-2 text-sm font-bold text-gray-500">
-                            <div className="w-20">Lần thi</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('attemptNumber')}
+                                className="cursor-pointer flex w-20 items-center gap-1 text-left"
+                                title={`Sắp xếp lần thi: ${getSortLabel('attemptNumber')}`}
+                            >
+                                Lần thi
+                                <ArrowUpDown size={12} className={sortBy === 'attemptNumber' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                             <div className="w-[16%] text-start">Trạng thái</div>
-                            <div className="w-[14%] text-start">Điểm</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('totalPoints')}
+                                className="cursor-pointer flex w-[14%] items-center gap-1 text-left"
+                                title={`Sắp xếp điểm: ${getSortLabel('totalPoints')}`}
+                            >
+                                Điểm
+                                <ArrowUpDown size={12} className={sortBy === 'totalPoints' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                             <div className="w-[12%] text-start">%</div>
                             <div className="w-[18%] text-start">Bắt đầu</div>
-                            <div className="w-[18%] text-start">Nộp bài</div>
-                            <div className="flex-1 text-start">Thời gian</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('submittedAt')}
+                                className="cursor-pointer flex w-[18%] items-center gap-1 text-left"
+                                title={`Sắp xếp nộp bài: ${getSortLabel('submittedAt')}`}
+                            >
+                                Nộp bài
+                                <ArrowUpDown size={12} className={sortBy === 'submittedAt' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('timeSpentSeconds')}
+                                className="cursor-pointer flex flex-1 items-center gap-1 text-left"
+                                title={`Sắp xếp thời gian: ${getSortLabel('timeSpentSeconds')}`}
+                            >
+                                Thời gian
+                                <ArrowUpDown size={12} className={sortBy === 'timeSpentSeconds' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                         </div>
 
                         <div className="mt-2 flex flex-col gap-0.5">
@@ -226,20 +276,53 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                 <div className="w-full overflow-hidden">
                     <div className="hidden w-full md:block">
                         <div className="flex w-full border-b border-gray-100 px-3 py-2 text-sm font-bold text-gray-600">
-                            <div className="w-20">Lần thi</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('attemptNumber')}
+                                className="cursor-pointer flex w-20 items-center gap-1 text-left"
+                                title={`Sắp xếp lần thi: ${getSortLabel('attemptNumber')}`}
+                            >
+                                Lần thi
+                                <ArrowUpDown size={12} className={sortBy === 'attemptNumber' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                             <div className="w-[16%] text-start">Trạng thái</div>
-                            <div className="w-[14%] text-start">Điểm</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('totalPoints')}
+                                className="cursor-pointer flex w-[14%] items-center gap-1 text-left"
+                                title={`Sắp xếp điểm: ${getSortLabel('totalPoints')}`}
+                            >
+                                Điểm
+                                <ArrowUpDown size={12} className={sortBy === 'totalPoints' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                             <div className="w-[12%] text-start">%</div>
                             <div className="w-[18%] text-start">Bắt đầu</div>
-                            <div className="w-[18%] text-start">Nộp bài</div>
-                            <div className="flex-1 text-start">Thời gian</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('submittedAt')}
+                                className="cursor-pointer flex w-[18%] items-center gap-1 text-left"
+                                title={`Sắp xếp nộp bài: ${getSortLabel('submittedAt')}`}
+                            >
+                                Nộp bài
+                                <ArrowUpDown size={12} className={sortBy === 'submittedAt' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort('timeSpentSeconds')}
+                                className="cursor-pointer flex flex-1 items-center gap-1 text-left"
+                                title={`Sắp xếp thời gian: ${getSortLabel('timeSpentSeconds')}`}
+                            >
+                                Thời gian
+                                <ArrowUpDown size={12} className={sortBy === 'timeSpentSeconds' ? 'text-blue-700' : 'text-gray-400'} />
+                            </button>
                         </div>
 
                         <div className="mt-2 flex flex-col gap-0.5">
                             {history.map((item, index) => (
                                 <div
                                     key={item?.competitionSubmitId ?? `${item?.attemptNumber ?? 'attempt'}-${index}`}
-                                    className="group relative overflow-hidden rounded-xl"
+                                    className="cursor-pointer group relative overflow-hidden rounded-xl"
+                                    onClick={() => item?.canViewDetail && handleViewResult(item?.competitionSubmitId)}
                                 >
                                     <div
                                         className={`ranking-wave-row flex items-center border px-4 py-2 transition-all duration-300 md:group-hover:-translate-x-14 md:group-hover:mr-1 ${getRowHighlightClass(index)}`}
@@ -258,11 +341,10 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                                         type="button"
                                         onClick={() => item?.canViewDetail && handleViewResult(item?.competitionSubmitId)}
                                         disabled={!item?.canViewDetail}
-                                        className={`absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${
-                                            item?.canViewDetail
+                                        className={`cursor-pointer absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${item?.canViewDetail
                                                 ? 'cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95'
                                                 : 'cursor-not-allowed bg-gray-400'
-                                        }`}
+                                            }`}
                                         aria-label={item?.canViewDetail ? 'Xem kết quả' : 'Không thể xem kết quả'}
                                     >
                                         {item?.canViewDetail ? <ArrowRight size={20} /> : <Lock size={18} />}
@@ -307,7 +389,7 @@ const CompetitionHistoryPage = ({ competitionId: competitionIdProp, onViewResult
                                     <button
                                         type="button"
                                         onClick={() => handleViewResult(item?.competitionSubmitId)}
-                                        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                                        className="cursor-pointer mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
                                     >
                                         <Eye size={15} />
                                         Xem kết quả

@@ -82,6 +82,16 @@ const CompetitionRanking = () => {
         return student?.fullName || `${student?.lastName ?? ''} ${student?.firstName ?? ''}`.trim() || 'Học sinh';
     };
 
+    const getStudentId = (student) => {
+        return student?.studentId ?? student?.id ?? student?.userId ?? null;
+    };
+
+    const handleOpenStudentProfile = (student) => {
+        const studentId = getStudentId(student);
+        if (!studentId) return;
+        navigate(ROUTES.STUDENT_PROFILE_DETAIL(studentId));
+    };
+
     const formatTimeSpent = (seconds) => {
         if (seconds == null || Number.isNaN(Number(seconds))) return '--:--';
 
@@ -149,6 +159,7 @@ const CompetitionRanking = () => {
                                 timeLabel={formatTimeSpent(currentUserRanking?.timeSpentSeconds)}
                                 className="border-blue-200 bg-blue-50/70"
                                 entryDelay={80}
+                                onClick={() => handleOpenStudentProfile(currentUserRanking?.student)}
                             />
                         </div>
                     )}
@@ -162,7 +173,12 @@ const CompetitionRanking = () => {
                                     const fullName = getStudentName(student);
 
                                     return (
-                                        <div key={`podium-rank-${rank}`} className="group flex w-24 flex-col items-center text-center">
+                                        <button
+                                            key={`podium-rank-${rank}`}
+                                            type="button"
+                                            onClick={() => handleOpenStudentProfile(student)}
+                                            className="group flex w-24 cursor-pointer flex-col items-center text-center"
+                                        >
                                             <Podium
                                                 className="mx-auto"
                                                 rank={rank}
@@ -178,7 +194,7 @@ const CompetitionRanking = () => {
                                                 maxPoints={rankingItem?.maxPoints}
                                                 timeSpentSeconds={rankingItem?.timeSpentSeconds}
                                             />
-                                        </div>
+                                        </button>
                                     );
                                 })}
                             </div>
@@ -203,6 +219,7 @@ const CompetitionRanking = () => {
                                         attemptLabel={item?.attemptNumber ?? '-'}
                                         timeLabel={timeLabel}
                                         entryDelay={index * 70 + 120}
+                                        onClick={() => handleOpenStudentProfile(student)}
                                     />
                                 );
                             })}

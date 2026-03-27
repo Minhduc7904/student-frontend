@@ -1,10 +1,11 @@
-import { useCallback, useState, Suspense, memo, useEffect } from "react";
+import { Suspense, memo } from "react";
 import { Outlet, Link } from "react-router-dom";
 import { ContentLoading } from "../../../shared/components/loading";
 import { useCourseDetail } from "../hooks";
 import StartList from '../../../assets/icons/StarList.svg';
 import { SvgIcon } from "../../../shared/components";
 import { ROUTES } from "../../../core/constants";
+import AuthenticatedLayout from "../../../shared/components/layout/AuthenticatedLayout";
 
 /**
  * Course Not Found Component
@@ -50,31 +51,31 @@ const CourseDetailLayout = () => {
     // Hiển thị loading khi đang tải
     if (loading) {
         return (
-            <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
+            <AuthenticatedLayout>
                 <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                     <SvgIcon src={StartList} width={232} height={137} />
                 </div>
                 <div className="flex-1 flex items-center justify-center">
                     <ContentLoading />
                 </div>
-            </div>
+            </AuthenticatedLayout>
         );
     }
 
     // Hiển thị 404 nếu có lỗi hoặc không tìm thấy course
     if (error || !courseDetail) {
         return (
-            <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
+            <AuthenticatedLayout>
                 <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                     <SvgIcon src={StartList} width={232} height={137} />
                 </div>
                 <CourseNotFound />
-            </div>
+            </AuthenticatedLayout>
         );
     }
 
     return (
-        <div className="h-dvh flex flex-col bg-gray-50 overflow-hidden">
+        <AuthenticatedLayout>
             <div className="w-full bg-blue-800 h-20 flex items-center justify-end">
                 <SvgIcon src={StartList} width={232} height={137} />
             </div>
@@ -90,7 +91,7 @@ const CourseDetailLayout = () => {
                         lessonsError,
                     }} />
                 </Suspense>
-        </div>
+        </AuthenticatedLayout>
     );
 };
 

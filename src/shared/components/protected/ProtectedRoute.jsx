@@ -1,19 +1,20 @@
 // src/shared/permissions/ProtectedRoute.js
-import { Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { ROUTES } from '../../../core/constants';
 import { hasPermission } from '../../utils/permission';
-import { selectProfileRoles, selectProfilePermissions, selectProfile } from '../../../features/profile/store/profileSlice';
+import { selectMyProfile, selectProfileRoles, selectProfilePermissions } from '../../../features/profile/store/profileSlice';
 import { selectIsAuthenticated } from '../../../features/auth/store/authSlice';
 
 export const ProtectedRoute = ({ permission }) => {
     const location = useLocation();
+    const parentOutletContext = useOutletContext();
 
     const isAuthenticated = useSelector(selectIsAuthenticated);
 
     const userPermissions = useSelector(selectProfilePermissions);
     const userRoles = useSelector(selectProfileRoles);
-    const profile = useSelector(selectProfile);
+    const profile = useSelector(selectMyProfile);
 
     // 1️⃣ Chưa đăng nhập
     if (!isAuthenticated) {
@@ -43,5 +44,5 @@ export const ProtectedRoute = ({ permission }) => {
     }
 
     // 4️⃣ OK → render route con
-    return <Outlet />;
+    return <Outlet context={parentOutletContext} />;
 };

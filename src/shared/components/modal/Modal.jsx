@@ -1,4 +1,3 @@
-import { X } from 'lucide-react'
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -6,6 +5,7 @@ export const Modal = ({
     isOpen,
     onClose,
     children,
+    overlayClassName = '',
 }) => {
     useEffect(() => {
         if (isOpen) {
@@ -23,7 +23,7 @@ export const Modal = ({
 
     const modalContent = (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+            className={`fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 ${overlayClassName}`}
             onClick={onClose}
         >
             {children}

@@ -56,48 +56,46 @@ const ProfileAvatar = memo(({ avatarUrl, fullName }) => {
     );
 
     return (
-        <div className="relative group shrink-0">
-            {/* Avatar */}
-            <div className="relative w-28 h-28 md:w-32 md:h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
-                {avatarUrl ? (
-                    <img
-                        src={avatarUrl}
-                        alt={fullName}
-                        className="w-full h-full object-cover"
-                    />
-                ) : (
-                    <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-                        <User className="w-16 h-16 text-blue-800" />
-                    </div>
-                )}
+        <div className=" flex w-full justify-center items-center">
+            <div className="relative shrink-0 flex flex-col items-center">
+                <button
+                    type="button"
+                    onClick={handleAvatarClick}
+                    disabled={uploading}
+                    className="group relative h-20 w-20 cursor-pointer overflow-hidden rounded-lg border border-gray-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.06)] transition-all hover:border-[rgba(45,181,93,0.45)] hover:shadow-[0_6px_18px_rgba(15,23,42,0.12)] disabled:cursor-not-allowed"
+                    aria-label="Thay đổi ảnh đại diện"
+                >
+                    {avatarUrl ? (
+                        <img src={avatarUrl} alt={fullName} className="h-full w-full object-cover" />
+                    ) : (
+                        <div className="h-full w-full bg-blue-100 flex items-center justify-center">
+                            <User className="h-8 w-8 text-blue-800" />
+                        </div>
+                    )}
 
-                {/* Upload overlay */}
-                {uploading && (
-                    <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center">
-                        <Loader2 className="w-6 h-6 text-white animate-spin" />
-                        <span className="text-xs text-white mt-1">{uploadProgress}%</span>
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
+                        <Camera size={16} className="text-white" />
                     </div>
-                )}
+
+                    {uploading ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/55">
+                            <Loader2 className="h-5 w-5 animate-spin text-white" />
+                            <span className="mt-1 text-xs font-semibold text-white">{uploadProgress}%</span>
+                        </div>
+                    ) : null}
+                </button>
+
+                <p className="mt-2 text-xs text-gray-500">Nhấn vào ảnh để thay đổi</p>
+
+                {/* Hidden file input */}
+                <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    onChange={handleFileChange}
+                    className="hidden"
+                />
             </div>
-
-            {/* Camera button */}
-            <button
-                onClick={handleAvatarClick}
-                disabled={uploading}
-                className="absolute bottom-1 right-1 w-9 h-9 bg-blue-800 hover:bg-blue-900 text-white rounded-full flex items-center justify-center shadow-md transition-colors duration-200 disabled:opacity-50 cursor-pointer"
-                aria-label="Thay đổi ảnh đại diện"
-            >
-                <Camera size={16} />
-            </button>
-
-            {/* Hidden file input */}
-            <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                onChange={handleFileChange}
-                className="hidden"
-            />
         </div>
     );
 });

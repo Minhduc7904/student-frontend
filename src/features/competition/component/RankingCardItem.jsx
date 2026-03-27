@@ -11,11 +11,25 @@ const RankingCardItem = ({
     timeLabel,
     entryDelay = 0,
     className = '',
+    onClick,
 }) => {
     return (
         <article
-            className={`ranking-entry inline-flex h-16 w-full cursor-pointer items-center gap-4 rounded-2xl border border-[rgba(226,232,240,0.6)] bg-[rgba(255,255,255,0.85)] px-4 py-2 shadow-[0_18px_45px_rgba(15,23,42,0.12)] transition-all duration-200 hover:border-[#a1a1aa] hover:bg-white ${className}`}
+            className={`ranking-entry inline-flex h-16 w-full items-center gap-4 rounded-2xl border border-[rgba(226,232,240,0.6)] bg-[rgba(255,255,255,0.85)] px-4 py-2 shadow-[0_18px_45px_rgba(15,23,42,0.12)] transition-all duration-200 hover:border-[#a1a1aa] hover:bg-white ${onClick ? 'cursor-pointer' : ''} ${className}`}
             style={{ animationDelay: `${entryDelay}ms`, '--ranking-entry-delay': `${entryDelay}ms` }}
+            onClick={onClick}
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            onKeyDown={
+                onClick
+                    ? (event) => {
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            onClick();
+                        }
+                    }
+                    : undefined
+            }
         >
             <div className="flex w-full flex-1 items-center gap-4">
                 <div className="flex justify-start">
