@@ -5,6 +5,7 @@ import { User } from "lucide-react";
 import { logoutAsync } from "../../../features/auth/store/authSlice";
 import { ROUTES } from "../../../core/constants/routes";
 import UserAvatarDropdown from "./UserAvatarDropdown";
+import { ComingSoonModal } from "../modal/ComingSoonModal";
 
 /**
  * UserAvatar Component
@@ -15,6 +16,7 @@ import UserAvatarDropdown from "./UserAvatarDropdown";
  */
 const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
     const dispatch = useDispatch();
@@ -53,42 +55,47 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
     }, [dispatch, navigate]);
 
     return (
-        <div className="relative flex items-center justify-center" ref={dropdownRef}>
-            {/* Avatar Button */}
-            <button
-                onClick={handleToggle}
-                className="inline-flex cursor-pointer group focus:outline-none"
-                aria-label="User menu"
-                aria-expanded={isOpen}
-            >
-                {avatarUrl ? (
-                    <img
-                        src={avatarUrl}
-                        alt={fullName}
-                        className={`object-cover rounded-full ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
-                            compact ? 'h-9 w-9' : 'h-8 w-8'
-                        }`}
-                    />
-                ) : (
-                    <div className={`rounded-full bg-blue-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
-                        compact ? 'h-9 w-9 p-1.5' : 'h-6 w-6 p-1'
-                    }`}>
-                        <User className="text-blue-800 w-full h-full" />
-                    </div>
-                )}
-            </button>
+        <>
+            <div className="relative flex items-center justify-center" ref={dropdownRef}>
+                {/* Avatar Button */}
+                <button
+                    onClick={handleToggle}
+                    className="inline-flex cursor-pointer group focus:outline-none"
+                    aria-label="User menu"
+                    aria-expanded={isOpen}
+                >
+                    {avatarUrl ? (
+                        <img
+                            src={avatarUrl}
+                            alt={fullName}
+                            className={`object-cover rounded-full ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
+                                compact ? 'h-9 w-9' : 'h-8 w-8'
+                            }`}
+                        />
+                    ) : (
+                        <div className={`rounded-full bg-blue-100 flex items-center justify-center overflow-hidden ring-2 ring-transparent group-hover:ring-blue-400 transition-all duration-200 ${
+                            compact ? 'h-9 w-9 p-1.5' : 'h-6 w-6 p-1'
+                        }`}>
+                            <User className="text-blue-800 w-full h-full" />
+                        </div>
+                    )}
+                </button>
 
-            {isOpen && (
-                <UserAvatarDropdown
-                    avatarUrl={avatarUrl}
-                    fullName={fullName}
-                    email={email}
-                    onNavigate={handleNavigate}
-                    onLogout={handleLogout}
-                    onClose={() => setIsOpen(false)}
-                />
-            )}
-        </div>
+                {isOpen && (
+                    <UserAvatarDropdown
+                        avatarUrl={avatarUrl}
+                        fullName={fullName}
+                        email={email}
+                        onNavigate={handleNavigate}
+                        onLogout={handleLogout}
+                        onClose={() => setIsOpen(false)}
+                        onOpenComingSoon={() => setIsComingSoonOpen(true)}
+                    />
+                )}
+            </div>
+
+            <ComingSoonModal isOpen={isComingSoonOpen} onClose={() => setIsComingSoonOpen(false)} />
+        </>
     );
 });
 

@@ -221,6 +221,18 @@ const NotificationBell = memo(({ compact = false }) => {
         return () => document.removeEventListener("mousedown", handler);
     }, [isOpen]);
 
+    // Prevent body scroll when compact full-screen panel is open
+    useEffect(() => {
+        if (!compact || !isOpen) return undefined;
+
+        const originalOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+
+        return () => {
+            document.body.style.overflow = originalOverflow;
+        };
+    }, [compact, isOpen]);
+
     const handleRead = (id, e) => {
         e.stopPropagation();
         dispatch(markNotificationReadAsync(id));
@@ -250,7 +262,7 @@ const NotificationBell = memo(({ compact = false }) => {
 
             {isOpen && (
                 <div className={compact
-                    ? "fixed left-1/2 top-25 z-60 w-[min(92vw,24rem)] -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
+                    ? "fixed inset-0 z-60 flex h-dvh w-screen flex-col overflow-hidden bg-white"
                     : "absolute right-0 top-full z-50 mt-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg sm:w-96"
                 }>
                     <DropdownHeader
@@ -259,7 +271,10 @@ const NotificationBell = memo(({ compact = false }) => {
                         onClose={() => setIsOpen(false)}
                     />
 
-                    <div className="max-h-100 overflow-y-auto custom-scrollbar">
+                    <div className={compact
+                        ? "flex-1 overflow-y-auto custom-scrollbar"
+                        : "max-h-100 overflow-y-auto custom-scrollbar"
+                    }>
                         {notifications.length === 0 && !loading ? (
                             <EmptyState />
                         ) : (
@@ -284,15 +299,6 @@ const NotificationBell = memo(({ compact = false }) => {
                         <DropdownFooter onViewAll={handleViewAll} />
                     )}
                 </div>
-            )}
-
-            {isOpen && compact && (
-                <button
-                    type="button"
-                    className="fixed inset-0 z-50 bg-black/20"
-                    onClick={() => setIsOpen(false)}
-                    aria-label="Đóng thông báo"
-                />
             )}
         </div>
     );

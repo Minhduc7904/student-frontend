@@ -1,15 +1,12 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 import { User, LogOut, TrendingUp, Coins, UserCircle, Wallet, Settings } from "lucide-react";
 import { ROUTES } from "../../../core/constants/routes";
-import { ComingSoonModal } from "../modal/ComingSoonModal";
 
 /**
  * UserAvatarDropdown
  * Menu dropdown của avatar người dùng.
  */
-const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout, onClose }) => {
-    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
-
+const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout, onClose, onOpenComingSoon }) => {
     const quickMenus = [
         {
             key: "progress",
@@ -44,14 +41,15 @@ const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLog
     ];
 
     const handleQuickMenuClick = (item) => {
-        
+
         if (item.key === "points") {
             onClose();
-            setIsComingSoonOpen(true);
+            onOpenComingSoon?.();
             return;
         }
 
         onNavigate(item.path);
+        onClose();
     };
 
     return (
@@ -135,8 +133,6 @@ const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLog
                     </button>
                 </div>
             </div>
-
-            <ComingSoonModal isOpen={isComingSoonOpen} onClose={() => setIsComingSoonOpen(false)} />
         </>
     );
 });
