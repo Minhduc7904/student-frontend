@@ -135,12 +135,12 @@ const CompetitionDetailInfoTab = ({ detail: detailProp }) => {
                 </div>
 
             </div>
-            <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-4 md:p-5">
+            {/* <div className="mt-6 rounded-2xl border border-gray-100 bg-white p-4 md:p-5">
                 <MarkdownRenderer
                     content={policiesContent}
                     className="mt-3 text-sm text-gray-700"
                 />
-            </div>
+            </div> */}
         </section>
     );
 };
