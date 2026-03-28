@@ -5,24 +5,6 @@ import { markdownService } from '../../../core/services/modules';
 import 'katex/dist/katex.min.css';
 import './markdown-styles.css';
 
-const isLegacyIOSVersion = () => {
-    if (typeof navigator === 'undefined') return false;
-
-    const ua = navigator.userAgent || '';
-    const isIOSDevice = /iP(hone|od|ad)/i.test(ua)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (!isIOSDevice) return false;
-
-    const versionMatch = ua.match(/OS (\d+)_?(\d+)?_?(\d+)?/i);
-    if (!versionMatch) return false;
-
-    const major = Number(versionMatch[1] || 0);
-    const minor = Number(versionMatch[2] || 0);
-
-    return major < 16 || (major === 16 && minor < 3);
-};
-
 const looksLikeHtml = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
 
 const escapeHtml = (value = '') => value
@@ -105,7 +87,6 @@ export const MarkdownRenderer = memo(({
         return null;
     }
 
-    const isLegacyIOS = isLegacyIOSVersion();
     const isHtmlContent = looksLikeHtml(content);
 
     const [renderedHtml, setRenderedHtml] = useState('');
@@ -152,7 +133,7 @@ export const MarkdownRenderer = memo(({
         return () => {
             isMounted = false;
         };
-    }, [content, imgClassNameSize, isHtmlContent, isLegacyIOS, allowRawHtml, breaks]);
+    }, [content, imgClassNameSize, isHtmlContent, allowRawHtml, breaks]);
 
     const htmlOutput = useMemo(() => renderedHtml, [renderedHtml]);
 
