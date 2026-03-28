@@ -1,10 +1,7 @@
-import { memo } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import remarkMath from 'remark-math';
-import rehypeKatex from 'rehype-katex';
-import rehypeRaw from 'rehype-raw';
+import DOMPurify from 'dompurify';
+import { markdownService } from '../../../core/services/modules';
 import 'katex/dist/katex.min.css';
 import './markdown-styles.css';
 
@@ -26,6 +23,62 @@ const isLegacyIOSVersion = () => {
     return major < 16 || (major === 16 && minor < 3);
 };
 
+const looksLikeHtml = (value = '') => /<\/?[a-z][\s\S]*>/i.test(value);
+
+const escapeHtml = (value = '') => value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+
+const extractHtmlFromRenderResponse = (payload) => {
+    if (!payload) return '';
+    if (typeof payload === 'string') return payload;
+    if (typeof payload?.html === 'string') return payload.html;
+    if (typeof payload?.data?.html === 'string') return payload.data.html;
+    if (typeof payload?.data === 'string') return payload.data;
+    if (typeof payload?.data?.data?.html === 'string') return payload.data.data.html;
+    return '';
+};
+
+const sanitizeAndEnhanceHtml = (rawHtml, imgClassNameSize) => {
+    const sanitized = DOMPurify.sanitize(rawHtml, {
+        USE_PROFILES: { html: true, svg: true, mathMl: true },
+        ADD_TAGS: ['eq'],
+        ADD_ATTR: ['class', 'style', 'target', 'rel', 'aria-hidden'],
+        FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input'],
+    });
+
+    if (typeof window === 'undefined') {
+        return sanitized;
+    }
+
+    const container = window.document.createElement('div');
+    container.innerHTML = sanitized;
+
+    const imageClassTokens = ['markdown-image', 'object-contain', ...(imgClassNameSize || '').split(' ').filter(Boolean)];
+
+    container.querySelectorAll('img').forEach((img) => {
+        const src = img.getAttribute('src') || '';
+        if (!src.trim()) {
+            img.remove();
+            return;
+        }
+
+        img.setAttribute('loading', 'lazy');
+        img.classList.add(...imageClassTokens);
+    });
+
+    container.querySelectorAll('a').forEach((anchor) => {
+        anchor.setAttribute('target', '_blank');
+        anchor.setAttribute('rel', 'noopener noreferrer');
+        anchor.classList.add('markdown-link');
+    });
+
+    return container.innerHTML;
+};
+
 /**
  * MarkdownRenderer Component
  *
@@ -44,106 +97,68 @@ const isLegacyIOSVersion = () => {
 export const MarkdownRenderer = memo(({
     content,
     className = '',
-    components: customComponents,
     imgClassNameSize = 'max-w-full max-h-[600px]',
+    allowRawHtml = true,
+    breaks = true,
 }) => {
     if (!content) {
         return null;
     }
 
     const isLegacyIOS = isLegacyIOSVersion();
+    const isHtmlContent = looksLikeHtml(content);
 
-    // Legacy iOS Safari (<16.3) can crash on some regex used by remark/rehype plugins.
-    const remarkPlugins = isLegacyIOS ? [] : [remarkGfm, remarkMath];
-    const rehypePlugins = isLegacyIOS
-        ? []
-        : [
-            rehypeRaw,
-            [
-                rehypeKatex,
-                {
-                    strict: false,
-                    trust: true,
-                    throwOnError: false,
-                    errorColor: '#cc0000',
-                    output: 'html',
-                },
-            ],
-        ];
+    const [renderedHtml, setRenderedHtml] = useState('');
 
-    const defaultComponents = {
-        // Custom rendering for code blocks
-        code({ node, inline, className, children, ...props }) {
-            return inline ? (
-                <code className="inline-code" {...props}>
-                    {children}
-                </code>
-            ) : (
-                <code className={`code-block ${className || ''}`} {...props}>
-                    {children}
-                </code>
-            );
-        },
-        // Custom rendering for images
-        img({ node, ...props }) {
-            // Skip rendering if src is empty or invalid
-            if (!props.src || props.src.trim() === '') {
-                return null;
+    useEffect(() => {
+        let isMounted = true;
+
+        const renderContent = async () => {
+            // HTML input: sanitize and render directly.
+            if (isHtmlContent) {
+                const safeHtml = sanitizeAndEnhanceHtml(content, imgClassNameSize);
+                if (isMounted) {
+                    setRenderedHtml(safeHtml);
+                }
+                return;
             }
 
-            // Skip rendering media: protocol (these are placeholders)
-            if (props.src.startsWith('media:')) {
-                return (
-                    <span className="text-gray-400 italic text-sm">
-                        [Hình ảnh: {props.alt || 'Không có mô tả'}]
-                    </span>
-                );
-            }
+            // Markdown input: delegate parsing to backend, then sanitize result.
+            try {
+                const response = await markdownService.renderMarkdownToHtml(content, {
+                    allowRawHtml,
+                    breaks,
+                });
+                const htmlFromApi = extractHtmlFromRenderResponse(response);
+                const fallbackHtml = `<p>${escapeHtml(content).replaceAll('\n', '<br />')}</p>`;
+                const htmlToRender = htmlFromApi || fallbackHtml;
+                const safeHtml = sanitizeAndEnhanceHtml(htmlToRender, imgClassNameSize);
 
-            return (
-                <span className="inline-flex justify-center w-full my-4">
-                    <img
-                        className={`markdown-image object-contain ${imgClassNameSize}`}
-                        loading="lazy"
-                        {...props}
-                        alt={props.alt || 'Image'}
-                    />
-                </span>
-            );
-        },
-        // Custom rendering for tables
-        table({ node, ...props }) {
-            return (
-                <div className="table-wrapper">
-                    <table className="markdown-table" {...props} />
-                </div>
-            );
-        },
-        // Custom rendering for links
-        a({ node, ...props }) {
-            return (
-                <a
-                    className="markdown-link"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    {...props}
-                />
-            );
-        },
-    };
+                if (isMounted) {
+                    setRenderedHtml(safeHtml);
+                }
+            } catch {
+                const fallbackHtml = `<p>${escapeHtml(content).replaceAll('\n', '<br />')}</p>`;
+                const safeHtml = sanitizeAndEnhanceHtml(fallbackHtml, imgClassNameSize);
+
+                if (isMounted) {
+                    setRenderedHtml(safeHtml);
+                }
+            }
+        };
+
+        renderContent();
+
+        return () => {
+            isMounted = false;
+        };
+    }, [content, imgClassNameSize, isHtmlContent, isLegacyIOS, allowRawHtml, breaks]);
+
+    const htmlOutput = useMemo(() => renderedHtml, [renderedHtml]);
 
     return (
         <div className={`markdown-renderer ${className}`}>
-            <ReactMarkdown
-                remarkPlugins={remarkPlugins}
-                rehypePlugins={rehypePlugins}
-                components={{
-                    ...defaultComponents,
-                    ...customComponents,
-                }}
-            >
-                {content}
-            </ReactMarkdown>
+            <div dangerouslySetInnerHTML={{ __html: htmlOutput }} />
         </div>
     );
 });
@@ -153,8 +168,9 @@ MarkdownRenderer.displayName = 'MarkdownRenderer';
 MarkdownRenderer.propTypes = {
     content: PropTypes.string,
     className: PropTypes.string,
-    components: PropTypes.object,
     imgClassNameSize: PropTypes.string,
+    allowRawHtml: PropTypes.bool,
+    breaks: PropTypes.bool,
 };
 
 export default MarkdownRenderer;
