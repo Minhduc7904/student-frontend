@@ -16,3 +16,4 @@ export * from './questionAnswerService';
 export * from './examAttemptService';
 export * from './mediaService';
 export * from './tuitionPaymentService';
+export * from './markdownService';
