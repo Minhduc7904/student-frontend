@@ -5,11 +5,37 @@ import React, { useState } from "react";
  */
 const getYoutubeVideoId = (url) => {
     if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-};
 
+    try {
+        const parsed = new URL(url);
+
+        // 👉 youtu.be/VIDEO_ID
+        if (parsed.hostname.includes('youtu.be')) {
+            const id = parsed.pathname.slice(1);
+            return id.length === 11 ? id : null;
+        }
+
+        // 👉 youtube.com/watch?v=VIDEO_ID
+        const v = parsed.searchParams.get('v');
+        if (v && v.length === 11) return v;
+
+        // 👉 youtube.com/embed/VIDEO_ID
+        if (parsed.pathname.includes('/embed/')) {
+            const id = parsed.pathname.split('/embed/')[1];
+            return id?.length === 11 ? id : null;
+        }
+
+        // 👉 youtube.com/shorts/VIDEO_ID
+        if (parsed.pathname.includes('/shorts/')) {
+            const id = parsed.pathname.split('/shorts/')[1];
+            return id?.length === 11 ? id : null;
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+};
 /**
  * Youtube Content Component
  * Hiển thị nội dung learning item type YOUTUBE
@@ -31,18 +57,17 @@ export const YoutubeContent = ({ learningItemDetail }) => {
                             <button
                                 key={content.youtubeContentId}
                                 onClick={() => setSelectedIndex(index)}
-                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-text-5 sm:text-subhead-5 transition whitespace-nowrap cursor-pointer ${
-                                    selectedIndex === index
-                                        ? 'bg-blue-800 text-white'
-                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                }`}
+                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-text-5 sm:text-subhead-5 transition whitespace-nowrap cursor-pointer ${selectedIndex === index
+                                    ? 'bg-blue-800 text-white'
+                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                    }`}
                             >
                                 Video {index + 1}
                             </button>
                         ))}
                     </div>
                 )}
-                
+
                 {/* Video youtube player */}
                 {videoId ? (
                     <div className="w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">

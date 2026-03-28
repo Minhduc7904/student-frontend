@@ -1,18 +1,47 @@
 import { Play, Trophy, CheckCircle2, Youtube, Eye, Hash, Clock, CalendarClock, Timer, MessageSquare, AlertTriangle, Monitor, VideoOff } from "lucide-react";
 
+
+import { useNavigate } from 'react-router-dom';
+import { ROUTES } from '@/core/constants';
+import { formatDate } from '@/shared/utils';
+
+
 /**
  * Extract YouTube video ID from URL
  */
 const getYoutubeVideoId = (url) => {
     if (!url) return null;
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
-};
-import { useNavigate } from 'react-router-dom';
-import { ROUTES } from '@/core/constants';
-import { formatDate } from '@/shared/utils';
 
+    try {
+        const parsed = new URL(url);
+
+        // 👉 youtu.be/VIDEO_ID
+        if (parsed.hostname.includes('youtu.be')) {
+            const id = parsed.pathname.slice(1);
+            return id.length === 11 ? id : null;
+        }
+
+        // 👉 youtube.com/watch?v=VIDEO_ID
+        const v = parsed.searchParams.get('v');
+        if (v && v.length === 11) return v;
+
+        // 👉 youtube.com/embed/VIDEO_ID
+        if (parsed.pathname.includes('/embed/')) {
+            const id = parsed.pathname.split('/embed/')[1];
+            return id?.length === 11 ? id : null;
+        }
+
+        // 👉 youtube.com/shorts/VIDEO_ID
+        if (parsed.pathname.includes('/shorts/')) {
+            const id = parsed.pathname.split('/shorts/')[1];
+            return id?.length === 11 ? id : null;
+        }
+
+        return null;
+    } catch {
+        return null;
+    }
+};
 // Status configuration
 const STATUS_CONFIG = {
     NOT_STARTED: {
@@ -282,11 +311,10 @@ export const DetailTabContent = ({ content, onStartCompetition }) => {
                         type="button"
                         disabled={statusConfig.disabled}
                         onClick={statusConfig.disabled ? undefined : onStartCompetition}
-                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[14px] transition-all ${
-                            statusConfig.disabled
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : `${statusConfig.buttonClass} cursor-pointer active:scale-[0.98]`
-                        }`}
+                        className={`w-full flex items-center justify-center gap-2 py-3 rounded-xl font-semibold text-[14px] transition-all ${statusConfig.disabled
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : `${statusConfig.buttonClass} cursor-pointer active:scale-[0.98]`
+                            }`}
                     >
                         {statusConfig.buttonIcon && <Play size={16} />}
                         <span>{statusConfig.buttonText}</span>

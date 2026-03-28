@@ -29,7 +29,7 @@ export const courseDetailRoutes = [
                         },
                     },
                     {
-                        path: ROUTES.COURSE_LESSON(':courseId', ':lessonId'),
+                        path: 'lessons/:lessonId',
                         element: <CourseLessonsPage />,
                         meta: {
                             title: 'Bài học khóa học',
@@ -37,7 +37,7 @@ export const courseDetailRoutes = [
                         },
                     },
                     {
-                        path: ROUTES.COURSE_LEARNING_ITEM(':courseId', ':lessonId', ':learningItemId'),
+                        path: 'lessons/:lessonId/learning-items/:learningItemId',
                         element: <CourseLessonsPage />,
                         meta: {
                             title: 'Mục học tập',
@@ -45,7 +45,7 @@ export const courseDetailRoutes = [
                         },
                     },
                     {
-                        path: ROUTES.COURSE_LEARNING_ITEM_RESULT(':courseId', ':lessonId', ':learningItemId', ':competitionSubmitId'),
+                        path: 'lessons/:lessonId/learning-items/:learningItemId/result/:competitionSubmitId',
                         element: <CourseLessonsPage />,
                         meta: {
                             title: 'Kết quả bài tập',

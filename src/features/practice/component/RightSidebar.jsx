@@ -15,7 +15,7 @@ const PracticeRightSidebar = memo(() => {
             <RightSidebarHeader profile={profile} />
 
             {/* Scrollable content area */}
-            <div className="max-w-[394px] min-w-[394px] flex-1 lg:block hidden lg:overflow-y-auto custom-scrollbar flex flex-col gap-4 lg:gap-5 xl:gap-6 mt-4 lg:mt-5 xl:mt-6 w-full overflow-x-hidden lg:pr-1">
+            <div className="max-w-98.5 min-w-98.5 hidden flex-1 flex-col gap-4 mt-4 w-full overflow-x-hidden custom-scrollbar lg:mt-5 lg:flex lg:gap-5 lg:overflow-y-auto lg:pr-1 xl:mt-6 xl:gap-6">
                 
             </div>
         </div>
