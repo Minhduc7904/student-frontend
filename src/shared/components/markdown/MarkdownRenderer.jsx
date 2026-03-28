@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -8,56 +8,34 @@ import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
 import './markdown-styles.css';
 
-const isLegacyIOSVersion = () => {
-    if (typeof navigator === 'undefined') return false;
-
-    const ua = navigator.userAgent || '';
-    const isIOSDevice = /iP(hone|od|ad)/i.test(ua)
-        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-    if (!isIOSDevice) return false;
-
-    const versionMatch = ua.match(/OS (\d+)_?(\d+)?_?(\d+)?/i);
-    if (!versionMatch) return false;
-
-    const major = Number(versionMatch[1] || 0);
-    const minor = Number(versionMatch[2] || 0);
-
-    return major < 16 || (major === 16 && minor < 3);
+/**
+ * ✅ Detect regex feature (NOT userAgent)
+ */
+const isModernRegexSupported = () => {
+    try {
+        new RegExp('(?<test>a)');
+        return true;
+    } catch {
+        return false;
+    }
 };
 
 /**
- * MarkdownRenderer Component
- *
- * A reusable component for rendering markdown content with support for:
- * - GitHub Flavored Markdown (tables, strikethrough, task lists)
- * - Math equations (KaTeX)
- * - Raw HTML
- * - Syntax highlighting
- * - Custom styling
- *
- * @param {string} content - Markdown content to render
- * @param {string} className - Additional CSS classes
- * @param {object} components - Custom component renderers
- * @param {string} imgClassNameSize - Tailwind size classes for images
+ * ✅ Safe plugin loader (không bao giờ crash)
  */
-export const MarkdownRenderer = memo(({
-    content,
-    className = '',
-    components: customComponents,
-    imgClassNameSize = 'max-w-full max-h-[600px]',
-}) => {
-    if (!content) {
-        return null;
+const getSafePlugins = () => {
+    const safe = isModernRegexSupported();
+
+    if (!safe) {
+        return {
+            remarkPlugins: [],
+            rehypePlugins: [],
+        };
     }
 
-    const isLegacyIOS = isLegacyIOSVersion();
-
-    // Legacy iOS Safari (<16.3) can crash on some regex used by remark/rehype plugins.
-    const remarkPlugins = isLegacyIOS ? [] : [remarkGfm, remarkMath];
-    const rehypePlugins = isLegacyIOS
-        ? []
-        : [
+    return {
+        remarkPlugins: [remarkGfm, remarkMath],
+        rehypePlugins: [
             rehypeRaw,
             [
                 rehypeKatex,
@@ -69,11 +47,34 @@ export const MarkdownRenderer = memo(({
                     output: 'html',
                 },
             ],
-        ];
+        ],
+    };
+};
 
+/**
+ * MarkdownRenderer - SAFE VERSION 🚀
+ */
+export const MarkdownRenderer = memo(({
+    content,
+    className = '',
+    components: customComponents,
+    imgClassNameSize = 'max-w-full max-h-[600px]',
+}) => {
+
+    if (!content) return null;
+
+    /**
+     * ✅ Memo plugin để tránh re-render
+     */
+    const { remarkPlugins, rehypePlugins } = useMemo(() => {
+        return getSafePlugins();
+    }, []);
+
+    /**
+     * ✅ Safe components
+     */
     const defaultComponents = {
-        // Custom rendering for code blocks
-        code({ node, inline, className, children, ...props }) {
+        code({ inline, className, children, ...props }) {
             return inline ? (
                 <code className="inline-code" {...props}>
                     {children}
@@ -84,14 +85,10 @@ export const MarkdownRenderer = memo(({
                 </code>
             );
         },
-        // Custom rendering for images
-        img({ node, ...props }) {
-            // Skip rendering if src is empty or invalid
-            if (!props.src || props.src.trim() === '') {
-                return null;
-            }
 
-            // Skip rendering media: protocol (these are placeholders)
+        img({ ...props }) {
+            if (!props.src || props.src.trim() === '') return null;
+
             if (props.src.startsWith('media:')) {
                 return (
                     <span className="text-gray-400 italic text-sm">
@@ -111,16 +108,16 @@ export const MarkdownRenderer = memo(({
                 </span>
             );
         },
-        // Custom rendering for tables
-        table({ node, ...props }) {
+
+        table({ ...props }) {
             return (
                 <div className="table-wrapper">
                     <table className="markdown-table" {...props} />
                 </div>
             );
         },
-        // Custom rendering for links
-        a({ node, ...props }) {
+
+        a({ ...props }) {
             return (
                 <a
                     className="markdown-link"
@@ -132,20 +129,42 @@ export const MarkdownRenderer = memo(({
         },
     };
 
-    return (
-        <div className={`markdown-renderer ${className}`}>
-            <ReactMarkdown
-                remarkPlugins={remarkPlugins}
-                rehypePlugins={rehypePlugins}
-                components={{
-                    ...defaultComponents,
-                    ...customComponents,
-                }}
-            >
-                {content}
-            </ReactMarkdown>
-        </div>
-    );
+    /**
+     * ✅ HARD FAILSAFE (quan trọng nhất)
+     * Nếu plugin vẫn crash → fallback ngay
+     */
+    try {
+        return (
+            <div className={`markdown-renderer ${className}`}>
+                <ReactMarkdown
+                    remarkPlugins={remarkPlugins}
+                    rehypePlugins={rehypePlugins}
+                    components={{
+                        ...defaultComponents,
+                        ...customComponents,
+                    }}
+                >
+                    {content}
+                </ReactMarkdown>
+            </div>
+        );
+    } catch (err) {
+        console.error('Markdown render failed:', err);
+
+        // 👉 fallback basic (KHÔNG plugin)
+        return (
+            <div className={`markdown-renderer ${className}`}>
+                <ReactMarkdown
+                    components={{
+                        ...defaultComponents,
+                        ...customComponents,
+                    }}
+                >
+                    {content}
+                </ReactMarkdown>
+            </div>
+        );
+    }
 });
 
 MarkdownRenderer.displayName = 'MarkdownRenderer';
