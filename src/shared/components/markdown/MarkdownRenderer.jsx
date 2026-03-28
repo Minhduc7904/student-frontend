@@ -8,6 +8,24 @@ import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
 import './markdown-styles.css';
 
+const isLegacyIOSVersion = () => {
+    if (typeof navigator === 'undefined') return false;
+
+    const ua = navigator.userAgent || '';
+    const isIOSDevice = /iP(hone|od|ad)/i.test(ua)
+        || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+    if (!isIOSDevice) return false;
+
+    const versionMatch = ua.match(/OS (\d+)_?(\d+)?_?(\d+)?/i);
+    if (!versionMatch) return false;
+
+    const major = Number(versionMatch[1] || 0);
+    const minor = Number(versionMatch[2] || 0);
+
+    return major < 16 || (major === 16 && minor < 3);
+};
+
 /**
  * MarkdownRenderer Component
  *
@@ -32,6 +50,26 @@ export const MarkdownRenderer = memo(({
     if (!content) {
         return null;
     }
+
+    const isLegacyIOS = isLegacyIOSVersion();
+
+    // Legacy iOS Safari (<16.3) can crash on some regex used by remark/rehype plugins.
+    const remarkPlugins = isLegacyIOS ? [] : [remarkGfm, remarkMath];
+    const rehypePlugins = isLegacyIOS
+        ? []
+        : [
+            rehypeRaw,
+            [
+                rehypeKatex,
+                {
+                    strict: false,
+                    trust: true,
+                    throwOnError: false,
+                    errorColor: '#cc0000',
+                    output: 'html',
+                },
+            ],
+        ];
 
     const defaultComponents = {
         // Custom rendering for code blocks
@@ -97,20 +135,8 @@ export const MarkdownRenderer = memo(({
     return (
         <div className={`markdown-renderer ${className}`}>
             <ReactMarkdown
-                remarkPlugins={[remarkGfm, remarkMath]}
-                rehypePlugins={[
-                    rehypeRaw,
-                    [
-                        rehypeKatex,
-                        {
-                            strict: false,
-                            trust: true,
-                            throwOnError: false,
-                            errorColor: '#cc0000',
-                            output: 'html',
-                        },
-                    ],
-                ]}
+                remarkPlugins={remarkPlugins}
+                rehypePlugins={rehypePlugins}
                 components={{
                     ...defaultComponents,
                     ...customComponents,
