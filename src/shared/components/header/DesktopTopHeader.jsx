@@ -1,6 +1,6 @@
 import { memo, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ChevronDown, Menu, X } from "lucide-react";
+import { ChevronDown, Lock, Menu, X } from "lucide-react";
 import { Logo } from "../logo";
 import { ROUTES } from "../../../core/constants";
 import DeMauImage from "../../../assets/images/DeMau.png";
@@ -25,7 +25,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
 
     const practiceItems = [
         { label: "Đề mẫu", path: ROUTES.EXAMS, image: DeMauImage },
-        { label: "Phòng luyện đề", path: ROUTES.PRACTICE, image: LuyenDeImage },
+        { label: "Phòng luyện đề", path: ROUTES.PRACTICE, image: LuyenDeImage, locked: true },
     ];
 
     const isActive = (path) => {
@@ -158,6 +158,26 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                                     >
                                         {practiceItems.map((item) => {
                                             const active = isActive(item.path);
+
+                                            if (item.locked) {
+                                                return (
+                                                    <div
+                                                        key={item.path}
+                                                        className="relative flex w-full cursor-not-allowed items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm text-gray-500"
+                                                    >
+                                                        <img
+                                                            src={item.image}
+                                                            alt={item.label}
+                                                            className="h-7 w-7 shrink-0 rounded object-cover blur-[1px]"
+                                                            loading="lazy"
+                                                        />
+                                                        <span className="blur-[0.7px]">{item.label}</span>
+                                                        <span className="absolute -right-1 -top-1 inline-flex h-5 w-5 items-center justify-center rounded-full bg-amber-500 text-white shadow-sm">
+                                                            <Lock size={11} />
+                                                        </span>
+                                                    </div>
+                                                );
+                                            }
 
                                             return (
                                                 <Link
