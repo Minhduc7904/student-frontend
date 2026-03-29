@@ -29,6 +29,8 @@ export const ROUTES = {
     // Exam Routes
     EXAMS: '/exams',
     EXAM_DETAIL: (id) => `/exams/${id}`,
+    EXAM_TYPE_DETAIL: (typeexam, id) => `/exams/${typeexam}/${id}`,
+    EXAM_TYPE_ATTEMPT_PRACTICE: (typeExam, id, attemptId) => `/exams/${typeExam}/${id}/attempt/${attemptId}/practice`,
     EXAM_START: (id) => `/exams/${id}/start`,
     EXAM_RESULT: (id) => `/exams/${id}/result`,
 
@@ -125,6 +127,7 @@ export const ROUTE_PATTERNS = {
     COURSE_DETAIL: /^\/courses\/(\d+)$/,
     COURSE_LESSON: /^\/courses\/(\d+)\/lessons\/(\d+)$/,
     EXAM_DETAIL: /^\/exams\/(\d+)$/,
+    EXAM_TYPE_ATTEMPT_PRACTICE: /^\/exams\/([^/]+)\/(\d+)\/attempt\/(\d+)\/practice$/,
     EXAM_START: /^\/exams\/(\d+)\/start$/,
     EXAM_RESULT: /^\/exams\/(\d+)\/result$/,
 };

@@ -22,6 +22,11 @@ const HISTORY_TABS = {
     EXAM: "exam",
 };
 
+const normalizeStatus = (status) => {
+    if (!status) return "";
+    return String(status).trim().toUpperCase();
+};
+
 const pickFirstDefined = (obj, keys) => {
     for (const key of keys) {
         const value = obj?.[key];
@@ -67,8 +72,8 @@ const formatRelativeTime = (value) => {
 };
 
 const formatPointsText = (item) => {
-    const totalPoints = pickFirstDefined(item, ["totalPoints", "totalPoint"]);
-    const maxPoints = pickFirstDefined(item, ["maxPoints", "maxPoint"]);
+    const totalPoints = pickFirstDefined(item, ["points", "score", "point", "totalPoints", "totalPoint"]);
+    const maxPoints = pickFirstDefined(item, ["maxPoints", "maxPoint", "totalScore"]);
 
     if (totalPoints !== "" && maxPoints !== "") {
         return `${totalPoints}/${maxPoints}`;
@@ -76,6 +81,13 @@ const formatPointsText = (item) => {
 
     const fallbackScore = pickFirstDefined(item, ["score", "point"]);
     return fallbackScore !== "" ? String(fallbackScore) : "";
+};
+
+const truncateText = (value, maxLength = 85) => {
+    const text = String(value || "").trim();
+    if (!text) return "";
+    if (text.length <= maxLength) return text;
+    return `${text.slice(0, maxLength).trimEnd()}...`;
 };
 
 const getHistoryRowModel = (item, index, activeTab) => {
@@ -95,17 +107,18 @@ const getHistoryRowModel = (item, index, activeTab) => {
     }
 
     if (activeTab === HISTORY_TABS.QUESTION) {
-        const title =
+        const rawTitle =
             pickFirstDefined(item, ["questionContent", "content", "questionTitle", "title", "name"]) ||
             `Câu hỏi #${index + 1}`;
+        const title = truncateText(rawTitle);
         const answeredAt = formatRelativeTime(pickFirstDefined(item, ["answeredAt", "createdAt", "updatedAt"]));
         const isCorrect = pickFirstDefined(item, ["isCorrect", "correct"]);
-        const correctText = isCorrect === true ? "Đúng" : isCorrect === false ? "Sai" : "--";
+        const correctText = isCorrect === true ? "Đúng" : isCorrect === false ? "Sai" : "";
 
         return {
             title,
             timeText: answeredAt,
-            rightText: `isCorrect: ${correctText}`,
+            rightText: correctText,
             badgeClass:
                 isCorrect === false
                     ? "bg-rose-50 text-rose-700"
@@ -117,13 +130,24 @@ const getHistoryRowModel = (item, index, activeTab) => {
         pickFirstDefined(item, ["examTitle", "title", "name"]) ||
         `Đề mẫu #${index + 1}`;
     const attemptedAt = formatRelativeTime(pickFirstDefined(item, ["attemptedAt", "submittedAt", "createdAt", "updatedAt"]));
+    const examStatus = normalizeStatus(pickFirstDefined(item, ["status"]));
+
+    if (examStatus === "IN_PROGRESS") {
+        return {
+            title,
+            timeText: attemptedAt,
+            rightText: "Đang làm",
+            badgeClass: "bg-amber-50 text-amber-700",
+        };
+    }
+
     const pointsText = formatPointsText(item);
 
     return {
         title,
         timeText: attemptedAt,
         rightText: pointsText !== "" ? `Điểm: ${pointsText}` : "",
-        badgeClass: "bg-violet-50 text-violet-700",
+        badgeClass: "bg-emerald-50 text-emerald-700",
     };
 };
 
@@ -139,6 +163,15 @@ const HistoryListCard = () => {
     const examHistoryLoading = useSelector(selectPublicStudentExamAttemptsLoading);
 
     const [activeHistoryTab, setActiveHistoryTab] = useState(HISTORY_TABS.COMPETITION);
+    const [isSwitchingTab, setIsSwitchingTab] = useState(false);
+    const [hasTriggeredTabFetch, setHasTriggeredTabFetch] = useState(false);
+
+    const handleChangeHistoryTab = (nextTab) => {
+        if (nextTab === activeHistoryTab) return;
+        setActiveHistoryTab(nextTab);
+        setIsSwitchingTab(true);
+        setHasTriggeredTabFetch(false);
+    };
 
     const historyQuery = useMemo(() => {
         if (!studentId) return HISTORY_QUERY;
@@ -151,15 +184,18 @@ const HistoryListCard = () => {
     useEffect(() => {
         if (activeHistoryTab === HISTORY_TABS.COMPETITION) {
             dispatch(getPublicStudentSubmittedHistoryAsync(historyQuery));
+            setHasTriggeredTabFetch(true);
             return;
         }
 
         if (activeHistoryTab === HISTORY_TABS.QUESTION) {
             dispatch(getPublicStudentQuestionAnswersAsync(historyQuery));
+            setHasTriggeredTabFetch(true);
             return;
         }
 
         dispatch(getPublicStudentExamAttemptsAsync(historyQuery));
+        setHasTriggeredTabFetch(true);
     }, [activeHistoryTab, dispatch, historyQuery]);
 
     const activeItems = useMemo(() => {
@@ -181,10 +217,58 @@ const HistoryListCard = () => {
                 ? questionHistoryLoading
                 : examHistoryLoading;
 
+    useEffect(() => {
+        if (!isSwitchingTab) return;
+        if (!hasTriggeredTabFetch) return;
+        if (activeLoading) return;
+        setIsSwitchingTab(false);
+    }, [activeLoading, hasTriggeredTabFetch, isSwitchingTab]);
+
+    const shouldShowLoading = activeLoading || isSwitchingTab;
+
     const historyRouteByTab = {
         [HISTORY_TABS.COMPETITION]: ROUTES.HISTORY_COMPETITION,
         [HISTORY_TABS.QUESTION]: ROUTES.HISTORY_QUESTION,
         [HISTORY_TABS.EXAM]: ROUTES.HISTORY_EXAM,
+    };
+
+    const getRowNavigatePath = (item) => {
+        if (activeHistoryTab === HISTORY_TABS.COMPETITION) {
+            const competitionId = pickFirstDefined(item, ["competitionId", "id"]);
+            const submitId = pickFirstDefined(item, ["competitionSubmitId", "submitId", "id"]);
+            if (competitionId && submitId) {
+                return ROUTES.COMPETITION_RESULT(competitionId, submitId);
+            }
+            return "";
+        }
+
+        if (activeHistoryTab === HISTORY_TABS.EXAM) {
+            const status = normalizeStatus(pickFirstDefined(item, ["status"]));
+            if (status !== "IN_PROGRESS") return "";
+
+            const typeOfExam = pickFirstDefined(item, ["typeOfExam", "typeExam", "typeexam"]);
+            const examId = pickFirstDefined(item, ["examId", "id"]);
+            if (!examId) return "";
+
+            if (typeOfExam) {
+                return ROUTES.EXAM_TYPE_DETAIL(typeOfExam, examId);
+            }
+
+            return ROUTES.EXAM_DETAIL(examId);
+        }
+
+        return "";
+    };
+
+    const getRowKey = (item, index) => {
+        const baseId = pickFirstDefined(item, [
+            "questionAnswerId",
+            "competitionSubmitId",
+            "submitId",
+            "attemptId",
+            "id",
+        ]);
+        return `${activeHistoryTab}-${baseId || "row"}-${index}`;
     };
 
     return (
@@ -193,7 +277,7 @@ const HistoryListCard = () => {
                 <div className="flex flex-wrap items-center gap-2">
                     <button
                         type="button"
-                        onClick={() => setActiveHistoryTab(HISTORY_TABS.COMPETITION)}
+                        onClick={() => handleChangeHistoryTab(HISTORY_TABS.COMPETITION)}
                         className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${activeHistoryTab === HISTORY_TABS.COMPETITION
                             ? "bg-[#F7F7F8] text-gray-900"
                             : "text-gray-600 hover:bg-gray-50"
@@ -203,7 +287,7 @@ const HistoryListCard = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setActiveHistoryTab(HISTORY_TABS.QUESTION)}
+                        onClick={() => handleChangeHistoryTab(HISTORY_TABS.QUESTION)}
                         className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${activeHistoryTab === HISTORY_TABS.QUESTION
                             ? "bg-[#F7F7F8] text-gray-900"
                             : "text-gray-600 hover:bg-gray-50"
@@ -213,7 +297,7 @@ const HistoryListCard = () => {
                     </button>
                     <button
                         type="button"
-                        onClick={() => setActiveHistoryTab(HISTORY_TABS.EXAM)}
+                        onClick={() => handleChangeHistoryTab(HISTORY_TABS.EXAM)}
                         className={`cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${activeHistoryTab === HISTORY_TABS.EXAM
                             ? "bg-[#F7F7F8] text-gray-900"
                             : "text-gray-600 hover:bg-gray-50"
@@ -236,7 +320,7 @@ const HistoryListCard = () => {
                 </button>
             </div>
 
-            {activeLoading ? (
+            {shouldShowLoading ? (
                 <div className="space-y-2">
                     {Array.from({ length: 3 }).map((_, index) => (
                         <div key={index} className="h-12 animate-pulse rounded-md bg-gray-100" />
@@ -245,14 +329,20 @@ const HistoryListCard = () => {
             ) : activeItems.length === 0 ? (
                 <p className="text-sm text-gray-500">Chưa có dữ liệu lịch sử.</p>
             ) : (
-                <div className="space-y-2">
+                <div key={activeHistoryTab} className="space-y-2">
                     {activeItems.map((item, index) => {
                         const rowModel = getHistoryRowModel(item, index, activeHistoryTab);
+                        const navigatePath = getRowNavigatePath(item);
+                        const isRowClickable = Boolean(navigatePath);
 
                         return (
                             <div
-                                key={pickFirstDefined(item, ["id", "submitId", "attemptId"]) || `${rowModel.title}-${index}`}
-                                className={`cursor-pointer flex flex-col items-start justify-between gap-2 rounded-lg px-3 py-2 sm:flex-row sm:items-center ${index % 2 === 0 ? "bg-[#F7F7F8]" : "bg-white"
+                                key={getRowKey(item, index)}
+                                onClick={() => {
+                                    if (!isRowClickable) return;
+                                    navigate(navigatePath);
+                                }}
+                                className={`${isRowClickable ? "cursor-pointer" : "cursor-default"} flex flex-col items-start justify-between gap-2 rounded-lg px-3 py-2 sm:flex-row sm:items-center ${index % 2 === 0 ? "bg-[#F7F7F8]" : "bg-white"
                                     }`}
                             >
                                 <div className="min-w-0 w-full sm:w-auto">

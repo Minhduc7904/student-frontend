@@ -61,9 +61,8 @@ const CustomDropdown = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => setIsOpen((prev) => !prev)}
-                    className={`min-w-26 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-text-5 text-gray-700 flex items-center justify-between gap-2 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 ${
-                        disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
-                    } ${buttonClassName}`.trim()}
+                    className={`min-w-26 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-text-5 text-gray-700 flex items-center justify-between gap-2 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                        } ${buttonClassName}`.trim()}
                     aria-haspopup="listbox"
                     aria-expanded={isOpen}
                 >
@@ -84,11 +83,10 @@ const CustomDropdown = ({
                                     key={String(option.value)}
                                     type="button"
                                     onClick={() => handleSelect(option.value)}
-                                    className={`cursor-pointer w-full text-left px-3 py-1.5 rounded-md text-text-5 transition-colors ${
-                                        isActive
-                                            ? 'bg-blue-50 text-blue-800 font-semibold'
-                                            : 'text-gray-700 hover:bg-gray-50'
-                                    } ${optionClassName}`.trim()}
+                                    className={`cursor-pointer w-full text-left px-3 py-1.5 rounded-md text-text-5 transition-colors ${isActive
+                                        ? 'bg-blue-50 text-blue-800 font-semibold'
+                                        : 'text-gray-700 hover:bg-gray-50'
+                                        } ${optionClassName}`.trim()}
                                 >
                                     {option.label}
                                 </button>

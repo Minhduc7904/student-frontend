@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { Search } from "lucide-react";
 import { SvgIcon } from "..";
+import { DebouncedSearchInput } from "..";
 import UserClass from "../../../assets/icons/UserClass.svg";
 
 /**
@@ -11,28 +11,10 @@ const SearchHeader = memo(({ onAddCourse }) => {
     return (
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
             {/* Search Input */}
-            <div className="w-50 flex justify-center items-center">
-                <div className="relative w-full">
-                    <Search
-                        className="absolute left-2 sm:left-[10px] top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4"
-                    />
-                    <input
-                        type="text"
-                        placeholder="Tìm kiếm khóa học..."
-                        className="
-                            w-full
-                            px-9 py-1.5
-                            rounded-full
-                            bg-[#F5F5F5]
-                            text-xs text-gray-700
-                            focus:outline-none
-                            focus:ring-2 focus:ring-yellow-400
-                            focus:border-yellow-400
-                            transition
-                        "
-                    />
-                </div>
-            </div>
+            <DebouncedSearchInput
+                placeholder="Tìm kiếm khóa học..."
+                debounceMs={400}
+            />
 
             {/* Add Course Button */}
             <button

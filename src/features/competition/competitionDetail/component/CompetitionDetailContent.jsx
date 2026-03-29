@@ -190,7 +190,7 @@ const CompetitionDetailContent = ({ detail, competitionId, onCountdownFinished }
     return (
         <div className="rounded-2xl pb-24 md:pb-0">
             <div
-                className={`hidden md:block fixed left-0 top-0 z-40 w-full border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-300 ${showFloatingHeader ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0 pointer-events-none'
+                className={`hidden md:block fixed left-0 top-12.5 z-40 w-full border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-sm transition-all duration-300 ${showFloatingHeader ? 'translate-y-0 opacity-100' : '-translate-y-3 opacity-0 pointer-events-none'
                     }`}
             >
                 <div className="mx-auto w-full max-w-7xl px-3 py-2 sm:px-4 sm:py-3">

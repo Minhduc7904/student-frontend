@@ -119,7 +119,7 @@ MenuItem.displayName = "MenuItem";
 const MENU_ITEMS = [
     { icon: LayoutDashboard, label: "Tổng quan", path: ROUTES.DASHBOARD },
     { icon: BookOpen, label: "Khóa học", path: ROUTES.COURSE_ENROLLMENTS },
-    // { icon: FileText, label: "Phòng luyện đề", path: ROUTES.PRACTICE },
+    { icon: FileText, label: "Phòng luyện đề", path: ROUTES.PRACTICE },
     { icon: Trophy, label: "Cuộc thi", path: ROUTES.COMPETITION },
     // { icon: Library, label: "Thư viện", path: ROUTES.LIBRARY },
     // { icon: TrendingUp, label: "Tiến độ học tập", path: ROUTES.PROGRESS },

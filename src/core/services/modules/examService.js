@@ -20,13 +20,84 @@ export async function getExams(params = {}) {
 }
 
 /**
+ * Count published public exams by exam type for students
+ * @returns {Promise<Object>} Exam type counts
+ */
+export async function getPublicExamTypeCounts() {
+    const response = await axiosClient.get(API_ENDPOINTS.EXAMS.PUBLIC_TYPE_COUNTS);
+    return response;
+}
+
+/**
+ * Get public exams for students with filters and pagination
+ * @param {Object} query - Query params
+ * @param {number} [query.page]
+ * @param {number} [query.limit]
+ * @param {string} [query.search]
+ * @param {number|string} [query.grade]
+ * @param {string} [query.typeOfExam]
+ * @param {number|string} [query.subjectId]
+ * @param {string} [query.sortBy]
+ * @param {'asc'|'desc'|'ASC'|'DESC'} [query.sortOrder]
+ * @returns {Promise<Object>} Public exam list response with meta
+ */
+export async function getPublicStudentExams(query = {}) {
+    const response = await axiosClient.get(API_ENDPOINTS.EXAMS.PUBLIC_STUDENT, {
+        params: query,
+    });
+    return response;
+}
+
+/**
+ * Get exam detail for student from public exam list
+ * @param {string|number} examId - Exam ID
+ * @returns {Promise<Object>} Public exam detail response
+ */
+export async function getPublicStudentExamDetail(examId) {
+    const response = await axiosClient.get(API_ENDPOINTS.EXAMS.PUBLIC_STUDENT_DETAIL(examId));
+    return response;
+}
+
+/**
+ * Get public exam content for student (sections + questions)
+ * @param {string|number} examId - Exam ID
+ * @param {Object} [query] - Optional query params
+ * @param {Array<number|string>} [query.questionIds] - Optional question filter
+ * @returns {Promise<Object>} Public exam content response
+ */
+export async function getPublicStudentExam(examId, query = {}) {
+    const response = await axiosClient.get(API_ENDPOINTS.EXAMS.PUBLIC_STUDENT_EXAM(examId), {
+        params: query,
+    });
+    return response;
+}
+
+/**
+ * Get all subjects with pagination and filtering
+ * @param {Object} query - Query params
+ * @param {number} [query.page]
+ * @param {number} [query.limit]
+ * @param {string} [query.search]
+ * @param {string} [query.code]
+ * @param {'name'|'code'} [query.sortBy]
+ * @param {'asc'|'desc'|'ASC'|'DESC'} [query.sortOrder]
+ * @returns {Promise<Object>} Subject list response with meta
+ */
+export async function getSubjects(query = {}) {
+    const response = await axiosClient.get(API_ENDPOINTS.SUBJECTS.LIST, {
+        params: query,
+    });
+    return response;
+}
+
+/**
  * Get exam detail by ID
  * @param {string|number} examId - Exam ID
  * @returns {Promise<Object>} Exam detail
  */
 export async function getExamDetail(examId) {
     const response = await axiosClient.get(API_ENDPOINTS.EXAMS.DETAIL(examId));
-    return response.data;
+    return response;
 }
 
 /**
@@ -36,7 +107,7 @@ export async function getExamDetail(examId) {
  */
 export async function startExam(examId) {
     const response = await axiosClient.post(API_ENDPOINTS.EXAMS.START(examId));
-    return response.data;
+    return response;
 }
 
 /**
@@ -52,7 +123,7 @@ export async function submitExam(examId, examData) {
         API_ENDPOINTS.EXAMS.SUBMIT(examId),
         examData
     );
-    return response.data;
+    return response;
 }
 
 /**
@@ -62,7 +133,7 @@ export async function submitExam(examId, examData) {
  */
 export async function getExamResult(examId) {
     const response = await axiosClient.get(API_ENDPOINTS.EXAMS.RESULT(examId));
-    return response.data;
+    return response;
 }
 
 /**
@@ -72,7 +143,7 @@ export async function getExamResult(examId) {
  */
 export async function getExamResults(params = {}) {
     const response = await axiosClient.get(API_ENDPOINTS.EXAMS.RESULTS, { params });
-    return response.data;
+    return response;
 }
 
 /**
@@ -99,9 +170,13 @@ export async function getCompletedExams() {
     return getExams({ status: 'completed' });
 }
 
-// Default export
-export default {
+export const examService = {
     getExams,
+    getPublicExamTypeCounts,
+    getPublicStudentExams,
+    getPublicStudentExamDetail,
+    getPublicStudentExam,
+    getSubjects,
     getExamDetail,
     startExam,
     submitExam,
@@ -111,3 +186,6 @@ export default {
     getAvailableExams,
     getCompletedExams,
 };
+
+// Default export
+export default examService;

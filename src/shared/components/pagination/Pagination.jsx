@@ -30,7 +30,7 @@ const Pagination = ({
         return [1, 'ellipsis-left', ...middlePages, 'ellipsis-right', totalPages];
     }, [currentPage, totalPages]);
 
-    if (items.length === 0) return null;
+    // if (items.length === 0) return null;
 
     return (
         <div className={`flex items-center justify-center gap-1.5 ${className}`}>

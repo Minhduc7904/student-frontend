@@ -3,10 +3,17 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Card } from '../../../shared/components';
+import { ROUTES } from '../../../core/constants';
 import ExamDetailInfoCard from './component/ExamDetailInfoCard';
-import CompetitionExamSectionTabs from '../../competition/exam/component/CompetitionExamSectionTabs';
+import ExamHistoryTabContent from './component/ExamHistoryTabContent';
+import ExamFullExamTabContent from './component/ExamFullExamTabContent';
+import ExamPracticeTabContent from './component/ExamPracticeTabContent';
+import ExamDiscussionTabContent from './component/ExamDiscussionTabContent';
+import ExamVideoSolutionTabContent from './component/ExamVideoSolutionTabContent';
+import ExamQuestionsTabContent from './component/ExamQuestionsTabContent';
 import {
     fetchPublicStudentExam,
+    fetchPublicStudentExamAttemptsByExamId,
     fetchPublicStudentExamDetail,
     selectCurrentExamContentId,
     selectCurrentExamDetailId,
@@ -17,6 +24,12 @@ import {
     selectExamDetail,
     selectExamDetailError,
     selectExamDetailLoading,
+    selectPublicStudentExamAttempts,
+    selectPublicStudentExamAttemptsError,
+    selectPublicStudentExamAttemptsLoading,
+    selectPublicStudentExamAttemptsPagination,
+    selectStartPublicStudentExamAttemptLoading,
+    startPublicStudentExamAttempt,
 } from './store/examDetailSlice';
 
 const extractYoutubeVideoId = (url = '') => {
@@ -56,9 +69,16 @@ const ExamDetailPage = () => {
     const sectionsWithQuestions = useSelector(selectExamContentSectionsWithQuestions);
     const loading = useSelector(selectExamDetailLoading);
     const error = useSelector(selectExamDetailError);
+    const examAttempts = useSelector(selectPublicStudentExamAttempts);
+    const examAttemptsLoading = useSelector(selectPublicStudentExamAttemptsLoading);
+    const examAttemptsError = useSelector(selectPublicStudentExamAttemptsError);
+    const examAttemptsPagination = useSelector(selectPublicStudentExamAttemptsPagination);
+    const startExamAttemptLoading = useSelector(selectStartPublicStudentExamAttemptLoading);
     const currentExamContentId = useSelector(selectCurrentExamContentId);
     const currentExamId = useSelector(selectCurrentExamDetailId);
+    const [examModeTab, setExamModeTab] = useState('history');
     const [activeTab, setActiveTab] = useState('discussion');
+    const [historyPage, setHistoryPage] = useState(1);
 
     useEffect(() => {
         if (!id) return;
@@ -73,6 +93,22 @@ const ExamDetailPage = () => {
 
         dispatch(fetchPublicStudentExam(id));
     }, [dispatch, id, currentExamContentId, examContent]);
+
+    useEffect(() => {
+        if (!id) return;
+
+        setHistoryPage(1);
+    }, [id]);
+
+    useEffect(() => {
+        if (!id) return;
+
+        dispatch(fetchPublicStudentExamAttemptsByExamId({
+            examId: id,
+            page: historyPage,
+            limit: 10,
+        }));
+    }, [dispatch, id, historyPage]);
 
     const title = useMemo(() => {
         if (examDetail?.title) return examDetail.title;
@@ -92,6 +128,15 @@ const ExamDetailPage = () => {
         return tabs;
     }, [examDetail?.solutionYoutubeUrl]);
 
+    const examModeTabs = useMemo(
+        () => [
+            { key: 'history', label: 'Lịch sử' },
+            { key: 'full-exam', label: 'Làm full đề' },
+            { key: 'practice', label: 'Luyện tập' },
+        ],
+        []
+    );
+
     useEffect(() => {
         if (!tabItems.some((tab) => tab.key === activeTab)) {
             setActiveTab(tabItems[0]?.key || 'discussion');
@@ -103,6 +148,71 @@ const ExamDetailPage = () => {
         if (!videoId) return '';
         return `https://www.youtube.com/embed/${videoId}`;
     }, [examDetail?.solutionYoutubeUrl]);
+
+    const normalizedExamId = useMemo(() => {
+        if (!id) return null;
+        const parsed = Number(id);
+        return Number.isNaN(parsed) ? id : parsed;
+    }, [id]);
+
+    const navigateToPracticeAttempt = (attemptId, attemptExamTitle) => {
+        if (!typeexam || !normalizedExamId || !attemptId) return;
+
+        navigate(ROUTES.EXAM_TYPE_ATTEMPT_PRACTICE(typeexam, normalizedExamId, attemptId), {
+            state: {
+                examTitle: attemptExamTitle || examDetail?.title || `Đề thi #${normalizedExamId}`,
+            },
+        });
+    };
+
+    const handleStartFullExam = async () => {
+        if (!normalizedExamId) return;
+
+        const resultAction = await dispatch(startPublicStudentExamAttempt({
+            examId: normalizedExamId,
+            duration: 90,
+        }));
+
+        const payload = resultAction?.payload;
+        const isSuccess = resultAction?.meta?.requestStatus === 'fulfilled' && payload?.success === true;
+        const attemptId = payload?.data?.attemptId;
+
+        if (isSuccess && attemptId != null) {
+            navigateToPracticeAttempt(attemptId, payload?.data?.examTitle);
+        }
+    };
+
+    const handleStartPractice = async ({ questionIds, duration }) => {
+        if (!normalizedExamId) return;
+
+        const resultAction = await dispatch(startPublicStudentExamAttempt({
+            examId: normalizedExamId,
+            duration,
+            questionIds,
+        }));
+
+        const payload = resultAction?.payload;
+        const isSuccess = resultAction?.meta?.requestStatus === 'fulfilled' && payload?.success === true;
+        const attemptId = payload?.data?.attemptId;
+
+        if (isSuccess && attemptId != null) {
+            navigateToPracticeAttempt(attemptId, payload?.data?.examTitle);
+        }
+    };
+
+    const handleContinueAttempt = (attempt) => {
+        const attemptId = attempt?.attemptId || attempt?.id;
+        if (!attemptId) return;
+
+        navigateToPracticeAttempt(attemptId, attempt?.examTitle);
+    };
+
+    const handleViewResultAttempt = (attempt) => {
+        const attemptId = attempt?.attemptId || attempt?.id;
+        if (!attemptId) return;
+
+        navigateToPracticeAttempt(attemptId, attempt?.examTitle);
+    };
 
     if (loading) {
         return (
@@ -156,6 +266,62 @@ const ExamDetailPage = () => {
             <Card>
                 <div className="border-b border-gray-100 px-1 pb-2">
                     <div className="flex flex-wrap items-center gap-2">
+                        {examModeTabs.map((tab) => {
+                            const isActive = examModeTab === tab.key;
+
+                            return (
+                                <button
+                                    key={tab.key}
+                                    type="button"
+                                    onClick={() => setExamModeTab(tab.key)}
+                                    className={`cursor-pointer rounded-full px-3 py-1.5 text-sm font-semibold transition-colors ${isActive
+                                        ? 'bg-blue-600 text-white'
+                                        : 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
+                <div className="pt-4">
+                    {examModeTab === 'history' ? (
+                        <ExamHistoryTabContent
+                            attempts={examAttempts}
+                            loading={examAttemptsLoading}
+                            error={examAttemptsError}
+                            pagination={examAttemptsPagination}
+                            onPageChange={setHistoryPage}
+                            onContinueAttempt={handleContinueAttempt}
+                            onViewResult={handleViewResultAttempt}
+                        />
+                    ) : null}
+
+                    {examModeTab === 'full-exam' ? (
+                        <ExamFullExamTabContent
+                            onStart={handleStartFullExam}
+                            disabled={!normalizedExamId || startExamAttemptLoading}
+                            loading={startExamAttemptLoading}
+                        />
+                    ) : null}
+
+                    {examModeTab === 'practice' ? (
+                        <ExamPracticeTabContent
+                            examId={normalizedExamId}
+                            sectionsWithQuestions={sectionsWithQuestions}
+                            onStart={handleStartPractice}
+                            isStarting={startExamAttemptLoading}
+                        />
+                    ) : null}
+                </div>
+            </Card>
+
+
+            <Card>
+                <div className="border-b border-gray-100 px-1 pb-2">
+                    <div className="flex flex-wrap items-center gap-2">
                         {tabItems.map((tab) => {
                             const isActive = activeTab === tab.key;
 
@@ -178,48 +344,19 @@ const ExamDetailPage = () => {
 
                 <div className="pt-4">
                     {activeTab === 'discussion' ? (
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
-                            Khu vực thảo luận sẽ sớm được cập nhật. Bạn có thể quay lại sau để xem các trao đổi về đề thi này.
-                        </div>
+                        <ExamDiscussionTabContent />
                     ) : null}
 
                     {activeTab === 'video-solution' ? (
-                        videoEmbedUrl
-                            ? (
-                                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
-                                    <div className="aspect-video w-full">
-                                        <iframe
-                                            title="Video chữa đề"
-                                            src={videoEmbedUrl}
-                                            className="h-full w-full"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                            allowFullScreen
-                                        />
-                                    </div>
-                                </div>
-                            )
-                            : (
-                                <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-700">
-                                    Không thể hiển thị video chữa do đường dẫn chưa hợp lệ.
-                                </div>
-                            )
+                        <ExamVideoSolutionTabContent videoEmbedUrl={videoEmbedUrl} />
                     ) : null}
 
                     {activeTab === 'questions' ? (
-                        examContentError
-                            ? (
-                                <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-                                    {typeof examContentError === 'string'
-                                        ? examContentError
-                                        : examContentError?.message || 'Không thể tải nội dung câu hỏi.'}
-                                </div>
-                            )
-                            : (
-                                <CompetitionExamSectionTabs
-                                    sectionsWithQuestions={sectionsWithQuestions}
-                                    loading={examContentLoading}
-                                />
-                            )
+                        <ExamQuestionsTabContent
+                            examContentError={examContentError}
+                            sectionsWithQuestions={sectionsWithQuestions}
+                            examContentLoading={examContentLoading}
+                        />
                     ) : null}
                 </div>
             </Card>

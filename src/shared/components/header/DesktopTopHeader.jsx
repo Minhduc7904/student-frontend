@@ -1,8 +1,10 @@
-import { memo } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import { Logo } from "../logo";
 import { ROUTES } from "../../../core/constants";
+import DeMauImage from "../../../assets/images/DeMau.png";
+import LuyenDeImage from "../../../assets/images/LuyenDe.png";
 import RightHeader from "./RightHeader";
 import SearchHeader from "./SearchHeader";
 /**
@@ -11,11 +13,19 @@ import SearchHeader from "./SearchHeader";
  */
 const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false, onToggleMobileMenu = () => { } }) => {
     const location = useLocation();
+    const [isPracticeMenuOpen, setIsPracticeMenuOpen] = useState(false);
+    const [isPracticeMenuPinned, setIsPracticeMenuPinned] = useState(false);
+    const practiceMenuRef = useRef(null);
 
     const navItems = [
         { label: "Tổng quan", path: ROUTES.DASHBOARD },
         { label: "Khóa học", path: ROUTES.COURSE_ENROLLMENTS },
         { label: "Cuộc thi", path: ROUTES.COMPETITION },
+    ];
+
+    const practiceItems = [
+        { label: "Đề mẫu", path: ROUTES.EXAMS, image: DeMauImage },
+        { label: "Phòng luyện đề", path: ROUTES.PRACTICE, image: LuyenDeImage },
     ];
 
     const isActive = (path) => {
@@ -24,6 +34,45 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
         }
         return location.pathname.startsWith(`${path}/`);
     };
+
+    const isPracticeActive = practiceItems.some((item) => isActive(item.path));
+
+    const handlePracticeMouseEnter = () => {
+        if (!isPracticeMenuPinned) {
+            setIsPracticeMenuOpen(true);
+        }
+    };
+
+    const handlePracticeMouseLeave = () => {
+        if (!isPracticeMenuPinned) {
+            setIsPracticeMenuOpen(false);
+        }
+    };
+
+    const handlePracticeTriggerClick = () => {
+        setIsPracticeMenuPinned((prevPinned) => {
+            const nextPinned = !prevPinned;
+            setIsPracticeMenuOpen(nextPinned);
+            return nextPinned;
+        });
+    };
+
+    const handlePracticeItemClick = () => {
+        setIsPracticeMenuPinned(false);
+        setIsPracticeMenuOpen(false);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (!practiceMenuRef.current?.contains(event.target)) {
+                setIsPracticeMenuPinned(false);
+                setIsPracticeMenuOpen(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
         <>
@@ -50,7 +99,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                 </div>
             </div>
 
-            <div className="hidden md:block w-full border-b border-gray-200 bg-white">
+            <div className="hidden md:block w-full border-b border-gray-200 bg-white relative z-40">
                 <div className="mx-auto w-full max-w-300 px-4 py-2.5 xl:py-0">
                     <div className="grid grid-cols-1 gap-2 xl:h-12.5 xl:grid-cols-[auto_1fr_auto] xl:items-center xl:gap-8">
                         <div className="flex items-center justify-between xl:justify-start">
@@ -61,7 +110,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                             </div>
                         </div>
 
-                        <nav className="flex items-center gap-6 overflow-x-auto border-b border-gray-100 pb-2 xl:h-full xl:border-b-0 xl:pb-0">
+                        <nav className="flex items-center gap-6 overflow-visible border-b border-gray-100 pb-2 xl:h-full xl:border-b-0 xl:pb-0">
                             {navItems.map((item) => {
                                 const active = isActive(item.path);
 
@@ -78,6 +127,62 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                                     </Link>
                                 );
                             })}
+
+                            <div
+                                ref={practiceMenuRef}
+                                className="relative h-9 shrink-0 xl:h-full"
+                                onMouseEnter={handlePracticeMouseEnter}
+                                onMouseLeave={handlePracticeMouseLeave}
+                            >
+                                <button
+                                    type="button"
+                                    onClick={handlePracticeTriggerClick}
+                                    className={`inline-flex h-9 cursor-pointer items-center gap-1 border-b-2 text-sm font-semibold transition-colors xl:h-full ${isPracticeActive
+                                        ? "border-blue-800 text-blue-800"
+                                        : "border-transparent text-gray-500 hover:border-blue-200 hover:text-blue-800"
+                                        }`}
+                                    aria-haspopup="menu"
+                                    aria-expanded={isPracticeMenuOpen}
+                                >
+                                    Luyện tập
+                                    <ChevronDown
+                                        size={16}
+                                        className={`transition-transform ${isPracticeMenuOpen ? "rotate-180" : ""}`}
+                                    />
+                                </button>
+
+                                {isPracticeMenuOpen ? (
+                                    <div
+                                        role="menu"
+                                        className="absolute right-0 top-full w-45 rounded-lg border border-gray-200 bg-white p-1 shadow-lg z-50"
+                                    >
+                                        {practiceItems.map((item) => {
+                                            const active = isActive(item.path);
+
+                                            return (
+                                                <Link
+                                                    key={item.path}
+                                                    to={item.path}
+                                                    onClick={handlePracticeItemClick}
+                                                    role="menuitem"
+                                                    className={`flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-sm transition-colors ${active
+                                                        ? "bg-blue-50 text-blue-800 font-semibold"
+                                                        : "text-gray-700 hover:bg-gray-50"
+                                                        }`}
+                                                >
+                                                    <img
+                                                        src={item.image}
+                                                        alt={item.label}
+                                                        className="h-7 w-7 shrink-0 rounded object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                    <span>{item.label}</span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                ) : null}
+                            </div>
                         </nav>
 
                         <div className="flex items-center justify-between gap-3 xl:justify-end">

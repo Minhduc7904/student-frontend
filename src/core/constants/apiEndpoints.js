@@ -77,6 +77,10 @@ export const API_ENDPOINTS = {
     // Exams
     EXAMS: {
         LIST: '/exams',
+        PUBLIC_STUDENT: '/exams/public/student',
+        PUBLIC_STUDENT_DETAIL: (id) => `/exams/public/student/${id}`,
+        PUBLIC_STUDENT_EXAM: (id) => `/exams/public/student/${id}/exam`,
+        PUBLIC_TYPE_COUNTS: '/exams/public/type-counts',
         DETAIL: (id) => `/exams/${id}`,
         START: (id) => `/exams/${id}/start`,
         SUBMIT: (id) => `/exams/${id}/submit`,
@@ -129,11 +133,21 @@ export const API_ENDPOINTS = {
     // Question Answers
     QUESTION_ANSWERS: {
         PUBLIC_STUDENT: '/question-answers/public/student',
+        PUBLIC_STUDENT_SUBMIT: '/question-answers/public/student/submit',
+        PUBLIC_STUDENT_BY_ATTEMPT: (attemptId) => `/question-answers/public/student/attempt/${attemptId}`,
     },
 
     // Exam Attempts
     EXAM_ATTEMPTS: {
         PUBLIC_STUDENT: '/exam-attempts/public/student',
+        PUBLIC_STUDENT_START: '/exam-attempts/public/student/start',
+        PUBLIC_STUDENT_DETAIL: (attemptId) => `/exam-attempts/public/student/${attemptId}`,
+        PUBLIC_STUDENT_SUBMIT: (attemptId) => `/exam-attempts/public/student/${attemptId}/submit`,
+    },
+
+    // Subjects
+    SUBJECTS: {
+        LIST: '/subjects',
     },
 
     // Media
@@ -156,6 +170,11 @@ export const API_ENDPOINTS = {
         COURSES: '/search/courses',
         LESSONS: '/search/lessons',
         EXAMS: '/search/exams',
+    },
+
+    // Markdown
+    MARKDOWN: {
+        RENDER_HTML: '/markdown/render-html',
     },
 
     // Admin (nếu có)

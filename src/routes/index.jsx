@@ -5,6 +5,7 @@ import { profileRoutes } from '../features/profile/route';
 import { historyRoutes } from '../features/history/routes';
 import { practiceRoutes } from '../features/practice/routes';
 import { competitionRoutes } from '../features/competition/routes';
+import { examsRoutes } from '../features/exams/routes';
 import { courseDetailRoutes } from '../features/course-detail/route';
 import { doCompetitionRoutes } from '../features/do-competition/route';
 import { paymentRoutes } from '../features/tuition-payment/routes';
@@ -28,6 +29,8 @@ const router = createBrowserRouter([
     ...practiceRoutes,
     // Competition routes (standalone layout)
     ...competitionRoutes,
+    // Exams routes (standalone layout)
+    ...examsRoutes,
     // Payment routes (standalone layout)
     ...paymentRoutes,
     // Course detail routes

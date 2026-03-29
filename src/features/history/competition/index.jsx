@@ -335,37 +335,36 @@ const CompetitionHistoryPage = () => {
                                 const canViewResult = !isOtherStudentHistory && Boolean(item?.canViewDetail);
 
                                 return (
-                                <div
-                                    key={item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}
-                                    className="group relative overflow-hidden rounded-xl"
-                                >
                                     <div
-                                        className={`ranking-wave-row flex items-center border px-4 py-2 transition-all duration-300 md:group-hover:-translate-x-14 md:group-hover:mr-1 ${getRowHighlightClass(index)}`}
-                                        style={{ animationDelay: `${Math.min(index, 19) * 55}ms` }}
+                                        key={item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}
+                                        className="group relative overflow-hidden rounded-xl"
                                     >
-                                        <div className="w-20 text-sm font-semibold text-gray-700">#{item?.attemptNumber ?? "--"}</div>
-                                        <div className="w-[26%] text-start text-sm font-medium text-gray-700">{item?.competitionTitle ?? "--"}</div>
-                                        <div className="w-[14%] text-start text-sm text-gray-700">{item?.status ?? "--"}</div>
-                                        <div className="w-[14%] text-start text-sm font-semibold text-gray-900">{formatScore(item)}</div>
-                                        <div className="w-[10%] text-start text-sm font-semibold text-gray-900">{formatPercent(item?.scorePercentage)}</div>
-                                        <div className="w-[18%] text-start text-sm text-gray-700">{formatDateTime(item?.submittedAt)}</div>
-                                        <div className="flex-1 text-start text-sm text-gray-700">{formatTimeSpent(item)}</div>
-                                    </div>
+                                        <div
+                                            className={`ranking-wave-row flex items-center border px-4 py-2 transition-all duration-300 md:group-hover:-translate-x-14 md:group-hover:mr-1 ${getRowHighlightClass(index)}`}
+                                            style={{ animationDelay: `${Math.min(index, 19) * 55}ms` }}
+                                        >
+                                            <div className="w-20 text-sm font-semibold text-gray-700">#{item?.attemptNumber ?? "--"}</div>
+                                            <div className="w-[26%] text-start text-sm font-medium text-gray-700">{item?.competitionTitle ?? "--"}</div>
+                                            <div className="w-[14%] text-start text-sm text-gray-700">{item?.status ?? "--"}</div>
+                                            <div className="w-[14%] text-start text-sm font-semibold text-gray-900">{formatScore(item)}</div>
+                                            <div className="w-[10%] text-start text-sm font-semibold text-gray-900">{formatPercent(item?.scorePercentage)}</div>
+                                            <div className="w-[18%] text-start text-sm text-gray-700">{formatDateTime(item?.submittedAt)}</div>
+                                            <div className="flex-1 text-start text-sm text-gray-700">{formatTimeSpent(item)}</div>
+                                        </div>
 
-                                    <button
-                                        type="button"
-                                        onClick={() => canViewResult && navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
-                                        disabled={!canViewResult}
-                                        className={`absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${
-                                            canViewResult
-                                                ? "cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95"
-                                                : "cursor-not-allowed bg-gray-400"
-                                        }`}
-                                        aria-label={canViewResult ? "Xem kết quả" : "Không thể xem kết quả"}
-                                    >
-                                        {canViewResult ? <ArrowRight size={20} /> : <Lock size={18} />}
-                                    </button>
-                                </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => canViewResult && navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
+                                            disabled={!canViewResult}
+                                            className={`absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${canViewResult
+                                                    ? "cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95"
+                                                    : "cursor-not-allowed bg-gray-400"
+                                                }`}
+                                            aria-label={canViewResult ? "Xem kết quả" : "Không thể xem kết quả"}
+                                        >
+                                            {canViewResult ? <ArrowRight size={20} /> : <Lock size={18} />}
+                                        </button>
+                                    </div>
                                 );
                             })}
                         </div>
@@ -376,50 +375,50 @@ const CompetitionHistoryPage = () => {
                             const canViewResult = !isOtherStudentHistory && Boolean(item?.canViewDetail);
 
                             return (
-                            <article
-                                key={`mobile-${item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}`}
-                                className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(index)}`}
-                            >
-                                <div className="flex items-center justify-between gap-2">
-                                    <p className="text-sm font-semibold text-gray-800">Lần #{item?.attemptNumber ?? "--"}</p>
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusClass(item?.status)}`}>
-                                        {item?.status ?? "--"}
-                                    </span>
-                                </div>
+                                <article
+                                    key={`mobile-${item?.competitionSubmitId ?? `${item?.attemptNumber ?? "attempt"}-${index}`}`}
+                                    className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(index)}`}
+                                >
+                                    <div className="flex items-center justify-between gap-2">
+                                        <p className="text-sm font-semibold text-gray-800">Lần #{item?.attemptNumber ?? "--"}</p>
+                                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${getStatusClass(item?.status)}`}>
+                                            {item?.status ?? "--"}
+                                        </span>
+                                    </div>
 
-                                <p className="mt-2 text-sm font-medium text-gray-800">{item?.competitionTitle || "Không có tiêu đề cuộc thi"}</p>
+                                    <p className="mt-2 text-sm font-medium text-gray-800">{item?.competitionTitle || "Không có tiêu đề cuộc thi"}</p>
 
-                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
-                                    <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
-                                        Điểm: <span className="font-semibold text-slate-900">{formatScore(item)}</span>
+                                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                                        <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
+                                            Điểm: <span className="font-semibold text-slate-900">{formatScore(item)}</span>
+                                        </div>
+                                        <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
+                                            %: <span className="font-semibold text-slate-900">{formatPercent(item?.scorePercentage)}</span>
+                                        </div>
+                                        <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
+                                            Nộp bài: <span className="font-semibold text-slate-900">{formatDateTime(item?.submittedAt)}</span>
+                                        </div>
+                                        <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
+                                            Thời gian: <span className="font-semibold text-slate-900">{formatTimeSpent(item)}</span>
+                                        </div>
                                     </div>
-                                    <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
-                                        %: <span className="font-semibold text-slate-900">{formatPercent(item?.scorePercentage)}</span>
-                                    </div>
-                                    <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
-                                        Nộp bài: <span className="font-semibold text-slate-900">{formatDateTime(item?.submittedAt)}</span>
-                                    </div>
-                                    <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
-                                        Thời gian: <span className="font-semibold text-slate-900">{formatTimeSpent(item)}</span>
-                                    </div>
-                                </div>
 
-                                {canViewResult ? (
-                                    <button
-                                        type="button"
-                                        onClick={() => navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
-                                        className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
-                                    >
-                                        <Eye size={15} />
-                                        Xem kết quả
-                                    </button>
-                                ) : (
-                                    <div className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-500">
-                                        <Lock size={15} />
-                                        Đã khóa
-                                    </div>
-                                )}
-                            </article>
+                                    {canViewResult ? (
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate(ROUTES.COMPETITION_RESULT(item?.competitionId, item?.competitionSubmitId))}
+                                            className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
+                                        >
+                                            <Eye size={15} />
+                                            Xem kết quả
+                                        </button>
+                                    ) : (
+                                        <div className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-sm font-semibold text-gray-500">
+                                            <Lock size={15} />
+                                            Đã khóa
+                                        </div>
+                                    )}
+                                </article>
                             );
                         })}
                     </div>
