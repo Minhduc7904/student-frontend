@@ -139,9 +139,9 @@ export const PracticeAttemptSingleChoiceQuestionCard = ({
             dispatch,
             onSubmitQuestionAnswer,
             payload: {
-            attemptId,
-            questionId,
-            selectedStatementIds: [debouncedSelectedStatementId],
+                attemptId,
+                questionId,
+                selectedStatementIds: [debouncedSelectedStatementId],
             },
         });
     }, [attemptId, debouncedSelectedStatementId, dispatch, onSubmitQuestionAnswer, questionId]);
@@ -203,59 +203,113 @@ export const PracticeAttemptTrueFalseQuestionCard = ({
     const dispatch = useDispatch();
     const statements = useMemo(() => getSortedStatements(question), [question]);
     const questionId = question?.questionId;
-    const submitLoading = useSelector((state) => selectPracticeSubmitAnswerLoadingByQuestionId(state, questionId));
-    const submitError = useSelector((state) => selectPracticeSubmitAnswerErrorByQuestionId(state, questionId));
-    const [trueFalseAnswers, setTrueFalseAnswers] = useState(() => resolveTrueFalseAnswers(question));
-    const debouncedTrueFalseAnswers = useDebounce(trueFalseAnswers, ANSWER_SUBMIT_DEBOUNCE_MS);
-    const lastSubmittedSerializedRef = useRef(JSON.stringify(resolveTrueFalseAnswers(question)));
+
+    const submitLoading = useSelector((state) =>
+        selectPracticeSubmitAnswerLoadingByQuestionId(state, questionId)
+    );
+    const submitError = useSelector((state) =>
+        selectPracticeSubmitAnswerErrorByQuestionId(state, questionId)
+    );
+
+    const [trueFalseAnswers, setTrueFalseAnswers] = useState(() =>
+        resolveTrueFalseAnswers(question)
+    );
+
+    // ✅ giữ state mới nhất
+    const latestAnswersRef = useRef(trueFalseAnswers);
+
+    // ✅ timer để debounce thủ công
+    const submitTimerRef = useRef(null);
+
+    // ✅ tránh submit trùng
+    const lastSubmittedSerializedRef = useRef(
+        JSON.stringify(resolveTrueFalseAnswers(question))
+    );
 
     const answerMap = useMemo(() => {
         const map = new Map();
         (Array.isArray(trueFalseAnswers) ? trueFalseAnswers : []).forEach((item) => {
-            if (item?.statementId != null && typeof item?.isTrue === 'boolean') {
+            if (item?.statementId != null && typeof item?.isTrue === "boolean") {
                 map.set(String(item.statementId), item.isTrue);
             }
         });
         return map;
     }, [trueFalseAnswers]);
 
+    // reset khi đổi question
     useEffect(() => {
         const initialAnswers = resolveTrueFalseAnswers(question);
         setTrueFalseAnswers(initialAnswers);
+        latestAnswersRef.current = initialAnswers;
         lastSubmittedSerializedRef.current = JSON.stringify(initialAnswers);
+
+        if (submitTimerRef.current) {
+            clearTimeout(submitTimerRef.current);
+        }
     }, [question]);
 
+    // 🔥 core debounce logic
     useEffect(() => {
-        const normalizedAnswers = [...(Array.isArray(debouncedTrueFalseAnswers) ? debouncedTrueFalseAnswers : [])]
-            .filter((item) => item?.statementId != null && typeof item?.isTrue === 'boolean')
-            .sort((a, b) => String(a.statementId).localeCompare(String(b.statementId)));
+        latestAnswersRef.current = trueFalseAnswers;
 
-        const serialized = JSON.stringify(normalizedAnswers);
-        if (serialized === lastSubmittedSerializedRef.current) return;
+        // clear timer cũ
+        if (submitTimerRef.current) {
+            clearTimeout(submitTimerRef.current);
+        }
 
-        lastSubmittedSerializedRef.current = serialized;
-        submitAnswerWithCallback({
-            dispatch,
-            onSubmitQuestionAnswer,
-            payload: {
-            attemptId,
-            questionId,
-            trueFalseAnswers: normalizedAnswers,
-            },
-        });
-    }, [attemptId, debouncedTrueFalseAnswers, dispatch, onSubmitQuestionAnswer, questionId]);
+        // set timer mới
+        submitTimerRef.current = setTimeout(() => {
+            const normalizedAnswers = [...(latestAnswersRef.current || [])]
+                .filter(
+                    (item) =>
+                        item?.statementId != null &&
+                        typeof item?.isTrue === "boolean"
+                )
+                .sort((a, b) =>
+                    String(a.statementId).localeCompare(String(b.statementId))
+                );
+
+            const serialized = JSON.stringify(normalizedAnswers);
+
+            // ❌ nếu giống lần trước thì skip
+            if (serialized === lastSubmittedSerializedRef.current) return;
+
+            lastSubmittedSerializedRef.current = serialized;
+
+            submitAnswerWithCallback({
+                dispatch,
+                onSubmitQuestionAnswer,
+                payload: {
+                    attemptId,
+                    questionId,
+                    trueFalseAnswers: normalizedAnswers,
+                },
+            });
+        }, 800); // ⏱️ chỉnh thời gian tùy bạn (800–1500ms)
+
+        return () => {
+            if (submitTimerRef.current) {
+                clearTimeout(submitTimerRef.current);
+            }
+        };
+    }, [trueFalseAnswers, attemptId, dispatch, onSubmitQuestionAnswer, questionId]);
 
     const handleSelect = (statementId, isTrue) => {
         if (questionId != null) {
             onQuestionInteraction?.(questionId);
         }
+
         setTrueFalseAnswers((prev) => {
             const safePrev = Array.isArray(prev) ? prev : [];
             const next = [...safePrev];
             const targetKey = String(statementId);
-            const existingIndex = next.findIndex((item) => String(item?.statementId) === targetKey);
+
+            const existingIndex = next.findIndex(
+                (item) => String(item?.statementId) === targetKey
+            );
 
             const nextItem = { statementId, isTrue };
+
             if (existingIndex >= 0) {
                 next[existingIndex] = nextItem;
             } else {
@@ -267,11 +321,22 @@ export const PracticeAttemptTrueFalseQuestionCard = ({
     };
 
     return (
-        <PracticeAttemptQuestionCardBase question={question} index={index} statementPrefixType="TRUE_FALSE">
-            <div className={`mt-4 space-y-3 transition-opacity ${submitLoading ? 'opacity-70' : 'opacity-100'}`}>
+        <PracticeAttemptQuestionCardBase
+            question={question}
+            index={index}
+            statementPrefixType="TRUE_FALSE"
+        >
+            <div
+                className={`mt-4 space-y-3 transition-opacity ${submitLoading ? "opacity-70" : "opacity-100"
+                    }`}
+            >
                 {statements.map((statement, statementIndex) => {
                     const statementId = statement?.statementId;
-                    const statementPrefix = getStatementPrefix('TRUE_FALSE', statementIndex);
+                    const statementPrefix = getStatementPrefix(
+                        "TRUE_FALSE",
+                        statementIndex
+                    );
+
                     const currentValue = answerMap.get(String(statementId));
                     const isTrueSelected = currentValue === true;
                     const isFalseSelected = currentValue === false;
@@ -287,9 +352,12 @@ export const PracticeAttemptTrueFalseQuestionCard = ({
                                         type="button"
                                         disabled={submitLoading}
                                         onClick={() => handleSelect(statementId, true)}
-                                        className={`rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors ${submitLoading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${isTrueSelected
-                                            ? 'border-emerald-600 bg-emerald-600 text-white'
-                                            : 'border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50'
+                                        className={`rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors ${submitLoading
+                                                ? "cursor-not-allowed opacity-60"
+                                                : "cursor-pointer"
+                                            } ${isTrueSelected
+                                                ? "border-emerald-600 bg-emerald-600 text-white"
+                                                : "border-emerald-300 bg-white text-emerald-700 hover:bg-emerald-50"
                                             }`}
                                     >
                                         Đúng
@@ -298,17 +366,22 @@ export const PracticeAttemptTrueFalseQuestionCard = ({
                                         type="button"
                                         disabled={submitLoading}
                                         onClick={() => handleSelect(statementId, false)}
-                                        className={`rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors ${submitLoading ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'} ${isFalseSelected
-                                            ? 'border-rose-600 bg-rose-600 text-white'
-                                            : 'border-rose-300 bg-white text-rose-700 hover:bg-rose-50'
+                                        className={`rounded-md border px-2 py-0.5 text-xs font-semibold transition-colors ${submitLoading
+                                                ? "cursor-not-allowed opacity-60"
+                                                : "cursor-pointer"
+                                            } ${isFalseSelected
+                                                ? "border-rose-600 bg-rose-600 text-white"
+                                                : "border-rose-300 bg-white text-rose-700 hover:bg-rose-50"
                                             }`}
                                     >
                                         Sai
                                     </button>
                                 </div>
+
                                 <span className="mt-0.5 shrink-0 text-sm font-semibold text-gray-900">
                                     {statementPrefix}
                                 </span>
+
                                 <StatementContent statement={statement} />
                             </div>
                         </div>
@@ -316,13 +389,18 @@ export const PracticeAttemptTrueFalseQuestionCard = ({
                 })}
             </div>
 
-            {submitLoading ? (
+            {submitLoading && (
                 <p className="mt-2 inline-flex items-center gap-2 text-xs text-blue-600">
                     <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500" />
                     Đang lưu đáp án...
                 </p>
-            ) : null}
-            {submitError ? <p className="mt-2 text-xs text-red-600">{String(submitError)}</p> : null}
+            )}
+
+            {submitError && (
+                <p className="mt-2 text-xs text-red-600">
+                    {String(submitError)}
+                </p>
+            )}
         </PracticeAttemptQuestionCardBase>
     );
 };
@@ -360,6 +438,19 @@ export const PracticeAttemptShortAnswerQuestionCard = ({
 
         if (!trimmedValue) {
             setInputError(null);
+            if (lastSubmittedRef.current === '') return;
+
+            lastSubmittedRef.current = '';
+            submitAnswerWithCallback({
+                dispatch,
+                onSubmitQuestionAnswer,
+                payload: {
+                    attemptId,
+                    questionId,
+                    answer: '',
+                },
+            });
+            return;
         }
 
         if (!DECIMAL_FINAL_PATTERN.test(trimmedValue)) {
@@ -377,9 +468,9 @@ export const PracticeAttemptShortAnswerQuestionCard = ({
             dispatch,
             onSubmitQuestionAnswer,
             payload: {
-            attemptId,
-            questionId,
-            answer: trimmedValue,
+                attemptId,
+                questionId,
+                answer: trimmedValue,
             },
         });
     };
