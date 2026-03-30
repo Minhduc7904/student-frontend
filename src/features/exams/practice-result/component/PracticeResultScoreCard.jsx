@@ -157,7 +157,7 @@ const PracticeResultScoreCard = ({ attemptDetail, questions = [] }) => {
     const beeImage = resolveBeeImage(progressPercentNumber);
 
     const correctCount = useMemo(() => {
-        const directCorrect = toNumberOrNull(resolveMetric(attemptDetail, ['correctCount', 'correctAnswersCount'], null));
+        const directCorrect = toNumberOrNull(resolveMetric(attemptDetail, ['correctAnswers', 'correctAnswersCount'], null));
         if (directCorrect != null) return directCorrect;
 
         return questions.reduce((acc, question) => {
