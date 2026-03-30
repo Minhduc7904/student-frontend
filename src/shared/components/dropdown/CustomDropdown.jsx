@@ -45,7 +45,7 @@ const CustomDropdown = ({
     };
 
     return (
-        <div className={`flex items-center gap-2 ${containerClassName}`.trim()} ref={wrapperRef}>
+        <div className={`flex md:w-fit w-full items-center gap-2 ${containerClassName}`.trim()} ref={wrapperRef}>
             {label ? (
                 <label
                     htmlFor={id}
@@ -55,13 +55,13 @@ const CustomDropdown = ({
                 </label>
             ) : null}
 
-            <div className="relative">
+            <div className="relative md:w-fit w-full">
                 <button
                     id={id}
                     type="button"
                     disabled={disabled}
                     onClick={() => setIsOpen((prev) => !prev)}
-                    className={`min-w-26 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-text-5 text-gray-700 flex items-center justify-between gap-2 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
+                    className={`md:w-fit w-full min-w-26 px-3 py-1.5 rounded-lg border border-gray-200 bg-white text-text-5 text-gray-700 flex items-center justify-between gap-2 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-200 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
                         } ${buttonClassName}`.trim()}
                     aria-haspopup="listbox"
                     aria-expanded={isOpen}

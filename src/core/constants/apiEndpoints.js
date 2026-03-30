@@ -142,6 +142,7 @@ export const API_ENDPOINTS = {
         PUBLIC_STUDENT: '/exam-attempts/public/student',
         PUBLIC_STUDENT_START: '/exam-attempts/public/student/start',
         PUBLIC_STUDENT_DETAIL: (attemptId) => `/exam-attempts/public/student/${attemptId}`,
+        PUBLIC_STUDENT_RESULT: (attemptId) => `/exam-attempts/public/student/${attemptId}/result`,
         PUBLIC_STUDENT_SUBMIT: (attemptId) => `/exam-attempts/public/student/${attemptId}/submit`,
     },
 

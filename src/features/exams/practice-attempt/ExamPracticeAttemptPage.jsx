@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate, useParams, useBlocker } from 'react-router-dom';
+import { useParams, useBlocker } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, LogOut, Send } from 'lucide-react';
 import { Card } from '../../../shared/components';
 import { ROUTES } from '../../../core/constants';
@@ -30,9 +30,24 @@ const getScrollParent = (element) => {
     return null;
 };
 
+const resolveNavigationUrl = (path = '') => {
+    if (!path) return '/';
+    if (/^https?:\/\//i.test(path)) return path;
+
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const normalizedBase = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+    const normalizedPath = path.startsWith('/') ? path : `/${path}`;
+
+    if (!normalizedBase) return normalizedPath;
+    if (normalizedPath === normalizedBase || normalizedPath.startsWith(`${normalizedBase}/`)) {
+        return normalizedPath;
+    }
+
+    return `${normalizedBase}${normalizedPath}`;
+};
+
 const ExamPracticeAttemptPage = () => {
     const dispatch = useDispatch();
-    const navigate = useNavigate();
     const { attemptId, typeExam, typeexam, id } = useParams();
     const [showFloatingHeader, setShowFloatingHeader] = useState(false);
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -48,14 +63,16 @@ const ExamPracticeAttemptPage = () => {
     } = usePracticeAttemptDetail(attemptId);
     const submitAttemptLoading = useSelector(selectPracticeSubmitAttemptLoading);
     const [allowNavigation, setAllowNavigation] = useState(false);
-    const [pendingNavigation, setPendingNavigation] = useState(null);
+    const [hasFinishedAttempt, setHasFinishedAttempt] = useState(false);
+    const [isExitConfirmModalOpen, setIsExitConfirmModalOpen] = useState(false);
     const [isAlreadySubmittedModalOpen, setIsAlreadySubmittedModalOpen] = useState(false);
     const [isAutoSubmittedModalOpen, setIsAutoSubmittedModalOpen] = useState(false);
     const [questionElapsedSeconds, setQuestionElapsedSeconds] = useState(0);
-    const shouldBlockExit = attemptDetail?.status === 'IN_PROGRESS' && !allowNavigation;
+    const shouldBlockExit = attemptDetail?.status === 'IN_PROGRESS' && !allowNavigation && !hasFinishedAttempt;
     const blocker = useBlocker(shouldBlockExit);
     const autoSubmitTriggeredRef = useRef(false);
     const alreadySubmittedModalShownRef = useRef(false);
+    const skipBeforeUnloadPromptRef = useRef(false);
 
     const resolvedTypeExam = typeExam || typeexam;
 
@@ -82,30 +99,63 @@ const ExamPracticeAttemptPage = () => {
     const queueNavigateToExamDetail = useCallback((overrideTypeExam, overrideId) => {
         const nextTypeExam = overrideTypeExam || resolvedTypeExam;
         const nextId = overrideId || id;
+        const nextPath = nextTypeExam && nextId
+            ? ROUTES.EXAM_TYPE_DETAIL(nextTypeExam, nextId)
+            : ROUTES.EXAMS;
 
         setAllowNavigation(true);
-        if (nextTypeExam && nextId) {
-            setPendingNavigation({
-                type: 'to',
-                to: ROUTES.EXAM_TYPE_DETAIL(nextTypeExam, nextId),
-            });
+        skipBeforeUnloadPromptRef.current = true;
+        window.location.assign(resolveNavigationUrl(nextPath));
+    }, [id, resolvedTypeExam]);
+
+    const queueNavigateToExamResult = useCallback((overrideTypeExam, overrideId, overrideAttemptId) => {
+        const nextTypeExam = overrideTypeExam || resolvedTypeExam;
+        const nextId = overrideId || id;
+        const nextAttemptId = overrideAttemptId || attemptId;
+        const nextPath = nextTypeExam && nextId && nextAttemptId
+            ? ROUTES.EXAM_TYPE_ATTEMPT_RESULT(nextTypeExam, nextId, nextAttemptId)
+            : ROUTES.EXAMS;
+
+        setAllowNavigation(true);
+        skipBeforeUnloadPromptRef.current = true;
+        window.location.assign(resolveNavigationUrl(nextPath));
+    }, [attemptId, id, resolvedTypeExam]);
+
+    const handleConfirmBlockedNavigation = useCallback(() => {
+        const blockedPath = blocker?.location
+            ? `${blocker.location.pathname || ''}${blocker.location.search || ''}${blocker.location.hash || ''}`
+            : '';
+
+        setAllowNavigation(true);
+        skipBeforeUnloadPromptRef.current = true;
+        blocker.reset?.();
+        window.location.assign(resolveNavigationUrl(blockedPath || ROUTES.EXAMS));
+    }, [blocker]);
+
+    const handleHeaderBack = useCallback(() => {
+        if (shouldBlockExit) {
+            setIsExitConfirmModalOpen(true);
             return;
         }
 
-        setPendingNavigation({ type: 'back' });
-    }, [id, resolvedTypeExam]);
+        queueNavigateToExamDetail();
+    }, [queueNavigateToExamDetail, shouldBlockExit]);
 
-    useEffect(() => {
-        if (!allowNavigation || !pendingNavigation) return;
+    const handleCloseExitConfirmModal = useCallback(() => {
+        setIsExitConfirmModalOpen(false);
+        blocker.reset?.();
+    }, [blocker]);
 
-        if (pendingNavigation.type === 'to' && pendingNavigation.to) {
-            navigate(pendingNavigation.to);
-        } else {
-            navigate(-1);
+    const handleConfirmExitFromModal = useCallback(() => {
+        setIsExitConfirmModalOpen(false);
+
+        if (blocker.state === 'blocked') {
+            handleConfirmBlockedNavigation();
+            return;
         }
 
-        setPendingNavigation(null);
-    }, [allowNavigation, navigate, pendingNavigation]);
+        queueNavigateToExamDetail();
+    }, [blocker.state, handleConfirmBlockedNavigation, queueNavigateToExamDetail]);
 
     const isUnlimitedTime = useMemo(() => {
         const duration = Number(attemptDetail?.duration ?? attemptDetail?.durationMinutes);
@@ -160,15 +210,18 @@ const ExamPracticeAttemptPage = () => {
 
         if (!isSuccess) return;
 
+        setHasFinishedAttempt(true);
         setIsSubmitModalOpen(false);
-        queueNavigateToExamDetail();
+        queueNavigateToExamResult();
     };
 
     useEffect(() => {
         autoSubmitTriggeredRef.current = false;
         alreadySubmittedModalShownRef.current = false;
+        skipBeforeUnloadPromptRef.current = false;
         setAllowNavigation(false);
-        setPendingNavigation(null);
+        setHasFinishedAttempt(false);
+        setIsExitConfirmModalOpen(false);
         setIsAlreadySubmittedModalOpen(false);
         setIsAutoSubmittedModalOpen(false);
         setQuestionElapsedSeconds(0);
@@ -188,6 +241,7 @@ const ExamPracticeAttemptPage = () => {
         if (!attemptDetail || !isSubmittedAttemptStatus) return;
         if (alreadySubmittedModalShownRef.current) return;
 
+        setHasFinishedAttempt(true);
         alreadySubmittedModalShownRef.current = true;
         setIsSubmitModalOpen(false);
         setIsAutoSubmittedModalOpen(false);
@@ -197,14 +251,15 @@ const ExamPracticeAttemptPage = () => {
     useEffect(() => {
         const handleSidebarSubmitSuccess = (event) => {
             const detail = event?.detail || {};
-            queueNavigateToExamDetail(detail?.typeExam, detail?.examId);
+            setHasFinishedAttempt(true);
+            queueNavigateToExamResult(detail?.typeExam, detail?.examId);
         };
 
         window.addEventListener('practice-attempt:submit-success', handleSidebarSubmitSuccess);
         return () => {
             window.removeEventListener('practice-attempt:submit-success', handleSidebarSubmitSuccess);
         };
-    }, [queueNavigateToExamDetail]);
+    }, [queueNavigateToExamResult]);
 
     useEffect(() => {
         if (!attemptId || !shouldBlockExit || isUnlimitedTime) return undefined;
@@ -226,6 +281,7 @@ const ExamPracticeAttemptPage = () => {
             const isSuccess = resultAction?.meta?.requestStatus === 'fulfilled' && payload?.success === true;
 
             if (isSuccess) {
+                setHasFinishedAttempt(true);
                 if (shouldSubmitByOvertime) {
                     setIsSubmitModalOpen(false);
                     setIsAlreadySubmittedModalOpen(false);
@@ -233,7 +289,7 @@ const ExamPracticeAttemptPage = () => {
                     return;
                 }
 
-                queueNavigateToExamDetail();
+                queueNavigateToExamResult();
                 return;
             }
 
@@ -254,7 +310,7 @@ const ExamPracticeAttemptPage = () => {
         isInProgressStatus,
         isSubmittedAttemptStatus,
         isUnlimitedTime,
-        queueNavigateToExamDetail,
+        queueNavigateToExamResult,
         shouldBlockExit,
         submitAttemptLoading,
     ]);
@@ -263,13 +319,14 @@ const ExamPracticeAttemptPage = () => {
         if (!shouldBlockExit) return undefined;
 
         const handleBeforeUnload = (event) => {
+            if (skipBeforeUnloadPromptRef.current || hasFinishedAttempt) return;
             event.preventDefault();
             event.returnValue = '';
         };
 
         window.addEventListener('beforeunload', handleBeforeUnload);
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-    }, [shouldBlockExit]);
+    }, [hasFinishedAttempt, shouldBlockExit]);
 
     useEffect(() => {
         return () => {
@@ -346,7 +403,7 @@ const ExamPracticeAttemptPage = () => {
 
                 <button
                     type="button"
-                    onClick={() => queueNavigateToExamDetail()}
+                    onClick={handleHeaderBack}
                     className="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
                 >
                     <ArrowLeft size={15} />
@@ -368,7 +425,7 @@ const ExamPracticeAttemptPage = () => {
                             <div className='shrink-0'>
                                 <button
                                     type="button"
-                                    onClick={() => queueNavigateToExamDetail()}
+                                    onClick={handleHeaderBack}
                                     className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 bg-white px-3 py-1.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                                 >
                                     <ArrowLeft size={15} />
@@ -408,7 +465,7 @@ const ExamPracticeAttemptPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 type="button"
-                                onClick={() => queueNavigateToExamDetail()}
+                                onClick={handleHeaderBack}
                                 className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-slate-300 px-3 py-1.5 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-50"
                             >
                                 <ArrowLeft size={15} />
@@ -436,13 +493,13 @@ const ExamPracticeAttemptPage = () => {
             />
 
             <PracticeAttemptConfirmModal
-                isOpen={blocker.state === 'blocked'}
-                onClose={() => blocker.reset?.()}
+                isOpen={blocker.state === 'blocked' || isExitConfirmModalOpen}
+                onClose={handleCloseExitConfirmModal}
                 title="Bạn chắc chắn muốn thoát chứ?"
                 description="Bạn đang làm bài. Nếu thoát khỏi trang này, quá trình làm bài có thể bị gián đoạn."
                 cancelLabel="Ở lại"
                 confirmLabel="Thoát trang"
-                onConfirm={() => blocker.proceed?.()}
+                onConfirm={handleConfirmExitFromModal}
                 confirmIcon={<LogOut size={14} />}
             />
 
@@ -461,11 +518,11 @@ const ExamPracticeAttemptPage = () => {
                 isOpen={isAlreadySubmittedModalOpen}
                 onClose={() => {}}
                 title="Bạn đã nộp bài này rồi"
-                description="Lượt làm bài này đã ở trạng thái đã nộp. Vui lòng quay lại trang chi tiết đề thi."
+                description="Lượt làm bài này đã ở trạng thái đã nộp. Bạn có thể xem kết quả ngay bây giờ."
                 cancelLabel=""
-                confirmLabel="Quay lại"
-                onConfirm={() => queueNavigateToExamDetail()}
-                confirmIcon={<ArrowLeft size={14} />}
+                confirmLabel="Xem kết quả"
+                onConfirm={() => queueNavigateToExamResult()}
+                confirmIcon={<Send size={14} />}
                 showCancel={false}
             />
 
@@ -475,9 +532,9 @@ const ExamPracticeAttemptPage = () => {
                 title="Bài thi đã được nộp tự động"
                 description="Thời gian làm bài đã hết. Hệ thống đã tự động nộp bài cho bạn."
                 cancelLabel=""
-                confirmLabel="Quay lại"
-                onConfirm={() => queueNavigateToExamDetail()}
-                confirmIcon={<ArrowLeft size={14} />}
+                confirmLabel="Xem kết quả"
+                onConfirm={() => queueNavigateToExamResult()}
+                confirmIcon={<Send size={14} />}
                 showCancel={false}
             />
         </section>

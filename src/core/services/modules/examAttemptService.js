@@ -79,6 +79,17 @@ export const examAttemptService = {
     },
 
     /**
+     * Get submitted exam attempt result of current student.
+     *
+     * @route GET /exam-attempts/public/student/:attemptId/result
+     * @param {number|string} attemptId - Exam attempt ID
+     * @returns {Promise<Object>} BaseResponseDto<StudentExamAttemptResultDto>
+     */
+    getPublicStudentExamAttemptResult: (attemptId) => {
+        return axiosClient.get(API_ENDPOINTS.EXAM_ATTEMPTS.PUBLIC_STUDENT_RESULT(attemptId));
+    },
+
+    /**
      * Submit current exam attempt and finalize grading for current student.
      *
      * @route POST /exam-attempts/public/student/:attemptId/submit

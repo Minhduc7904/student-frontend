@@ -1,9 +1,14 @@
 import { memo, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { NavLink, Outlet, useSearchParams } from "react-router-dom";
+import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { ROUTES } from "../../../core/constants";
 import AuthenticatedLayout from "../../../shared/components/layout/AuthenticatedLayout";
 import { Card } from "../../../shared/components";
+import {
+    CompetitionHistoryStatsSidebar,
+    ExamHistoryStatsSidebar,
+    QuestionHistoryStatsSidebar,
+} from "./component/HistoryStatsSidebars";
 import {
     getActivityYearStatsAsync,
     selectActivityYearStats,
@@ -15,9 +20,9 @@ import {
 } from "../../profile/store/profileSlice";
 
 const tabs = [
-    { label: "Lịch sử cuộc thi", to: ROUTES.HISTORY_COMPETITION },
-    { label: "Lịch sử câu hỏi", to: ROUTES.HISTORY_QUESTION },
-    { label: "Lịch sử đề mẫu", to: ROUTES.HISTORY_EXAM },
+    { label: "Cuộc thi", to: ROUTES.HISTORY_COMPETITION },
+    { label: "Câu hỏi", to: ROUTES.HISTORY_QUESTION },
+    { label: "Đề mẫu", to: ROUTES.HISTORY_EXAM },
 ];
 
 const normalizeHistoryItems = (data) => {
@@ -32,6 +37,7 @@ const normalizeHistoryItems = (data) => {
 
 const HistoryLayout = () => {
     const dispatch = useDispatch();
+    const location = useLocation();
     const [searchParams] = useSearchParams();
     const studentId = searchParams.get("studentId") || undefined;
     const activityStats = useSelector(selectActivityYearStats);
@@ -50,21 +56,11 @@ const HistoryLayout = () => {
         );
     }, [dispatch, studentId]);
 
-    const stats = useMemo(() => {
-        const competitionCount = normalizeHistoryItems(submittedHistory).length;
-        const questionCount = normalizeHistoryItems(questionHistory).length;
-        const examCount = normalizeHistoryItems(examHistory).length;
-
-        return {
-            competitionCount,
-            questionCount,
-            examCount,
-            totalLoaded: competitionCount + questionCount + examCount,
-            totalActivities: activityStats?.totalActivities || 0,
-            totalActiveDays: activityStats?.totalActiveDays || 0,
-            maxStreak: activityStats?.maxStreak || 0,
-        };
-    }, [activityStats, examHistory, questionHistory, submittedHistory]);
+    const currentHistoryRoute = useMemo(() => {
+        const pathParts = location.pathname.split("/").filter(Boolean);
+        const historyIndex = pathParts.indexOf("history");
+        return historyIndex >= 0 ? pathParts[historyIndex + 1] || "competition" : "competition";
+    }, [location.pathname]);
 
     const historyViewMeta = useMemo(() => {
         const normalizedStudentId = studentId ? String(studentId) : "";
@@ -126,36 +122,26 @@ const HistoryLayout = () => {
                         </section>
 
                         <aside className="lg:sticky lg:top-6 lg:self-start">
-                            <Card>
-                                <h2 className="text-lg font-semibold text-gray-800">Thống kê</h2>
-                                <div className="mt-4 space-y-3">
-                                    <div className="rounded-lg bg-[#F7F7F8] p-3">
-                                        <p className="text-xs text-gray-500">Tổng hoạt động trong năm</p>
-                                        <p className="mt-1 text-xl font-semibold text-gray-900">{stats.totalActivities}</p>
-                                    </div>
+                            {currentHistoryRoute === "question" ? (
+                                <QuestionHistoryStatsSidebar
+                                    activityStats={activityStats}
+                                    questionHistory={questionHistory}
+                                />
+                            ) : null}
 
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <div className="rounded-lg bg-[#F7F7F8] p-3">
-                                            <p className="text-xs text-gray-500">Ngày hoạt động</p>
-                                            <p className="mt-1 text-lg font-semibold text-gray-900">{stats.totalActiveDays}</p>
-                                        </div>
-                                        <div className="rounded-lg bg-[#F7F7F8] p-3">
-                                            <p className="text-xs text-gray-500">Chuỗi dài nhất</p>
-                                            <p className="mt-1 text-lg font-semibold text-gray-900">{stats.maxStreak}</p>
-                                        </div>
-                                    </div>
+                            {currentHistoryRoute === "exam" ? (
+                                <ExamHistoryStatsSidebar
+                                    activityStats={activityStats}
+                                    examHistory={examHistory}
+                                />
+                            ) : null}
 
-                                    <div className="rounded-lg bg-[#F7F7F8] p-3">
-                                        <p className="text-xs text-gray-500">Bản ghi đã tải</p>
-                                        <p className="mt-1 text-lg font-semibold text-gray-900">{stats.totalLoaded}</p>
-                                        <div className="mt-2 grid grid-cols-3 gap-2 text-xs text-gray-600">
-                                            <span className="rounded bg-white px-2 py-1 text-center">Thi: {stats.competitionCount}</span>
-                                            <span className="rounded bg-white px-2 py-1 text-center">Hỏi: {stats.questionCount}</span>
-                                            <span className="rounded bg-white px-2 py-1 text-center">Đề: {stats.examCount}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </Card>
+                            {(currentHistoryRoute === "competition" || (currentHistoryRoute !== "question" && currentHistoryRoute !== "exam")) ? (
+                                <CompetitionHistoryStatsSidebar
+                                    activityStats={activityStats}
+                                    submittedHistory={submittedHistory}
+                                />
+                            ) : null}
                         </aside>
                     </div>
                 </div>

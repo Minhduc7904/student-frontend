@@ -1,9 +1,11 @@
 import MarkdownRenderer from '../../../../../../shared/components/markdown/MarkdownRenderer';
+import { resolveDifficultyMeta } from '../../../../../../shared/constants';
 import { getQuestionContent, getQuestionTypeLabel } from './questionUtils';
 import CompetitionQuestionStatements from './CompetitionQuestionStatements';
 
 const CompetitionQuestionCardBase = ({ question, index, statementPrefixType }) => {
     const questionContent = getQuestionContent(question);
+    const difficultyMeta = resolveDifficultyMeta(question?.difficulty);
 
     return (
         <article className="">
@@ -14,9 +16,9 @@ const CompetitionQuestionCardBase = ({ question, index, statementPrefixType }) =
                 <span className="rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-600">
                     {getQuestionTypeLabel(question?.type)}
                 </span>
-                {question?.difficulty ? (
-                    <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-700">
-                        {question.difficulty}
+                {difficultyMeta ? (
+                    <span className={`rounded-full border px-2 py-0.5 text-xs font-medium ${difficultyMeta.className}`}>
+                        {difficultyMeta.code} - {difficultyMeta.label}
                     </span>
                 ) : null}
                 {question?.pointsOrigin != null ? (

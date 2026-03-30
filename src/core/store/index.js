@@ -18,6 +18,7 @@ import competitionHistoryReducer from '../../features/competition/history/store/
 import examsReducer from '../../features/exams/store/examsSlice'
 import examDetailReducer from '../../features/exams/detail/store/examDetailSlice'
 import practiceAttemptReducer from '../../features/exams/practice-attempt/store/practiceAttemptSlice'
+import practiceResultReducer from '../../features/exams/practice-result/store/practiceResultSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -42,6 +43,7 @@ export const store = configureStore({
     exams: examsReducer,
     examDetail: examDetailReducer,
     practiceAttempt: practiceAttemptReducer,
+    practiceResult: practiceResultReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

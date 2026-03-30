@@ -175,7 +175,7 @@ const ExamTypePage = () => {
                         <p className="text-sm text-gray-600">Tổng số đề đang có: {total}</p>
                     </div>
 
-                    <div className="flex w-full flex-wrap items-center justify-start gap-2 md:w-auto md:justify-end">
+                    <div className="flex w-full flex-col md:flex-row items-start md:items-center justify-start gap-2 md:w-auto md:justify-end">
                         <button
                             type="button"
                             onClick={handleReload}
@@ -186,23 +186,25 @@ const ExamTypePage = () => {
                             Reload
                         </button>
 
-                        <CustomDropdown
-                            id="exam-grade-filter"
-                            value={filters?.grade || ''}
-                            options={gradeFilterOptions}
-                            onChange={handleGradeFilterChange}
-                            buttonClassName="min-w-31 rounded-full border-slate-300 px-3 py-1 text-xs"
-                            menuClassName="w-40"
-                        />
+                        <div className="md:w-fit w-full items-center gap-2 flex md:flex-row flex-col">
+                            <CustomDropdown
+                                id="exam-grade-filter"
+                                value={filters?.grade || ''}
+                                options={gradeFilterOptions}
+                                onChange={handleGradeFilterChange}
+                                buttonClassName=" min-w-31 rounded-full border-slate-300 px-3 py-1 text-xs"
+                                menuClassName="w-40"
+                            />
 
-                        <CustomDropdown
-                            id="exam-subject-filter"
-                            value={filters?.subjectId ? String(filters.subjectId) : ''}
-                            options={subjectFilterOptions}
-                            onChange={handleSubjectFilterChange}
-                            buttonClassName="min-w-38 rounded-full border-slate-300 px-3 py-1 text-xs"
-                            menuClassName="w-56"
-                        />
+                            <CustomDropdown
+                                id="exam-subject-filter"
+                                value={filters?.subjectId ? String(filters.subjectId) : ''}
+                                options={subjectFilterOptions}
+                                onChange={handleSubjectFilterChange}
+                                buttonClassName=" min-w-38 rounded-full border-slate-300 px-3 py-1 text-xs"
+                                menuClassName="w-56"
+                            />
+                        </div>
 
                         <DebouncedSearchInput
                             value={filters?.search || ''}
@@ -368,8 +370,8 @@ const ExamTypePage = () => {
                                         onClick={() => goToExamDetail(exam?.examId)}
                                         disabled={!exam?.examId}
                                         className={`absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center text-white opacity-0 scale-95 transition-all duration-500 md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100 ${exam?.examId
-                                                ? 'cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95'
-                                                : 'cursor-not-allowed bg-gray-400'
+                                            ? 'cursor-pointer bg-blue-600 hover:bg-blue-700 active:scale-95'
+                                            : 'cursor-not-allowed bg-gray-400'
                                             }`}
                                         aria-label="Xem chi tiet de thi"
                                     >

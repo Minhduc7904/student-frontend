@@ -39,11 +39,6 @@ const formatScore = (item) => {
     return `${item.totalPoints}/${item.maxPoints}`;
 };
 
-const formatPercent = (value) => {
-    if (value == null) return "--";
-    return `${Number(value).toFixed(1)}%`;
-};
-
 const getStatusClass = (status) => {
     if (status === "SUBMITTED") return "bg-emerald-50 text-emerald-700";
     if (status === "IN_PROGRESS") return "bg-amber-50 text-amber-700";
@@ -195,21 +190,28 @@ const CompetitionHistoryPage = () => {
                                 <ArrowUpDown size={12} className={sortBy === "attemptNumber" ? "text-blue-700" : "text-gray-400"} />
                             </button>
                             <div className="w-[26%] text-start">Tên cuộc thi</div>
-                            <div className="w-[14%] text-start">Trạng thái</div>
                             <button
                                 type="button"
                                 onClick={() => toggleSort("totalPoints")}
-                                className="cursor-pointer flex h-fit  w-[14%] items-center gap-1 text-left"
+                                className="cursor-pointer flex h-fit w-[16%] items-center gap-1 text-left"
                                 title={`Sắp xếp điểm: ${getSortLabel("totalPoints")}`}
                             >
                                 Điểm
                                 <ArrowUpDown size={12} className={sortBy === "totalPoints" ? "text-blue-700" : "text-gray-400"} />
                             </button>
-                            <div className="w-[10%] text-start">%</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort("startedAt")}
+                                className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                                title={`Sắp xếp bắt đầu làm: ${getSortLabel("startedAt")}`}
+                            >
+                                Bắt đầu làm
+                                <ArrowUpDown size={12} className={sortBy === "startedAt" ? "text-blue-700" : "text-gray-400"} />
+                            </button>
                             <button
                                 type="button"
                                 onClick={() => toggleSort("submittedAt")}
-                                className="cursor-pointer flex w-[18%] items-center gap-1 text-left"
+                                className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
                                 title={`Sắp xếp nộp bài: ${getSortLabel("submittedAt")}`}
                             >
                                 Nộp bài
@@ -239,16 +241,13 @@ const CompetitionHistoryPage = () => {
                                     <div className="w-[26%]">
                                         <div className="ranking-skeleton-block h-4 w-32 rounded-md" />
                                     </div>
-                                    <div className="w-[14%]">
-                                        <div className="ranking-skeleton-block h-4 w-24 rounded-md" />
-                                    </div>
-                                    <div className="w-[14%]">
+                                    <div className="w-[16%]">
                                         <div className="ranking-skeleton-block h-4 w-16 rounded-md" />
                                     </div>
-                                    <div className="w-[10%]">
-                                        <div className="ranking-skeleton-block h-4 w-14 rounded-md" />
+                                    <div className="w-[16%]">
+                                        <div className="ranking-skeleton-block h-4 w-24 rounded-md" />
                                     </div>
-                                    <div className="w-[18%]">
+                                    <div className="w-[16%]">
                                         <div className="ranking-skeleton-block h-4 w-28 rounded-md" />
                                     </div>
                                     <div className="flex-1">
@@ -299,21 +298,28 @@ const CompetitionHistoryPage = () => {
                                 <ArrowUpDown size={12} className={sortBy === "attemptNumber" ? "text-blue-700" : "text-gray-400"} />
                             </button>
                             <div className="w-[26%] text-start">Tên cuộc thi</div>
-                            <div className="w-[14%] text-start">Trạng thái</div>
                             <button
                                 type="button"
                                 onClick={() => toggleSort("totalPoints")}
-                                className="cursor-pointer flex w-[14%] items-center gap-1 text-left"
+                                className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
                                 title={`Sắp xếp điểm: ${getSortLabel("totalPoints")}`}
                             >
                                 Điểm
                                 <ArrowUpDown size={12} className={sortBy === "totalPoints" ? "text-blue-700" : "text-gray-400"} />
                             </button>
-                            <div className="w-[10%] text-start">%</div>
+                            <button
+                                type="button"
+                                onClick={() => toggleSort("startedAt")}
+                                className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                                title={`Sắp xếp bắt đầu làm: ${getSortLabel("startedAt")}`}
+                            >
+                                Bắt đầu làm
+                                <ArrowUpDown size={12} className={sortBy === "startedAt" ? "text-blue-700" : "text-gray-400"} />
+                            </button>
                             <button
                                 type="button"
                                 onClick={() => toggleSort("submittedAt")}
-                                className="cursor-pointer flex w-[18%] items-center gap-1 text-left"
+                                className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
                                 title={`Sắp xếp nộp bài: ${getSortLabel("submittedAt")}`}
                             >
                                 Nộp bài
@@ -345,10 +351,9 @@ const CompetitionHistoryPage = () => {
                                         >
                                             <div className="w-20 text-sm font-semibold text-gray-700">#{item?.attemptNumber ?? "--"}</div>
                                             <div className="w-[26%] text-start text-sm font-medium text-gray-700">{item?.competitionTitle ?? "--"}</div>
-                                            <div className="w-[14%] text-start text-sm text-gray-700">{item?.status ?? "--"}</div>
-                                            <div className="w-[14%] text-start text-sm font-semibold text-gray-900">{formatScore(item)}</div>
-                                            <div className="w-[10%] text-start text-sm font-semibold text-gray-900">{formatPercent(item?.scorePercentage)}</div>
-                                            <div className="w-[18%] text-start text-sm text-gray-700">{formatDateTime(item?.submittedAt)}</div>
+                                            <div className="w-[16%] text-start text-sm font-semibold text-gray-900">{formatScore(item)}</div>
+                                            <div className="w-[16%] text-start text-sm text-gray-700">{formatDateTime(item?.startedAt)}</div>
+                                            <div className="w-[16%] text-start text-sm text-gray-700">{formatDateTime(item?.submittedAt)}</div>
                                             <div className="flex-1 text-start text-sm text-gray-700">{formatTimeSpent(item)}</div>
                                         </div>
 
@@ -393,7 +398,7 @@ const CompetitionHistoryPage = () => {
                                             Điểm: <span className="font-semibold text-slate-900">{formatScore(item)}</span>
                                         </div>
                                         <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
-                                            %: <span className="font-semibold text-slate-900">{formatPercent(item?.scorePercentage)}</span>
+                                            Bắt đầu: <span className="font-semibold text-slate-900">{formatDateTime(item?.startedAt)}</span>
                                         </div>
                                         <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
                                             Nộp bài: <span className="font-semibold text-slate-900">{formatDateTime(item?.submittedAt)}</span>

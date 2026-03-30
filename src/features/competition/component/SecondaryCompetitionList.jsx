@@ -53,7 +53,7 @@ const SecondaryCompetitionList = () => {
 
     return (
         <section className="flex h-full min-h-240 w-full flex-col rounded-2xl border border-gray-100 bg-white p-4 md:p-5 xl:min-w-185">
-            <div className="mb-3 flex items-center justify-between gap-3">
+            <div className="mb-3 flex md:flex-row flex-col items-center justify-between gap-3">
                 <SecondaryStatusTabs
                     disabled={isSelectingCompetition}
                     onChange={setActiveStatus}

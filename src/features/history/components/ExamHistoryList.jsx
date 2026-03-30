@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ArrowRight, Eye } from "lucide-react";
+import { ArrowRight, ArrowUpDown, Eye, Check, Clock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "../../../core/constants";
 import { Pagination } from "../../../shared/components";
@@ -83,6 +83,11 @@ const getStatusMeta = (status) => {
             text: "Đang làm",
             className: "bg-amber-50 text-amber-700",
             canContinue: true,
+            icon: (
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-amber-100">
+                    <Clock className="w-3 h-3 text-amber-600" />
+                </div>
+            ),
         };
     }
 
@@ -91,6 +96,11 @@ const getStatusMeta = (status) => {
             text: "Đã nộp",
             className: "bg-emerald-50 text-emerald-700",
             canContinue: false,
+            icon: (
+                <div className="flex items-center justify-center w-4 h-4 rounded-full bg-emerald-100">
+                    <Check className="w-3 h-3 text-emerald-600" />
+                </div>
+            ),
         };
     }
 
@@ -98,6 +108,7 @@ const getStatusMeta = (status) => {
         text: status || "--",
         className: "bg-slate-100 text-slate-700",
         canContinue: false,
+        icon: null,
     };
 };
 
@@ -118,7 +129,28 @@ const buildContinuePath = (item) => {
     return ROUTES.EXAM_DETAIL(examId);
 };
 
-const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
+const buildResultPath = (item) => {
+    const status = normalizeStatus(pickFirstDefined(item, ["status"]));
+    if (status !== "SUBMITTED" && status !== "SUBMITED") return "";
+
+    const typeOfExam = pickFirstDefined(item, ["typeOfExam", "typeExam", "typeexam"]);
+    const examId = pickFirstDefined(item, ["examId", "id"]);
+    const attemptId = pickFirstDefined(item, ["attemptId", "id"]);
+
+    if (!typeOfExam || !examId || !attemptId) return "";
+    return ROUTES.EXAM_TYPE_ATTEMPT_RESULT(typeOfExam, examId, attemptId);
+};
+
+const ExamHistoryList = ({
+    data,
+    loading,
+    error,
+    emptyText,
+    onPageChange,
+    sortBy = "submittedAt",
+    sortOrder = "desc",
+    onSortChange,
+}) => {
     const navigate = useNavigate();
     const items = normalizeHistoryItems(data);
     const pagination = data?.pagination || data?.meta || null;
@@ -135,17 +167,63 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
 
     const skeletonRows = Array.from({ length: 8 }, (_, index) => index);
 
+    const getSortLabel = (field) => {
+        if (sortBy !== field) return "Chưa sắp xếp";
+        return sortOrder === "asc" ? "Tăng dần" : "Giảm dần";
+    };
+
     if (loading) {
         return (
             <div className="w-full overflow-hidden">
                 <div className="hidden w-full md:block">
                     <div className="flex w-full border-b border-gray-100 px-3 py-2 text-sm font-bold text-gray-500">
-                        <div className="w-16 text-start">#</div>
+                        <button
+                            type="button"
+                            onClick={() => onSortChange?.("attemptId")}
+                            className="cursor-pointer flex w-16 items-center gap-1 text-left"
+                            title={`Sắp xếp lần làm: ${getSortLabel("attemptId")}`}
+                        >
+                            #
+                            <ArrowUpDown size={12} className={sortBy === "attemptId" ? "text-blue-700" : "text-gray-400"} />
+                        </button>
                         <div className="w-[30%] text-start">Tên đề</div>
-                        <div className="w-[14%] text-start">Trạng thái</div>
-                        <div className="w-[12%] text-start">Điểm</div>
-                        <div className="w-[16%] text-start">Nộp bài</div>
-                        <div className="flex-1 text-start">TG làm</div>
+                        <div className="w-[8%] text-start"></div>
+                        <button
+                            type="button"
+                            onClick={() => onSortChange?.("points")}
+                            className="cursor-pointer flex w-[12%] items-center gap-1 text-left"
+                            title={`Sắp xếp điểm: ${getSortLabel("points")}`}
+                        >
+                            Điểm
+                            <ArrowUpDown size={12} className={sortBy === "points" ? "text-blue-700" : "text-gray-400"} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onSortChange?.("startedAt")}
+                            className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                            title={`Sắp xếp bắt đầu làm: ${getSortLabel("startedAt")}`}
+                        >
+                            Bắt đầu làm
+                            <ArrowUpDown size={12} className={sortBy === "startedAt" ? "text-blue-700" : "text-gray-400"} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onSortChange?.("submittedAt")}
+                            className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                            title={`Sắp xếp nộp bài: ${getSortLabel("submittedAt")}`}
+                        >
+                            Nộp bài
+                            <ArrowUpDown size={12} className={sortBy === "submittedAt" ? "text-blue-700" : "text-gray-400"} />
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => onSortChange?.("timeSpentSeconds")}
+                            className="cursor-pointer flex flex-1 items-center gap-1 text-left"
+                            title={`Sắp xếp thời gian làm: ${getSortLabel("timeSpentSeconds")}`}
+                        >
+                            TG
+                            <ArrowUpDown size={12} className={sortBy === "timeSpentSeconds" ? "text-blue-700" : "text-gray-400"} />
+                        </button>
                     </div>
 
                     <div className="mt-2 flex flex-col gap-0.5">
@@ -160,11 +238,14 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
                                 <div className="w-[30%]">
                                     <div className="ranking-skeleton-block h-4 w-4/5 rounded-md" />
                                 </div>
-                                <div className="w-[14%]">
+                                <div className="w-[8%]">
                                     <div className="ranking-skeleton-block h-4 w-16 rounded-md" />
                                 </div>
                                 <div className="w-[12%]">
                                     <div className="ranking-skeleton-block h-4 w-14 rounded-md" />
+                                </div>
+                                <div className="w-[16%]">
+                                    <div className="ranking-skeleton-block h-4 w-24 rounded-md" />
                                 </div>
                                 <div className="w-[16%]">
                                     <div className="ranking-skeleton-block h-4 w-24 rounded-md" />
@@ -218,18 +299,63 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
         <div className="w-full overflow-hidden">
             <div className="hidden w-full md:block">
                 <div className="flex w-full border-b border-gray-100 px-3 py-2 text-sm font-bold text-gray-600">
-                    <div className="w-16 text-start">#</div>
+                    <button
+                        type="button"
+                        onClick={() => onSortChange?.("attemptId")}
+                        className="cursor-pointer flex w-16 items-center gap-1 text-left"
+                        title={`Sắp xếp lần làm: ${getSortLabel("attemptId")}`}
+                    >
+                        #
+                        <ArrowUpDown size={12} className={sortBy === "attemptId" ? "text-blue-700" : "text-gray-400"} />
+                    </button>
                     <div className="w-[30%] text-start">Tên đề</div>
-                    <div className="w-[14%] text-start">Trạng thái</div>
-                    <div className="w-[12%] text-start">Điểm</div>
-                    <div className="w-[16%] text-start">Nộp bài</div>
-                    <div className="flex-1 text-start">TG làm</div>
+                    <div className="w-[8%] text-start"></div>
+                    <button
+                        type="button"
+                        onClick={() => onSortChange?.("points")}
+                        className="cursor-pointer flex w-[12%] items-center gap-1 text-left"
+                        title={`Sắp xếp điểm: ${getSortLabel("points")}`}
+                    >
+                        Điểm
+                        <ArrowUpDown size={12} className={sortBy === "points" ? "text-blue-700" : "text-gray-400"} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onSortChange?.("startedAt")}
+                        className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                        title={`Sắp xếp bắt đầu làm: ${getSortLabel("startedAt")}`}
+                    >
+                        Bắt đầu làm
+                        <ArrowUpDown size={12} className={sortBy === "startedAt" ? "text-blue-700" : "text-gray-400"} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onSortChange?.("submittedAt")}
+                        className="cursor-pointer flex w-[16%] items-center gap-1 text-left"
+                        title={`Sắp xếp nộp bài: ${getSortLabel("submittedAt")}`}
+                    >
+                        Nộp bài
+                        <ArrowUpDown size={12} className={sortBy === "submittedAt" ? "text-blue-700" : "text-gray-400"} />
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => onSortChange?.("timeSpentSeconds")}
+                        className="cursor-pointer flex flex-1 items-center gap-1 text-left"
+                        title={`Sắp xếp thời gian làm: ${getSortLabel("timeSpentSeconds")}`}
+                    >
+                        TG
+                        <ArrowUpDown size={12} className={sortBy === "timeSpentSeconds" ? "text-blue-700" : "text-gray-400"} />
+                    </button>
                 </div>
 
                 <div className="mt-2 flex flex-col gap-0.5">
                     {items.map((item, index) => {
                         const statusMeta = getStatusMeta(item?.status);
                         const continuePath = buildContinuePath(item);
+                        const resultPath = buildResultPath(item);
+                        const actionPath = resultPath || continuePath;
+                        const actionLabel = resultPath ? "Xem kết quả" : "Tiếp tục làm bài";
+                        const ActionIcon = resultPath ? Eye : ArrowRight;
 
                         return (
                             <div
@@ -237,28 +363,41 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
                                 className="group relative overflow-hidden rounded-xl"
                             >
                                 <div
-                                    className={`ranking-wave-row flex items-center border px-4 py-2 transition-all duration-300 ${continuePath ? "md:group-hover:-translate-x-14 md:group-hover:mr-1" : ""} ${getRowHighlightClass(index)}`}
+                                    role={actionPath ? "button" : undefined}
+                                    tabIndex={actionPath ? 0 : undefined}
+                                    onClick={actionPath ? () => navigate(actionPath) : undefined}
+                                    onKeyDown={actionPath ? (event) => {
+                                        if (event.key === "Enter" || event.key === " ") {
+                                            event.preventDefault();
+                                            navigate(actionPath);
+                                        }
+                                    } : undefined}
+                                    className={`ranking-wave-row flex items-center border px-4 py-2 transition-all duration-300 ${actionPath ? "cursor-pointer md:group-hover:-translate-x-14 md:group-hover:mr-1" : ""} ${getRowHighlightClass(index)}`}
                                 >
                                     <div className="w-16 text-sm font-semibold text-gray-700">#{item?.attemptId ?? index + 1}</div>
                                     <div className="w-[30%] text-start text-sm font-medium text-gray-700 line-clamp-1">{item?.examTitle ?? "--"}</div>
-                                    <div className="w-[14%] text-start text-sm">
+                                    <div className="w-[8%] text-start text-sm">
                                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${statusMeta.className}`}>
-                                            {statusMeta.text}
+                                            {statusMeta.icon}
                                         </span>
                                     </div>
                                     <div className="w-[12%] text-start text-sm font-semibold text-gray-900">{formatScore(item)}</div>
+                                    <div className="w-[16%] text-start text-sm text-gray-700">{formatDateTime(pickFirstDefined(item, ["startedAt", "createdAt"]))}</div>
                                     <div className="w-[16%] text-start text-sm text-gray-700">{formatDateTime(pickFirstDefined(item, ["endAt", "submittedAt"]))}</div>
                                     <div className="flex-1 text-start text-sm text-gray-700">{formatTimeSpent(item)}</div>
                                 </div>
 
-                                {continuePath ? (
+                                {actionPath ? (
                                     <button
                                         type="button"
-                                        onClick={() => navigate(continuePath)}
+                                        onClick={(event) => {
+                                            event.stopPropagation();
+                                            navigate(actionPath);
+                                        }}
                                         className="absolute right-0 top-0 hidden h-full w-14 translate-x-full items-center justify-center bg-blue-600 text-white opacity-0 scale-95 transition-all duration-500 hover:bg-blue-700 active:scale-95 md:flex md:group-hover:translate-x-0 md:group-hover:opacity-100 md:group-hover:scale-100"
-                                        aria-label="Tiếp tục làm bài"
+                                        aria-label={actionLabel}
                                     >
-                                        <ArrowRight size={20} />
+                                        <ActionIcon size={20} />
                                     </button>
                                 ) : null}
                             </div>
@@ -271,11 +410,23 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
                 {items.map((item, index) => {
                     const statusMeta = getStatusMeta(item?.status);
                     const continuePath = buildContinuePath(item);
+                    const resultPath = buildResultPath(item);
+                    const actionPath = resultPath || continuePath;
+                    const actionLabel = resultPath ? "Xem kết quả" : "Tiếp tục làm bài";
 
                     return (
                         <article
                             key={`exam-mobile-${pickFirstDefined(item, ["attemptId", "id"]) || "row"}-${index}`}
-                            className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(index)}`}
+                            role={actionPath ? "button" : undefined}
+                            tabIndex={actionPath ? 0 : undefined}
+                            onClick={actionPath ? () => navigate(actionPath) : undefined}
+                            onKeyDown={actionPath ? (event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    navigate(actionPath);
+                                }
+                            } : undefined}
+                            className={`rounded-xl border px-3 py-3 ${actionPath ? "cursor-pointer" : ""} ${getRowHighlightClass(index)}`}
                         >
                             <div className="flex items-center justify-between gap-2">
                                 <p className="text-sm font-semibold text-gray-800">Lần #{item?.attemptId ?? index + 1}</p>
@@ -294,18 +445,24 @@ const ExamHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
                                     TG làm: <span className="font-semibold text-slate-900">{formatTimeSpent(item)}</span>
                                 </div>
                                 <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600 col-span-2">
+                                    Bắt đầu: <span className="font-semibold text-slate-900">{formatDateTime(pickFirstDefined(item, ["startedAt", "createdAt"]))}</span>
+                                </div>
+                                <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600 col-span-2">
                                     Nộp bài: <span className="font-semibold text-slate-900">{formatDateTime(pickFirstDefined(item, ["endAt", "submittedAt"]))}</span>
                                 </div>
                             </div>
 
-                            {continuePath ? (
+                            {actionPath ? (
                                 <button
                                     type="button"
-                                    onClick={() => navigate(continuePath)}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        navigate(actionPath);
+                                    }}
                                     className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-100"
                                 >
                                     <Eye size={15} />
-                                    Tiếp tục làm bài
+                                    {actionLabel}
                                 </button>
                             ) : null}
                         </article>

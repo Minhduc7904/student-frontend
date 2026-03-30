@@ -209,9 +209,13 @@ const ExamDetailPage = () => {
 
     const handleViewResultAttempt = (attempt) => {
         const attemptId = attempt?.attemptId || attempt?.id;
-        if (!attemptId) return;
+        if (!typeexam || !normalizedExamId || !attemptId) return;
 
-        navigateToPracticeAttempt(attemptId, attempt?.examTitle);
+        navigate(ROUTES.EXAM_TYPE_ATTEMPT_RESULT(typeexam, normalizedExamId, attemptId), {
+            state: {
+                examTitle: attempt?.examTitle || examDetail?.title || `Đề thi #${normalizedExamId}`,
+            },
+        });
     };
 
     if (loading) {

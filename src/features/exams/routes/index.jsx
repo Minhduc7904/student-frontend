@@ -3,6 +3,7 @@ import ExamsPage from '../index';
 import ExamTypePage from '../type/ExamTypePage';
 import ExamDetailPage from '../detail/ExamDetailPage';
 import ExamPracticeAttemptPage from '../practice-attempt/ExamPracticeAttemptPage';
+import ExamPracticeResultPage from '../practice-result/ExamPracticeResultPage';
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 
@@ -49,6 +50,14 @@ export const examsRoutes = [
                         meta: {
                             title: 'Luyen tap de thi',
                             description: 'Trang luyen tap theo lan lam bai thi',
+                        },
+                    },
+                    {
+                        path: ':typeExam/:id/attempt/:attemptId/result',
+                        element: <ExamPracticeResultPage />,
+                        meta: {
+                            title: 'Ket qua de thi',
+                            description: 'Trang ket qua theo lan lam bai thi',
                         },
                     },
                 ],

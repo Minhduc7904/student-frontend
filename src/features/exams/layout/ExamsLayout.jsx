@@ -29,6 +29,7 @@ import {
     selectPracticeSubmitAnswerError,
     selectPracticeSubmitAnswerLoading,
 } from '../practice-attempt/store/practiceAttemptSlice';
+import { selectPracticeResult } from '../practice-result/store';
 import ContinueExamSidebar from './component/ContinueExamSidebar';
 import PracticeAttemptSidebar from './component/PracticeAttemptSidebar';
 
@@ -50,6 +51,7 @@ const ExamsLayout = () => {
     const practiceExamContent = useSelector(selectPracticeExamContent);
     const practiceSubmitAnswerLoading = useSelector(selectPracticeSubmitAnswerLoading);
     const practiceSubmitAnswerError = useSelector(selectPracticeSubmitAnswerError);
+    const practiceResult = useSelector(selectPracticeResult);
     const currentPracticeAttemptId = useSelector(selectCurrentPracticeAttemptId);
     const hasFetchedPublicTypeCounts = useSelector(selectHasFetchedPublicExamTypeCounts);
     const hasFetchedSubjects = useSelector(selectHasFetchedSubjects);
@@ -134,38 +136,58 @@ const ExamsLayout = () => {
         const typeSegment = examsIndex >= 0 ? pathParts[examsIndex + 1] : null;
         const idSegment = examsIndex >= 0 ? pathParts[examsIndex + 2] : null;
         const attemptSegment = examsIndex >= 0 ? pathParts[examsIndex + 4] : null;
-        const practiceKeyword = examsIndex >= 0 ? pathParts[examsIndex + 5] : null;
-        const isPracticeAttemptRoute = practiceKeyword === 'practice';
-        const examTypeLabel = typeSegment ? getExamTypeLabelById(typeSegment) : null;
+        const attemptAction = examsIndex >= 0 ? pathParts[examsIndex + 5] : null;
+        const isPracticeAttemptRoute = attemptAction === 'practice';
+        const isPracticeResultRoute = attemptAction === 'result';
+        const isAttemptFlowRoute = isPracticeAttemptRoute || isPracticeResultRoute;
+        const examTypeFromResult = practiceResult?.typeOfExam || practiceResult?.examType || practiceResult?.typeExam || null;
+        const resolvedTypeSegment = typeSegment || examTypeFromResult;
+        const examTypeLabel = resolvedTypeSegment ? getExamTypeLabelById(resolvedTypeSegment) : null;
         const isCurrentAttemptMatch =
             attemptSegment != null && String(currentPracticeAttemptId) === String(attemptSegment);
         const examTitleFromState = location.state?.examTitle;
+        const examTitleFromResult = practiceResult?.examTitle || practiceResult?.title;
         const examTitleFromPracticeAttempt = isCurrentAttemptMatch ? practiceAttemptDetail?.examTitle : null;
         const examTitleFromStore = examDetail?.title;
-        const examTitle = examTitleFromPracticeAttempt || examTitleFromState || examTitleFromStore;
+        const examTitle = examTitleFromPracticeAttempt || examTitleFromState || examTitleFromResult || examTitleFromStore;
 
         const items = [{ label: 'Danh sách đề thi', to: ROUTES.EXAMS }];
 
         if (examTypeLabel) {
-            items.push({ label: examTypeLabel, to: `${ROUTES.EXAMS}/${typeSegment}` });
+            items.push({ label: examTypeLabel, to: `${ROUTES.EXAMS}/${resolvedTypeSegment}` });
         }
 
         if (idSegment && examTitle) {
-            if (isPracticeAttemptRoute && typeSegment) {
-                items.push({ label: examTitle, to: ROUTES.EXAM_TYPE_DETAIL(typeSegment, idSegment) });
+            if (isAttemptFlowRoute && resolvedTypeSegment) {
+                items.push({ label: examTitle, to: ROUTES.EXAM_TYPE_DETAIL(resolvedTypeSegment, idSegment) });
             } else {
                 items.push({ label: examTitle });
             }
-        } else if (idSegment && isPracticeAttemptRoute && typeSegment) {
-            items.push({ label: 'Đề thi', to: ROUTES.EXAM_TYPE_DETAIL(typeSegment, idSegment) });
+        } else if (idSegment && isAttemptFlowRoute && resolvedTypeSegment) {
+            items.push({ label: 'Đề thi', to: ROUTES.EXAM_TYPE_DETAIL(resolvedTypeSegment, idSegment) });
         }
 
         if (isPracticeAttemptRoute) {
             items.push({ label: 'Luyện tập' });
         }
 
+        if (isPracticeResultRoute) {
+            items.push({ label: 'Kết quả' });
+        }
+
         return items;
-    }, [currentPracticeAttemptId, examDetail?.title, location.pathname, location.state, practiceAttemptDetail?.examTitle]);
+    }, [
+        currentPracticeAttemptId,
+        examDetail?.title,
+        location.pathname,
+        location.state,
+        practiceAttemptDetail?.examTitle,
+        practiceResult?.examTitle,
+        practiceResult?.title,
+        practiceResult?.typeExam,
+        practiceResult?.examType,
+        practiceResult?.typeOfExam,
+    ]);
 
     return (
         <AuthenticatedLayout>

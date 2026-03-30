@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, MinusCircle, Youtube, Lightbulb, User, BookCheck } from 'lucide-react';
 import { MarkdownRenderer } from '../../../../shared/components/markdown';
+import { resolveDifficultyMeta } from '../../../../shared/constants';
 
 // ─── Question type labels ────────────────────────────────────────────────────
 const TYPE_LABEL = {
@@ -8,12 +9,6 @@ const TYPE_LABEL = {
     TRUE_FALSE: 'Đúng / Sai',
     SHORT_ANSWER: 'Trả lời ngắn',
     ESSAY: 'Tự luận',
-};
-
-const DIFFICULTY_LABEL = {
-    EASY: { label: 'Dễ', className: 'text-green-600 bg-green-50 border-green-200' },
-    MEDIUM: { label: 'Trung bình', className: 'text-yellow-600 bg-yellow-50 border-yellow-200' },
-    HARD: { label: 'Khó', className: 'text-red-600 bg-red-50 border-red-200' },
 };
 
 const parseBooleanValue = (value) => {
@@ -218,6 +213,7 @@ const TrueFalseRow = ({ statement, selectedAnswer, showAnswer }) => {
 const AnswerCard = ({ answer, index, rules }) => {
     const { allowViewScore, showResultDetail, allowViewAnswer } = rules ?? {};
     const question = answer?.question;
+    const difficultyMeta = resolveDifficultyMeta(question?.difficulty);
 
     // Build card border accent based on correctness
     let accentClass = 'border-slate-200';
@@ -240,9 +236,9 @@ const AnswerCard = ({ answer, index, rules }) => {
                                 {TYPE_LABEL[question.type] ?? question.type}
                             </span>
                         )}
-                        {question?.difficulty && DIFFICULTY_LABEL[question.difficulty] && (
-                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${DIFFICULTY_LABEL[question.difficulty].className}`}>
-                                {DIFFICULTY_LABEL[question.difficulty].label}
+                        {difficultyMeta && (
+                            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${difficultyMeta.className}`}>
+                                {difficultyMeta.code} - {difficultyMeta.label}
                             </span>
                         )}
                     </div>

@@ -19,6 +19,8 @@ const ExamHistoryPage = () => {
     const error = useSelector(selectPublicStudentExamAttemptsError);
     const [page, setPage] = useState(1);
     const limit = 20;
+    const [sortBy, setSortBy] = useState("submittedAt");
+    const [sortOrder, setSortOrder] = useState("desc");
 
     useEffect(() => {
         dispatch(
@@ -26,10 +28,23 @@ const ExamHistoryPage = () => {
                 ...HISTORY_QUERY,
                 page,
                 limit,
+                sortBy,
+                sortOrder,
                 ...(studentId ? { studentId } : {}),
             })
         );
-    }, [dispatch, limit, page, studentId]);
+    }, [dispatch, limit, page, sortBy, sortOrder, studentId]);
+
+    const handleSortChange = (field) => {
+        setPage(1);
+        if (sortBy === field) {
+            setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+            return;
+        }
+
+        setSortBy(field);
+        setSortOrder("desc");
+    };
 
     return (
         <ExamHistoryList
@@ -38,6 +53,9 @@ const ExamHistoryPage = () => {
             error={error}
             emptyText="Bạn chưa có lịch sử làm đề mẫu nào."
             onPageChange={setPage}
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortChange={handleSortChange}
         />
     );
 };
