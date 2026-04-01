@@ -110,14 +110,23 @@ const ExamsPage = () => {
                         alt="Đề mẫu"
                         className="mx-auto mb-2 h-auto w-30 object-contain"
                     />
-                    <p className="text-h2 text-blue-800 text-center">Chọn loại đề thi</p>
-                    <p className="text-center text-gray-600">Chọn một loại đề thi mà bạn muốn luyện tập</p>
+
+                    <p className="text-h2 text-blue-800 text-center">
+                        Luyện tập
+                    </p>
+
+                    <p className="text-center text-gray-600 text-sm leading-relaxed max-w-2xl mx-auto mt-2">
+                        Chọn một loại đề thi để bắt đầu luyện tập theo cách của bạn.
+                        Bạn có thể làm toàn bộ đề như thi thật hoặc tùy chỉnh từng phần,
+                        lựa chọn nội dung và thời gian phù hợp với mục tiêu học tập của mình.
+                    </p>
                 </div>
                 <div className="mt-4 grid w-full grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
                     {examTypeOptions.map((type, index) => (
                         <ExamTypeCard
                             key={type.id}
                             title={type.label}
+                            subtitle={type.subtitle}
                             imageSrc={index % 2 === 0 ? OngDocSach1 : OngDocSach2}
                             examCount={examCountByType[type.id] || 0}
                             gradientFrom={type.gradientFrom}

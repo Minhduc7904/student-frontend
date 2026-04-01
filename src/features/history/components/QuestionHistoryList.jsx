@@ -203,13 +203,13 @@ const QuestionHistoryList = ({ data, pagination, loading, error, emptyText, onPa
                             >
                                 <div className="w-16 pt-0.5 text-sm font-semibold text-gray-700">#{index + 1}</div>
                                 <div className="w-[56%] text-start text-sm text-gray-700">
-                                    <div className="max-h-16 overflow-hidden opacity-100 transition-all duration-300 ease-out group-hover:max-h-0 group-hover:opacity-0 group-focus-within:max-h-0 group-focus-within:opacity-0">
+                                    <div className="max-h-16 overflow-hidden opacity-100 transition-all duration-300 ease-out group-hover:delay-150 group-focus-within:delay-150 group-hover:max-h-0 group-hover:opacity-0 group-focus-within:max-h-0 group-focus-within:opacity-0">
                                         <p className="font-medium text-gray-700 transition-colors duration-300 group-hover:text-slate-900">
                                             {title}
                                         </p>
                                     </div>
 
-                                    <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100">
+                                    <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:delay-150 group-focus-within:delay-150 group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100">
                                         <div className="min-h-0 overflow-hidden">
                                             <div className="mt-2 h-full rounded-lg">
                                                 <MarkdownRenderer content={questionMarkdown} className="h-full text-text-5 leading-relaxed" />

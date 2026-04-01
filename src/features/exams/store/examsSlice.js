@@ -64,6 +64,20 @@ export const fetchPublicStudentContinueExams = createAsyncThunk(
     }
 );
 
+export const fetchRecentExamAttemptsStats = createAsyncThunk(
+    'exams/fetchRecentExamAttemptsStats',
+    async (_, thunkAPI) => {
+        return handleAsyncThunk(
+            () => examAttemptService.getPublicStudentExamAttempts({ page: 1, limit: 10, status: 'SUBMITTED' }),
+            thunkAPI,
+            {
+                showSuccess: false,
+                errorTitle: 'Lay thong ke 10 bai thi gan nhat that bai',
+            }
+        );
+    }
+);
+
 const initialPublicExamsFilters = {
     page: 1,
     limit: 10,
@@ -153,9 +167,27 @@ const normalizeContinueExamsPayload = (payload) => {
     };
 };
 
+const normalizeRecentExamAttemptsPayload = (payload) => {
+    const root = payload || {};
+    const resolved = root?.data || root;
+
+    const items = Array.isArray(resolved?.data)
+        ? resolved.data
+        : Array.isArray(resolved?.items)
+            ? resolved.items
+            : Array.isArray(root?.data)
+                ? root.data
+                : Array.isArray(resolved)
+                    ? resolved
+                    : [];
+
+    return Array.isArray(items) ? items : [];
+};
+
 const initialState = {
     exams: [],
     continueExams: [],
+    recentExamAttemptsStats: [],
     publicExams: [],
     subjects: [],
     publicTypeCounts: {
@@ -172,14 +204,17 @@ const initialState = {
     hasFetchedPublicTypeCounts: false,
     hasFetchedSubjects: false,
     hasFetchedContinueExams: false,
+    hasFetchedRecentExamAttemptsStats: false,
     loading: false,
     loadingPublicExams: false,
     loadingSubjects: false,
     loadingContinueExams: false,
+    loadingRecentExamAttemptsStats: false,
     error: null,
     publicExamsError: null,
     subjectsError: null,
     continueExamsError: null,
+    recentExamAttemptsStatsError: null,
 };
 
 const examsSlice = createSlice({
@@ -191,6 +226,10 @@ const examsSlice = createSlice({
         },
         setContinueExams: (state, action) => {
             state.continueExams = action.payload;
+        },
+        setRecentExamAttemptsStats: (state, action) => {
+            state.recentExamAttemptsStats = Array.isArray(action.payload) ? action.payload : [];
+            state.hasFetchedRecentExamAttemptsStats = true;
         },
         setPublicExams: (state, action) => {
             state.publicExams = Array.isArray(action.payload) ? action.payload : [];
@@ -368,6 +407,20 @@ const examsSlice = createSlice({
                 state.loadingContinueExams = false;
                 state.continueExamsError = action.payload || action.error.message;
                 state.hasFetchedContinueExams = false;
+            })
+            .addCase(fetchRecentExamAttemptsStats.pending, (state) => {
+                state.loadingRecentExamAttemptsStats = true;
+                state.recentExamAttemptsStatsError = null;
+            })
+            .addCase(fetchRecentExamAttemptsStats.fulfilled, (state, action) => {
+                state.loadingRecentExamAttemptsStats = false;
+                state.recentExamAttemptsStats = normalizeRecentExamAttemptsPayload(action.payload);
+                state.hasFetchedRecentExamAttemptsStats = true;
+            })
+            .addCase(fetchRecentExamAttemptsStats.rejected, (state, action) => {
+                state.loadingRecentExamAttemptsStats = false;
+                state.recentExamAttemptsStatsError = action.payload || action.error.message;
+                state.hasFetchedRecentExamAttemptsStats = false;
             });
     },
 });
@@ -375,6 +428,7 @@ const examsSlice = createSlice({
 export const {
     setExams,
     setContinueExams,
+    setRecentExamAttemptsStats,
     setPublicExams,
     setSubjects,
     setPublicTypeCounts,
@@ -397,6 +451,7 @@ export const {
 
 export const selectExams = (state) => state.exams.exams;
 export const selectContinueExams = (state) => state.exams.continueExams;
+export const selectRecentExamAttemptsStats = (state) => state.exams.recentExamAttemptsStats;
 export const selectPublicExams = (state) => state.exams.publicExams;
 export const selectSubjects = (state) => state.exams.subjects;
 export const selectPublicExamTypeCounts = (state) => state.exams.publicTypeCounts;
@@ -410,6 +465,7 @@ export const selectHasFetchedPublicExams = (state) => state.exams.hasFetchedPubl
 export const selectHasFetchedPublicExamTypeCounts = (state) => state.exams.hasFetchedPublicTypeCounts;
 export const selectHasFetchedSubjects = (state) => state.exams.hasFetchedSubjects;
 export const selectHasFetchedContinueExams = (state) => state.exams.hasFetchedContinueExams;
+export const selectHasFetchedRecentExamAttemptsStats = (state) => state.exams.hasFetchedRecentExamAttemptsStats;
 export const selectExamsLoading = (state) => state.exams.loading;
 export const selectExamsError = (state) => state.exams.error;
 export const selectPublicExamsLoading = (state) => state.exams.loadingPublicExams;
@@ -418,5 +474,7 @@ export const selectSubjectsLoading = (state) => state.exams.loadingSubjects;
 export const selectSubjectsError = (state) => state.exams.subjectsError;
 export const selectContinueExamsLoading = (state) => state.exams.loadingContinueExams;
 export const selectContinueExamsError = (state) => state.exams.continueExamsError;
+export const selectRecentExamAttemptsStatsLoading = (state) => state.exams.loadingRecentExamAttemptsStats;
+export const selectRecentExamAttemptsStatsError = (state) => state.exams.recentExamAttemptsStatsError;
 
 export default examsSlice.reducer;

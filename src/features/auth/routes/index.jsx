@@ -5,6 +5,7 @@
 import AuthLayout from '../layout/AuthLayout';
 import LoginPage from '../login';
 import LoadingRedirectPage from '../loading-redirect';
+import LogoutPage from '../logout';
 import { ROUTES } from '../../../core/constants';
 /**
  * Auth routes configuration
@@ -28,6 +29,14 @@ export const authRoutes = [
                 element: <LoadingRedirectPage />,
                 meta: {
                     title: 'Đang chuyển hướng...',
+                    description: 'Vui lòng chờ trong giây lát',
+                }
+            },
+            {
+                path: ROUTES.LOGOUT,
+                element: <LogoutPage />,
+                meta: {
+                    title: 'Đang đăng xuất...',
                     description: 'Vui lòng chờ trong giây lát',
                 }
             },

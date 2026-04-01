@@ -1,10 +1,11 @@
-import { memo, useEffect, useMemo, useState } from 'react';
-import { Infinity, Send } from 'lucide-react';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { Flag, Infinity, Send } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams } from 'react-router-dom';
 import { formatDateTime } from '../../../../shared/utils';
 import PracticeAttemptConfirmModal from '../../practice-attempt/component/PracticeAttemptConfirmModal';
 import {
+    selectPracticeBookmarkedQuestionIds,
     selectPracticeSubmitAttemptLoading,
     submitPublicStudentExamAttempt,
 } from '../../practice-attempt/store/practiceAttemptSlice';
@@ -13,6 +14,9 @@ const TIMER_RADIUS = 56;
 const TIMER_CIRCUMFERENCE = 2 * Math.PI * TIMER_RADIUS;
 const TIMER_VISIBLE_RATIO = 0.84;
 const TIMER_VISIBLE_ARC = TIMER_CIRCUMFERENCE * TIMER_VISIBLE_RATIO;
+const DESKTOP_BREAKPOINT_PX = 1024;
+const STICKY_TOP_OFFSET_PX = 50;
+const STICKY_BOTTOM_BUFFER_PX = 16;
 
 const sortByOrderAsc = (items = []) => {
     return [...items].sort((a, b) => {
@@ -226,8 +230,11 @@ const PracticeAttemptSidebar = ({
 }) => {
     const dispatch = useDispatch();
     const { typeExam, typeexam, id } = useParams();
+    const asideRef = useRef(null);
     const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
+    const [canUseStickyOnDesktop, setCanUseStickyOnDesktop] = useState(true);
     const sections = useMemo(() => normalizeSectionsWithQuestions(examContent), [examContent]);
+    const bookmarkedQuestionIds = useSelector(selectPracticeBookmarkedQuestionIds);
     const normalizedAttemptStatus = String(attemptDetail?.status ?? '').toUpperCase();
     const isSubmittedAttempt = normalizedAttemptStatus === 'SUBMITED' || normalizedAttemptStatus === 'SUBMITTED';
     const isOverTimeAttempt = Boolean(attemptDetail?.isOverTime);
@@ -254,6 +261,39 @@ const PracticeAttemptSidebar = ({
 
         return () => window.clearInterval(timerId);
     }, [attemptDetail, hideTimingPanel, isUnlimitedTime, totalSeconds]);
+
+    useEffect(() => {
+        const updateStickyState = () => {
+            if (typeof window === 'undefined') return;
+
+            if (window.innerWidth < DESKTOP_BREAKPOINT_PX) {
+                setCanUseStickyOnDesktop(true);
+                return;
+            }
+
+            const sidebarHeight = asideRef.current?.offsetHeight || 0;
+            const viewportHeight = window.innerHeight;
+            const requiredHeight = sidebarHeight + STICKY_TOP_OFFSET_PX + STICKY_BOTTOM_BUFFER_PX;
+            setCanUseStickyOnDesktop(requiredHeight <= viewportHeight);
+        };
+
+        updateStickyState();
+        window.addEventListener('resize', updateStickyState);
+
+        return () => {
+            window.removeEventListener('resize', updateStickyState);
+        };
+    }, [
+        attemptId,
+        hideTimingPanel,
+        isUnlimitedTime,
+        loading,
+        questionListClassName,
+        sections.length,
+        submitAttemptLoading,
+    ]);
+
+    const desktopStickyClassName = canUseStickyOnDesktop ? 'lg:sticky lg:top-12.5' : '';
 
     const safeRemainingSeconds = Number.isFinite(remainingSeconds) ? remainingSeconds : totalSeconds;
     const progressRatio = Number.isFinite(totalSeconds) && totalSeconds > 0
@@ -310,9 +350,9 @@ const PracticeAttemptSidebar = ({
 
     if (loading) {
         return (
-            <aside className={`h-fit rounded-2xl border border-gray-200 bg-white p-4 md:p-5 lg:sticky lg:top-22 ${asideClassName}`.trim()}>
+            <aside ref={asideRef} className={`h-fit w-full max-w-full overflow-x-hidden rounded-2xl border border-gray-200 bg-white p-4 md:p-5 ${desktopStickyClassName} ${asideClassName}`.trim()}>
                 <div className="animate-pulse space-y-3">
-                    <div className="mx-auto h-36 w-36 rounded-full bg-slate-100" />
+                    <div className="mx-auto h-32 w-32 rounded-full bg-slate-100 sm:h-36 sm:w-36" />
                     <div className="h-5 w-2/3 rounded bg-slate-200" />
                     <div className="h-10 w-full rounded-xl bg-slate-100" />
                     <div className="h-10 w-full rounded-xl bg-slate-100" />
@@ -324,7 +364,7 @@ const PracticeAttemptSidebar = ({
 
     return (
         <>
-            <aside className={`h-fit rounded-2xl border border-gray-200 bg-white p-4 md:p-5 lg:sticky lg:top-22 ${asideClassName}`.trim()}>
+            <aside ref={asideRef} className={`h-fit w-full max-w-full overflow-x-hidden rounded-2xl border border-gray-200 bg-white p-4 md:p-5 ${desktopStickyClassName} ${asideClassName}`.trim()}>
                 <h2 className="text-base font-bold text-gray-900">Theo dõi luyện tập</h2>
 
                 {!hideTimingPanel ? (
@@ -369,7 +409,7 @@ const PracticeAttemptSidebar = ({
 
                         <div className="mt-3 space-y-1 text-xs text-slate-600">
                             <p>
-                                Mã lượt làm: <span className="font-semibold text-slate-900">{attemptId || '--'}</span>
+                                Mã lượt làm: <span className="break-all font-semibold text-slate-900">{attemptId || '--'}</span>
                             </p>
                             <p>
                                 Bắt đầu: <span className="font-semibold text-slate-900">{formatDateTime(attemptDetail?.startedAt) || '--'}</span>
@@ -399,12 +439,12 @@ const PracticeAttemptSidebar = ({
                     </div>
                 </div>
 
-                <div className={`mt-4 space-y-3 overflow-y-auto pr-1 ${questionListClassName}`.trim()}>
+                <div className={`mt-4 min-w-0 space-y-3 overflow-y-auto pr-1 ${questionListClassName}`.trim()}>
                     {sections.length ? sections.map((section, sectionIndex) => {
                         const questions = Array.isArray(section?.questions) ? section.questions : [];
 
                         return (
-                            <div key={section?.identity || `practice-sidebar-section-${sectionIndex + 1}`} className="rounded-xl border border-slate-200 p-3">
+                            <div key={section?.identity || `practice-sidebar-section-${sectionIndex + 1}`} className="min-w-0 rounded-xl border border-slate-200 p-3">
                                 <div className="flex items-center justify-between gap-2">
                                     <h3 className="line-clamp-1 text-sm font-semibold text-slate-900">
                                         {section?.title || `Phần ${sectionIndex + 1}`}
@@ -414,7 +454,7 @@ const PracticeAttemptSidebar = ({
                                     </span>
                                 </div>
 
-                                <div className="mt-3 grid grid-cols-6 gap-2">
+                                <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
                                     {questions.map((question, questionIndex) => {
                                         const questionId = question?.questionId;
                                         const questionOrder = question?.order ?? questionIndex + 1;
@@ -423,6 +463,7 @@ const PracticeAttemptSidebar = ({
                                             : String(questionId);
                                         const questionError = questionId != null ? submitAnswerError?.[String(questionId)] : null;
                                         const questionLoading = questionId != null ? Boolean(submitAnswerLoading?.[String(questionId)]) : false;
+                                        const isBookmarked = questionId != null ? Boolean(bookmarkedQuestionIds?.[String(questionId)]) : false;
                                         const isCompleted = isQuestionDone(question) && hasSavedAnswer(question);
 
                                         let buttonClassName = 'border-slate-200 bg-white text-slate-700 hover:border-slate-300';
@@ -440,9 +481,14 @@ const PracticeAttemptSidebar = ({
                                                 type="button"
                                                 onClick={() => handleNavigateQuestion(section?.identity, questionId)}
                                                 disabled={questionId == null}
-                                                className={`inline-flex h-8 cursor-pointer items-center justify-center rounded-lg border text-xs font-semibold transition-colors ${buttonClassName} ${questionId == null ? 'cursor-not-allowed opacity-60' : ''}`}
+                                                className={`relative inline-flex h-7 cursor-pointer items-center justify-center rounded-lg border text-[11px] font-semibold transition-colors sm:h-8 sm:text-xs ${buttonClassName} ${questionId == null ? 'cursor-not-allowed opacity-60' : ''}`}
                                                 title={`Câu ${questionOrder}${questionError ? ' - Lưu thất bại' : ''}`}
                                             >
+                                                {isBookmarked ? (
+                                                    <span className="absolute -top-2 left-1/2 -translate-x-1/2 rounded bg-amber-100 px-1 py-0.5 text-amber-600">
+                                                        <Flag size={10} className="fill-amber-500 text-amber-500" />
+                                                    </span>
+                                                ) : null}
                                                 {questionOrder}
                                             </button>
                                         );

@@ -207,6 +207,7 @@ const initialState = {
     submitAttemptLoading: false,
     submitAttemptError: null,
     submittedAttempt: null,
+    bookmarkedQuestionIds: {},
 };
 
 const practiceAttemptSlice = createSlice({
@@ -238,6 +239,28 @@ const practiceAttemptSlice = createSlice({
             state.submitAttemptLoading = false;
             state.submitAttemptError = null;
             state.submittedAttempt = null;
+            state.bookmarkedQuestionIds = {};
+        },
+        togglePracticeBookmarkedQuestion: (state, action) => {
+            const questionId = action.payload;
+            if (questionId == null) return;
+
+            const key = String(questionId);
+            if (state.bookmarkedQuestionIds[key]) {
+                delete state.bookmarkedQuestionIds[key];
+                return;
+            }
+
+            state.bookmarkedQuestionIds[key] = true;
+        },
+        setPracticeBookmarkedQuestions: (state, action) => {
+            const ids = Array.isArray(action.payload) ? action.payload : [];
+            state.bookmarkedQuestionIds = ids.reduce((acc, id) => {
+                if (id != null) {
+                    acc[String(id)] = true;
+                }
+                return acc;
+            }, {});
         },
     },
     extraReducers: (builder) => {
@@ -256,6 +279,7 @@ const practiceAttemptSlice = createSlice({
                 state.hasFetchedQuestionAnswersByAttemptSuccess = false;
                 state.hasFetchedExamContent = false;
                 state.hasFetchedExamContentSuccess = false;
+                state.bookmarkedQuestionIds = {};
             })
             .addCase(fetchPublicStudentExamAttemptDetail.fulfilled, (state, action) => {
                 state.loading = false;
@@ -400,7 +424,11 @@ const practiceAttemptSlice = createSlice({
     },
 });
 
-export const { clearPracticeAttempt } = practiceAttemptSlice.actions;
+export const {
+    clearPracticeAttempt,
+    togglePracticeBookmarkedQuestion,
+    setPracticeBookmarkedQuestions,
+} = practiceAttemptSlice.actions;
 
 export const selectPracticeAttemptDetail = (state) => state.practiceAttempt.attemptDetail;
 export const selectPracticeAttemptLoading = (state) => state.practiceAttempt.loading;
@@ -434,5 +462,10 @@ export const selectPracticeSubmittedAnswer = (state) => state.practiceAttempt.su
 export const selectPracticeSubmitAttemptLoading = (state) => state.practiceAttempt.submitAttemptLoading;
 export const selectPracticeSubmitAttemptError = (state) => state.practiceAttempt.submitAttemptError;
 export const selectPracticeSubmittedAttempt = (state) => state.practiceAttempt.submittedAttempt;
+export const selectPracticeBookmarkedQuestionIds = (state) => state.practiceAttempt.bookmarkedQuestionIds;
+export const selectIsPracticeQuestionBookmarked = (state, questionId) => {
+    if (questionId == null) return false;
+    return Boolean(state.practiceAttempt.bookmarkedQuestionIds[String(questionId)]);
+};
 
 export default practiceAttemptSlice.reducer;

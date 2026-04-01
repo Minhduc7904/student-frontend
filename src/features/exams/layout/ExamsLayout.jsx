@@ -7,6 +7,7 @@ import { AppBreadcrumb } from '../../../shared/components';
 import AuthenticatedLayout from '../../../shared/components/layout/AuthenticatedLayout';
 import { ROUTES } from '../../../core/constants';
 import {
+    fetchRecentExamAttemptsStats,
     fetchPublicStudentContinueExams,
     fetchPublicExamTypeCounts,
     fetchSubjects,
@@ -17,7 +18,11 @@ import {
     selectContinueExamsPagination,
     selectHasFetchedContinueExams,
     selectHasFetchedPublicExamTypeCounts,
+    selectHasFetchedRecentExamAttemptsStats,
     selectHasFetchedSubjects,
+    selectRecentExamAttemptsStats,
+    selectRecentExamAttemptsStatsError,
+    selectRecentExamAttemptsStatsLoading,
 } from '../store/examsSlice';
 import { getExamTypeLabelById } from '../constants/examTypes';
 import { selectExamDetail } from '../detail/store/examDetailSlice';
@@ -41,8 +46,11 @@ const ExamsLayout = () => {
     const dispatch = useDispatch();
     const location = useLocation();
     const continueExams = useSelector(selectContinueExams);
+    const recentExamAttemptsStats = useSelector(selectRecentExamAttemptsStats);
     const continueExamsLoading = useSelector(selectContinueExamsLoading);
+    const recentExamAttemptsStatsLoading = useSelector(selectRecentExamAttemptsStatsLoading);
     const continueExamsError = useSelector(selectContinueExamsError);
+    const recentExamAttemptsStatsError = useSelector(selectRecentExamAttemptsStatsError);
     const continueExamsPagination = useSelector(selectContinueExamsPagination);
     const continueExamsFilters = useSelector(selectContinueExamsFilters);
     const examDetail = useSelector(selectExamDetail);
@@ -56,6 +64,7 @@ const ExamsLayout = () => {
     const hasFetchedPublicTypeCounts = useSelector(selectHasFetchedPublicExamTypeCounts);
     const hasFetchedSubjects = useSelector(selectHasFetchedSubjects);
     const hasFetchedContinueExams = useSelector(selectHasFetchedContinueExams);
+    const hasFetchedRecentExamAttemptsStats = useSelector(selectHasFetchedRecentExamAttemptsStats);
     const [isPracticeSidebarOpen, setIsPracticeSidebarOpen] = useState(false);
     const isPracticeAttemptRoute = useMemo(() => {
         const pathParts = location.pathname.split('/').filter(Boolean);
@@ -101,6 +110,14 @@ const ExamsLayout = () => {
         hasFetchedContinueExams,
         isPracticeAttemptRoute,
     ]);
+
+    useEffect(() => {
+        if (isPracticeAttemptRoute) return;
+
+        if (!hasFetchedRecentExamAttemptsStats) {
+            dispatch(fetchRecentExamAttemptsStats());
+        }
+    }, [dispatch, hasFetchedRecentExamAttemptsStats, isPracticeAttemptRoute]);
 
     useEffect(() => {
         setIsPracticeSidebarOpen(false);
@@ -217,6 +234,9 @@ const ExamsLayout = () => {
                             <ContinueExamSidebar
                                 attempts={Array.isArray(continueExams) ? continueExams : []}
                                 pagination={continueExamsPagination}
+                                recentAttemptsStats={Array.isArray(recentExamAttemptsStats) ? recentExamAttemptsStats : []}
+                                recentAttemptsStatsLoading={recentExamAttemptsStatsLoading}
+                                recentAttemptsStatsError={recentExamAttemptsStatsError}
                                 loading={continueExamsLoading}
                                 error={continueExamsError}
                                 onPageChange={handleContinueExamsPageChange}
@@ -230,9 +250,17 @@ const ExamsLayout = () => {
                         <button
                             type="button"
                             onClick={() => setIsPracticeSidebarOpen(true)}
-                            className="fixed bottom-5 right-4 z-50 inline-flex cursor-pointer items-center gap-2 rounded-full bg-blue-600 p-2 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition-colors hover:bg-blue-700 lg:hidden"
+                            className="
+                                fixed bottom-4 right-4 z-50
+                                flex items-center gap-2
+                                rounded-full bg-blue-600 text-white
+                                p-3
+                                shadow-lg active:scale-95
+                                transition-all duration-200
+                                lg:hidden
+                            "
                         >
-                            <List size={16} />
+                            <List size={18} />
                         </button>
 
                         <div className={`fixed inset-0 z-70 lg:hidden ${isPracticeSidebarOpen ? 'pointer-events-auto' : 'pointer-events-none'}`}>
@@ -244,7 +272,7 @@ const ExamsLayout = () => {
 
                             <div className={`absolute inset-y-0 right-0 w-full bg-[#F7F8FA] transition-transform duration-300 ${isPracticeSidebarOpen ? 'translate-x-0' : 'translate-x-full'}`}>
                                 <div className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3">
-                                    <p className="text-sm font-semibold text-slate-900">Sidebar luyện tập</p>
+                                    <p className="text-sm font-semibold text-slate-900"></p>
                                     <button
                                         type="button"
                                         onClick={() => setIsPracticeSidebarOpen(false)}
@@ -255,7 +283,7 @@ const ExamsLayout = () => {
                                     </button>
                                 </div>
 
-                                <div className="h-[calc(100vh-57px)] overflow-y-auto px-4 py-4">
+                                <div className="h-[calc(100vh-57px)] overflow-y-auto">
                                     <PracticeAttemptSidebar
                                         attemptDetail={practiceAttemptDetail}
                                         attemptId={currentPracticeAttemptId}

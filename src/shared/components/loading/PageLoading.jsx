@@ -7,7 +7,7 @@ import { Spinner } from './Spinner';
 export const PageLoading = ({
     message = 'Đang tải...',
     showLogo = true,
-    backgroundColor = 'bg-background'
+    backgroundColor = 'bg-white',
 }) => {
     return (
         <div className={`fixed inset-0 z-[9999] ${backgroundColor} flex items-center justify-center`}>

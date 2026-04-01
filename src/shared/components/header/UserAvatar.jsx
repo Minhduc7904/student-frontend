@@ -1,8 +1,6 @@
 import { memo, useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { User } from "lucide-react";
-import { logoutAsync } from "../../../features/auth/store/authSlice";
 import { ROUTES } from "../../../core/constants/routes";
 import UserAvatarDropdown from "./UserAvatarDropdown";
 import { ComingSoonModal } from "../modal/ComingSoonModal";
@@ -19,7 +17,6 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
     const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
-    const dispatch = useDispatch();
 
     // Đóng dropdown khi click ra ngoài
     useEffect(() => {
@@ -44,15 +41,10 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
         [navigate]
     );
 
-    const handleLogout = useCallback(async () => {
+    const handleLogout = useCallback(() => {
         setIsOpen(false);
-        try {
-            await dispatch(logoutAsync()).unwrap();
-            navigate(ROUTES.LOGIN);
-        } catch (error) {
-            console.error("Logout failed:", error);
-        }
-    }, [dispatch, navigate]);
+        navigate(ROUTES.LOGOUT);
+    }, [navigate]);
 
     return (
         <>
