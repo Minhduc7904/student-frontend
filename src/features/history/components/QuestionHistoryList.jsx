@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Pagination } from "../../../shared/components";
+import MarkdownRenderer from "../../../shared/components/markdown/MarkdownRenderer";
 import "../../competition/ranking/ranking-loading.css";
 
 const pickFirstDefined = (obj, keys) => {
@@ -176,25 +177,52 @@ const QuestionHistoryList = ({ data, pagination, loading, error, emptyText, onPa
 
                 <div className="mt-2 flex flex-col gap-0.5">
                     {items.map((item, index) => {
-                        const title = truncateText(
-                            pickFirstDefined(item, ["questionContent", "content", "questionTitle", "title", "name"])
-                        );
+                        const questionMarkdown = pickFirstDefined(item, [
+                            "processedQuestionContent",
+                            "questionContent",
+                            "content",
+                            "questionTitle",
+                            "title",
+                            "name",
+                        ]);
+                        const title = truncateText( pickFirstDefined(item, [
+                            "questionContent",
+                            "content",
+                            "questionTitle",
+                            "title",
+                            "name",
+                        ]));
                         const timeSpent = formatTimeSpent(item);
                         const resultMeta = getResultMeta(item);
 
                         return (
                             <div
                                 key={`question-${pickFirstDefined(item, ["questionAnswerId", "id"]) || "row"}-${index}`}
-                                className={`ranking-wave-row flex items-center border px-4 py-2 ${getRowHighlightClass(index)}`}
+                                className={`group ranking-wave-row flex items-start border px-4 py-2.5 transition-all duration-300 ease-out hover:shadow-sm hover:ring-1 hover:ring-blue-100 ${getRowHighlightClass(index)}`}
+                                tabIndex={0}
                             >
-                                <div className="w-16 text-sm font-semibold text-gray-700">#{index + 1}</div>
-                                <div className="w-[56%] text-start text-sm font-medium text-gray-700">{title}</div>
-                                <div className="w-[14%] text-start text-sm">
+                                <div className="w-16 pt-0.5 text-sm font-semibold text-gray-700">#{index + 1}</div>
+                                <div className="w-[56%] text-start text-sm text-gray-700">
+                                    <div className="max-h-16 overflow-hidden opacity-100 transition-all duration-300 ease-out group-hover:max-h-0 group-hover:opacity-0 group-focus-within:max-h-0 group-focus-within:opacity-0">
+                                        <p className="font-medium text-gray-700 transition-colors duration-300 group-hover:text-slate-900">
+                                            {title}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid grid-rows-[0fr] opacity-0 transition-all duration-300 ease-out group-hover:grid-rows-[1fr] group-hover:opacity-100 group-focus-within:grid-rows-[1fr] group-focus-within:opacity-100">
+                                        <div className="min-h-0 overflow-hidden">
+                                            <div className="mt-2 h-full rounded-lg">
+                                                <MarkdownRenderer content={questionMarkdown} className="h-full text-text-5 leading-relaxed" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="w-[14%] pt-0.5 text-start text-sm">
                                     <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${resultMeta.className}`}>
                                         {resultMeta.text}
                                     </span>
                                 </div>
-                                <div className="flex-1 text-start text-sm text-gray-700">{timeSpent}</div>
+                                <div className="flex-1 pt-0.5 text-start text-sm text-gray-700">{timeSpent}</div>
                             </div>
                         );
                     })}
@@ -203,10 +231,15 @@ const QuestionHistoryList = ({ data, pagination, loading, error, emptyText, onPa
 
             <div className="space-y-2 md:hidden">
                 {items.map((item, index) => {
-                    const title = truncateText(
-                        pickFirstDefined(item, ["questionContent", "content", "questionTitle", "title", "name"]),
-                        90
-                    );
+                    const questionMarkdown = pickFirstDefined(item, [
+                        "processedQuestionContent",
+                        "questionContent",
+                        "content",
+                        "questionTitle",
+                        "title",
+                        "name",
+                    ]);
+                    const title = truncateText(questionMarkdown, 90);
                     const timeSpent = formatTimeSpent(item);
                     const resultMeta = getResultMeta(item);
 
@@ -215,7 +248,12 @@ const QuestionHistoryList = ({ data, pagination, loading, error, emptyText, onPa
                             key={`question-mobile-${pickFirstDefined(item, ["questionAnswerId", "id"]) || "row"}-${index}`}
                             className={`rounded-xl border px-3 py-3 ${getRowHighlightClass(index)}`}
                         >
-                            <p className="text-sm font-medium text-gray-800">{title}</p>
+                            <div className="mt-2 rounded-md border border-slate-200 bg-white/80 p-2">
+                                <MarkdownRenderer
+                                    content={questionMarkdown}
+                                    className="text-text-5 leading-relaxed"
+                                />
+                            </div>
 
                             <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
                                 <div className="rounded-md bg-white/70 px-2 py-1.5 text-slate-600">
