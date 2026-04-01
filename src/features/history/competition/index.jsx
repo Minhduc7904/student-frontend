@@ -5,11 +5,12 @@ import { ArrowRight, ArrowUpDown, Eye, Lock, RefreshCw } from "lucide-react";
 import { ROUTES } from "../../../core/constants";
 import { Pagination } from "../../../shared/components";
 import {
-    getPublicStudentSubmittedHistoryAsync,
-    selectPublicStudentSubmittedHistory,
-    selectPublicStudentSubmittedHistoryError,
-    selectPublicStudentSubmittedHistoryLoading,
-} from "../../profile/store/profileSlice";
+    getCompetitionHistoryPageAsync,
+    selectCompetitionHistoryPageData,
+    selectCompetitionHistoryPageError,
+    selectCompetitionHistoryPageLoading,
+    selectCompetitionHistoryPagePagination,
+} from "./store/competitionHistoryPageSlice";
 import { HISTORY_QUERY } from "../constants";
 import "../../competition/ranking/ranking-loading.css";
 
@@ -69,9 +70,10 @@ const CompetitionHistoryPage = () => {
     const { isOtherStudentHistory = false } = useOutletContext() || {};
     const [searchParams] = useSearchParams();
     const studentId = searchParams.get("studentId") || undefined;
-    const historyData = useSelector(selectPublicStudentSubmittedHistory);
-    const loading = useSelector(selectPublicStudentSubmittedHistoryLoading);
-    const error = useSelector(selectPublicStudentSubmittedHistoryError);
+    const historyData = useSelector(selectCompetitionHistoryPageData);
+    const pagination = useSelector(selectCompetitionHistoryPagePagination);
+    const loading = useSelector(selectCompetitionHistoryPageLoading);
+    const error = useSelector(selectCompetitionHistoryPageError);
 
     const [page, setPage] = useState(1);
     const limit = 20;
@@ -79,8 +81,6 @@ const CompetitionHistoryPage = () => {
     const [sortOrder, setSortOrder] = useState("desc");
 
     const historyItems = useMemo(() => normalizeHistoryItems(historyData), [historyData]);
-    const pagination = historyData?.pagination || historyData?.meta || null;
-
     const total = pagination?.total ?? historyItems.length;
     const currentPage = pagination?.page ?? page;
     const totalPages = pagination?.totalPages ?? 1;
@@ -101,7 +101,7 @@ const CompetitionHistoryPage = () => {
         };
 
         dispatch(
-            getPublicStudentSubmittedHistoryAsync(query)
+            getCompetitionHistoryPageAsync(query)
         );
     }, [dispatch, page, sortBy, sortOrder, studentId]);
 
@@ -138,7 +138,7 @@ const CompetitionHistoryPage = () => {
         };
 
         dispatch(
-            getPublicStudentSubmittedHistoryAsync(query)
+            getCompetitionHistoryPageAsync(query)
         );
     };
 
@@ -428,7 +428,8 @@ const CompetitionHistoryPage = () => {
                         })}
                     </div>
 
-                    <div className="mt-4">
+                    <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                        <p className="text-xs text-slate-500">Tổng {total} bản ghi</p>
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}

@@ -80,13 +80,13 @@ const getRowHighlightClass = (index) => {
     return index % 2 === 0 ? "border-transparent bg-[#f8fafc]" : "border-transparent bg-[#f1f5f9]";
 };
 
-const QuestionHistoryList = ({ data, loading, error, emptyText, onPageChange }) => {
+const QuestionHistoryList = ({ data, pagination, loading, error, emptyText, onPageChange }) => {
     const items = normalizeHistoryItems(data);
-    const pagination = data?.pagination || data?.meta || null;
+    const paginationData = pagination || data?.pagination || data?.meta || null;
 
-    const total = pagination?.total ?? items.length;
-    const currentPage = Number(pagination?.page) || 1;
-    const totalPages = Number(pagination?.totalPages) || 1;
+    const total = paginationData?.total ?? items.length;
+    const currentPage = Number(paginationData?.page) || 1;
+    const totalPages = Number(paginationData?.totalPages) || 1;
 
     const normalizedError = !error
         ? ""
@@ -230,14 +230,14 @@ const QuestionHistoryList = ({ data, loading, error, emptyText, onPageChange }) 
                 })}
             </div>
 
-            <div className="mt-4">
+            <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <p className="text-xs text-slate-500">Tổng {total} bản ghi</p>
                 <Pagination
                     currentPage={currentPage}
                     totalPages={totalPages}
                     onPageChange={onPageChange}
                     disabled={loading || !onPageChange}
                 />
-                <p className="mt-2 text-center text-xs text-slate-500">Tổng {total} bản ghi</p>
             </div>
         </div>
     );

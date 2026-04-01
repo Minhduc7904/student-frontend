@@ -1,5 +1,7 @@
 import { memo } from "react";
 import { Card, CustomTooltip } from "../../../../shared/components";
+import QuestionStatsSummaryDonutCard from "./QuestionStatsSummaryDonutCard";
+import QuestionChapterBubbleClusterCard from "./QuestionChapterBubbleClusterCard";
 
 const normalizeHistoryItems = (data) => {
     if (!data) return [];
@@ -181,14 +183,14 @@ const BarChart = ({ title, subtitle, items, chartType, onlySubmitted = false }) 
     );
 };
 
-export const CompetitionHistoryStatsSidebar = memo(({ activityStats, submittedHistory }) => {
+export const CompetitionHistoryStatsSidebar = memo(({ submittedHistory }) => {
     const items = normalizeHistoryItems(submittedHistory);
     const submittedCount = items.filter((item) => isSubmittedItem(item)).length;
 
     return (
         <BarChart
             title="Thống kê cuộc thi"
-            subtitle={`Đã nộp ${submittedCount} bài • Ngày hoạt động ${activityStats?.totalActiveDays || 0}`}
+            subtitle={`Đã nộp ${submittedCount} bài`}
             items={items}
             chartType="competition"
             onlySubmitted
@@ -198,49 +200,37 @@ export const CompetitionHistoryStatsSidebar = memo(({ activityStats, submittedHi
 
 CompetitionHistoryStatsSidebar.displayName = "CompetitionHistoryStatsSidebar";
 
-export const QuestionHistoryStatsSidebar = memo(({ activityStats, questionHistory }) => {
+export const QuestionHistoryStatsSidebar = memo(({ questionHistory, questionStatistics, onOpenChapterModal }) => {
     const items = normalizeHistoryItems(questionHistory);
-    const correctCount = items.filter((item) => item?.isCorrect === true).length;
-    const incorrectCount = items.filter((item) => item?.isCorrect === false).length;
+    const summary = questionStatistics?.summary || null;
+    const answeredCount = summary?.totalAnswered ?? items.length;
+    const correctCount = summary?.totalCorrect ?? items.filter((item) => item?.isCorrect === true).length;
+    const incorrectCount = summary?.totalIncorrect ?? items.filter((item) => item?.isCorrect === false).length;
+    const byChapter = Array.isArray(questionStatistics?.byChapter) ? questionStatistics.byChapter : [];
 
     return (
-        <Card>
-            <h2 className="text-lg font-semibold text-gray-800">Thống kê câu hỏi</h2>
-            <div className="mt-4 grid grid-cols-2 gap-3">
-                <div className="rounded-lg bg-[#F7F7F8] p-3">
-                    <p className="text-xs text-gray-500">Tổng hoạt động trong năm</p>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">{activityStats?.totalActivities || 0}</p>
-                </div>
-
-                <div className="rounded-lg bg-[#F7F7F8] p-3">
-                    <p className="text-xs text-gray-500">Đã trả lời</p>
-                    <p className="mt-1 text-lg font-semibold text-gray-900">{items.length}</p>
-                </div>
-
-                <div className="rounded-lg bg-emerald-50 p-3">
-                    <p className="text-xs text-emerald-600">Đúng</p>
-                    <p className="mt-1 text-lg font-semibold text-emerald-700">{correctCount}</p>
-                </div>
-
-                <div className="rounded-lg bg-rose-50 p-3">
-                    <p className="text-xs text-rose-600">Sai</p>
-                    <p className="mt-1 text-lg font-semibold text-rose-700">{incorrectCount}</p>
-                </div>
-            </div>
-        </Card>
+        <div className="space-y-4">
+            <QuestionStatsSummaryDonutCard
+                summary={summary}
+                fallbackAnswered={answeredCount}
+                fallbackCorrect={correctCount}
+                fallbackIncorrect={incorrectCount}
+            />
+            <QuestionChapterBubbleClusterCard byChapter={byChapter} onExpand={onOpenChapterModal} />
+        </div>
     );
 });
 
 QuestionHistoryStatsSidebar.displayName = "QuestionHistoryStatsSidebar";
 
-export const ExamHistoryStatsSidebar = memo(({ activityStats, examHistory }) => {
+export const ExamHistoryStatsSidebar = memo(({ examHistory }) => {
     const items = normalizeHistoryItems(examHistory);
     const submittedCount = items.filter((item) => isSubmittedItem(item)).length;
 
     return (
         <BarChart
             title="Thống kê đề mẫu"
-            subtitle={`Đã nộp ${submittedCount} lượt • Chuỗi dài nhất ${activityStats?.maxStreak || 0}`}
+            subtitle={`Đã nộp ${submittedCount} lượt`}
             items={items}
             chartType="exam"
             onlySubmitted

@@ -133,6 +133,7 @@ export const API_ENDPOINTS = {
     // Question Answers
     QUESTION_ANSWERS: {
         PUBLIC_STUDENT: '/question-answers/public/student',
+        PUBLIC_STUDENT_STATISTICS: '/question-answers/public/student/statistics',
         PUBLIC_STUDENT_SUBMIT: '/question-answers/public/student/submit',
         PUBLIC_STUDENT_BY_ATTEMPT: (attemptId) => `/question-answers/public/student/attempt/${attemptId}`,
     },

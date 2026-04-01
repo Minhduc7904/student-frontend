@@ -24,6 +24,25 @@ export const questionAnswerService = {
     },
 
     /**
+     * Get question-answer statistics of current student in a date range (Vietnam timezone).
+     *
+     * @route GET /question-answers/public/student/statistics
+     * @param {Object} query - fromDate/toDate (supports ISO date or dd/MM/yyyy)
+     * @returns {Promise<Object>} BaseResponseDto<StudentQuestionAnswerStatisticsDataDto>
+     *
+     * @example
+     * questionAnswerService.getPublicStudentQuestionAnswerStatistics({
+     *   fromDate: "16/03/2026",
+     *   toDate: "17/03/2026",
+     * })
+     */
+    getPublicStudentQuestionAnswerStatistics: (query = {}) => {
+        return axiosClient.get(API_ENDPOINTS.QUESTION_ANSWERS.PUBLIC_STUDENT_STATISTICS, {
+            params: query,
+        });
+    },
+
+    /**
      * Upsert student question answer by questionId + attemptId.
      * - If answer not found by (questionId, attemptId): create new one
      * - If found: update and re-grade

@@ -1,5 +1,5 @@
-import { memo, useEffect, useMemo } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { memo, useMemo, useState } from "react";
+import { useSelector } from "react-redux";
 import { NavLink, Outlet, useLocation, useSearchParams } from "react-router-dom";
 import { ROUTES } from "../../../core/constants";
 import AuthenticatedLayout from "../../../shared/components/layout/AuthenticatedLayout";
@@ -9,15 +9,17 @@ import {
     ExamHistoryStatsSidebar,
     QuestionHistoryStatsSidebar,
 } from "./component/HistoryStatsSidebars";
+import QuestionChapterBubbleClusterModal from "./component/QuestionChapterBubbleClusterModal";
 import {
-    getActivityYearStatsAsync,
-    selectActivityYearStats,
     selectMyProfile,
     selectProfile,
-    selectPublicStudentExamAttempts,
-    selectPublicStudentQuestionAnswers,
-    selectPublicStudentSubmittedHistory,
 } from "../../profile/store/profileSlice";
+import { selectCompetitionHistoryPageData } from "../competition/store/competitionHistoryPageSlice";
+import { selectExamHistoryPageData } from "../exam/store/examHistoryPageSlice";
+import {
+    selectQuestionHistoryPageData,
+    selectQuestionHistoryStatistics,
+} from "../question/store/questionHistoryPageSlice";
 
 const tabs = [
     { label: "Cuộc thi", to: ROUTES.HISTORY_COMPETITION },
@@ -25,36 +27,18 @@ const tabs = [
     { label: "Đề mẫu", to: ROUTES.HISTORY_EXAM },
 ];
 
-const normalizeHistoryItems = (data) => {
-    if (!data) return [];
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.items)) return data.items;
-    if (Array.isArray(data.history)) return data.history;
-    if (Array.isArray(data.rows)) return data.rows;
-    if (Array.isArray(data.data)) return data.data;
-    return [];
-};
-
 const HistoryLayout = () => {
-    const dispatch = useDispatch();
     const location = useLocation();
     const [searchParams] = useSearchParams();
+    const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
     const studentId = searchParams.get("studentId") || undefined;
-    const activityStats = useSelector(selectActivityYearStats);
     const myProfile = useSelector(selectMyProfile);
     const viewedProfile = useSelector(selectProfile);
-    const submittedHistory = useSelector(selectPublicStudentSubmittedHistory);
-    const questionHistory = useSelector(selectPublicStudentQuestionAnswers);
-    const examHistory = useSelector(selectPublicStudentExamAttempts);
-
-    useEffect(() => {
-        dispatch(
-            getActivityYearStatsAsync({
-                year: new Date().getFullYear(),
-                studentId,
-            })
-        );
-    }, [dispatch, studentId]);
+    const submittedHistory = useSelector(selectCompetitionHistoryPageData);
+    const questionHistory = useSelector(selectQuestionHistoryPageData);
+    const questionHistoryStatistics = useSelector(selectQuestionHistoryStatistics);
+    const examHistory = useSelector(selectExamHistoryPageData);
+    const byChapter = Array.isArray(questionHistoryStatistics?.byChapter) ? questionHistoryStatistics.byChapter : [];
 
     const currentHistoryRoute = useMemo(() => {
         const pathParts = location.pathname.split("/").filter(Boolean);
@@ -124,21 +108,20 @@ const HistoryLayout = () => {
                         <aside className="lg:sticky lg:top-6 lg:self-start">
                             {currentHistoryRoute === "question" ? (
                                 <QuestionHistoryStatsSidebar
-                                    activityStats={activityStats}
                                     questionHistory={questionHistory}
+                                    questionStatistics={questionHistoryStatistics}
+                                    onOpenChapterModal={() => setIsChapterModalOpen(true)}
                                 />
                             ) : null}
 
                             {currentHistoryRoute === "exam" ? (
                                 <ExamHistoryStatsSidebar
-                                    activityStats={activityStats}
                                     examHistory={examHistory}
                                 />
                             ) : null}
 
                             {(currentHistoryRoute === "competition" || (currentHistoryRoute !== "question" && currentHistoryRoute !== "exam")) ? (
                                 <CompetitionHistoryStatsSidebar
-                                    activityStats={activityStats}
                                     submittedHistory={submittedHistory}
                                 />
                             ) : null}
@@ -146,6 +129,12 @@ const HistoryLayout = () => {
                     </div>
                 </div>
             </main>
+
+            <QuestionChapterBubbleClusterModal
+                isOpen={isChapterModalOpen}
+                onClose={() => setIsChapterModalOpen(false)}
+                byChapter={byChapter}
+            />
         </AuthenticatedLayout>
     );
 };
