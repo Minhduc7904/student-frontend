@@ -105,7 +105,7 @@ const HistoryLayout = () => {
                             </Card>
                         </section>
 
-                        <aside className="lg:sticky lg:top-6 lg:self-start">
+                        <aside className="lg:self-start">
                             {currentHistoryRoute === "question" ? (
                                 <QuestionHistoryStatsSidebar
                                     questionHistory={questionHistory}

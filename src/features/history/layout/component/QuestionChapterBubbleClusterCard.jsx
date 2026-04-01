@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 import HighchartsMore from "highcharts/highcharts-more";
-import { Search } from "lucide-react";
+import { ZoomIn, X } from "lucide-react";
 import { Card } from "../../../../shared/components";
 
 if (typeof HighchartsMore === "function") {
@@ -11,52 +11,41 @@ if (typeof HighchartsMore === "function") {
 
 const CHART_SIZE_BY_VARIANT = {
     compact: {
-        height: 280,
-        minSize: "28%",
-        maxSize: "120%",
+        height: 240,
+        minSize: "18%",
+        maxSize: "72%",
     },
     modal: {
-        height: 560,
-        minSize: "20%",
-        maxSize: "130%",
+        height: 420,
+        minSize: "14%",
+        maxSize: "60%",
     },
 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-const splitLabel = (text = "", maxLineLength = 12, maxLines = 2) => {
-    if (!text) return "Không có chapter";
+const normalizeBubbleValue = (rawValue, chapterCount, variant) => {
+    const safeRaw = Math.max(1, Number(rawValue) || 1);
+    const logScaled = Math.log2(safeRaw + 1) * 9;
 
-    const words = text.split(" ");
-    const lines = [];
-    let currentLine = "";
+    const floorValue =
+        chapterCount >= 18
+            ? variant === "modal"
+                ? 10
+                : 8
+            : chapterCount >= 12
+                ? variant === "modal"
+                    ? 8
+                    : 6
+                : 1;
 
-    for (const word of words) {
-        if ((currentLine + " " + word).trim().length <= maxLineLength) {
-            currentLine = (currentLine + " " + word).trim();
-        } else {
-            lines.push(currentLine);
-            currentLine = word;
-        }
-
-        if (lines.length === maxLines) break;
-    }
-
-    if (lines.length < maxLines && currentLine) {
-        lines.push(currentLine);
-    }
-
-    if (lines.length > maxLines) {
-        lines[maxLines - 1] += "...";
-    }
-
-    return lines.join("<br/>");
+    return Math.max(floorValue, logScaled);
 };
 
 const getBubbleColor = (ratio) => {
     const safeRatio = clamp(Number(ratio) || 0, 0, 1);
-    const base = 0.25 + safeRatio * 0.65;
-    return `rgba(59, 130, 246, ${base.toFixed(3)})`;
+    const base = 0.2 + safeRatio * 0.45;
+    return `rgba(34, 197, 94, ${base.toFixed(3)})`;
 };
 
 const QuestionChapterBubbleClusterCard = ({
@@ -64,6 +53,7 @@ const QuestionChapterBubbleClusterCard = ({
     onExpand,
     variant = "compact",
     showExpandButton = true,
+    onClose,
 }) => {
     const chartConfig =
         CHART_SIZE_BY_VARIANT[variant] || CHART_SIZE_BY_VARIANT.compact;
@@ -73,6 +63,7 @@ const QuestionChapterBubbleClusterCard = ({
 
     const points = useMemo(() => {
         const source = Array.isArray(byChapter) ? byChapter : [];
+        const chapterCount = source.length;
 
         return source.map((item, index) => {
             const totalQuestions = Math.max(
@@ -101,10 +92,12 @@ const QuestionChapterBubbleClusterCard = ({
                         ? 1
                         : 0;
 
-            const bubbleValue =
+            const rawBubbleValue =
                 totalQuestions > 0
                     ? totalQuestions
                     : Math.max(1, answeredCount);
+
+            const bubbleValue = normalizeBubbleValue(rawBubbleValue, chapterCount, variant);
 
             return {
                 id: `${item?.chapterId ?? "null"}-${index}`,
@@ -120,16 +113,55 @@ const QuestionChapterBubbleClusterCard = ({
                     correctCount,
                     incorrectCount,
                     correctRate: Number(item?.correctRate) || 0,
+                    rawBubbleValue,
                 },
             };
         });
-    }, [byChapter]);
+    }, [byChapter, variant]);
 
     const options = useMemo(() => {
+        const chapterCount = points.length;
+        const denseMode = chapterCount >= 12;
+        const resolvedChartHeight = isModal
+            ? chapterCount >= 20
+                ? 560
+                : chapterCount >= 14
+                    ? 500
+                    : chartHeight
+            : chapterCount >= 20
+                ? 360
+                : chapterCount >= 14
+                    ? 320
+                    : chapterCount >= 10
+                        ? 300
+                        : chartHeight;
+
+        const resolvedMaxSize =
+            chapterCount <= 2
+                ? "48%"
+                : chapterCount <= 4
+                    ? "56%"
+                    : chapterCount <= 8
+                        ? maxSize
+                        : variant === "modal"
+                            ? "54%"
+                            : "66%";
+
+        const resolvedMinSize =
+            chapterCount <= 2
+                ? "20%"
+                : chapterCount <= 4
+                    ? "18%"
+                    : denseMode
+                        ? isModal
+                            ? "13%"
+                            : "14%"
+                        : minSize;
+
         return {
             chart: {
                 type: "packedbubble",
-                height: chartHeight,
+                height: resolvedChartHeight,
                 backgroundColor: "transparent",
                 spacing: [4, 4, 4, 4],
             },
@@ -139,29 +171,30 @@ const QuestionChapterBubbleClusterCard = ({
             legend: { enabled: false },
 
             tooltip: {
-                useHTML: true,
+                useHTML: false,
                 // In modal, keep tooltip inside chart to avoid being hidden by backdrop stacking context.
                 outside: !isModal,
                 headerFormat: "",
                 pointFormatter: function () {
                     const meta = this.custom || {};
-                    return `<div style="font-size:12px;line-height:1.45;">
-                        <div style="font-weight:600;color:#0f172a;margin-bottom:4px;">
-                            ${meta.chapterName || this.name}
-                        </div>
-                        <div>Tổng câu: ${meta.totalQuestions ?? 0}</div>
-                        <div>Đã trả lời: ${meta.answeredCount ?? 0}</div>
-                        <div>Đúng: ${meta.correctCount ?? 0}</div>
-                        <div>Sai: ${meta.incorrectCount ?? 0}</div>
-                        <div>Tỷ lệ đúng: ${meta.correctRate ?? 0}%</div>
-                    </div>`;
+                    return `<span style="font-size:12px;line-height:1.45;">
+                        <span style="font-weight:600;color:#0f172a;">${meta.chapterName || this.name}</span><br/>
+                        Tổng câu: ${meta.totalQuestions ?? 0}<br/>
+                        Đã trả lời: ${meta.answeredCount ?? 0}<br/>
+                        Đúng: ${meta.correctCount ?? 0}<br/>
+                        Sai: ${meta.incorrectCount ?? 0}<br/>
+                        Tỷ lệ đúng: ${meta.correctRate ?? 0}%
+                    </span>`;
+                },
+                style: {
+                    zIndex: 30,
                 },
             },
 
             plotOptions: {
                 packedbubble: {
-                    minSize,
-                    maxSize,
+                    minSize: resolvedMinSize,
+                    maxSize: resolvedMaxSize,
                     zMin: 0,
                     zMax: Math.max(
                         ...points.map((point) => point.value),
@@ -170,48 +203,142 @@ const QuestionChapterBubbleClusterCard = ({
 
                     layoutAlgorithm: {
                         splitSeries: false,
-                        gravitationalConstant: 0.03,
+                        gravitationalConstant: denseMode ? 0.02 : 0.03,
                         dragBetweenSeries: false,
                         parentNodeLimit: true,
-                        bubblePadding: 5,
+                        bubblePadding: denseMode ? 2 : 5,
                     },
 
                     dataLabels: {
                         enabled: true,
-                        useHTML: true,
+                        // HTML labels create a separate DOM layer that can cover tooltip in modal.
+                        useHTML: !isModal,
                         formatter: function () {
-                            const value = this.point.value;
-                            const name = this.point.custom.chapterName;
+                            const name =
+                                this.point?.custom?.chapterName ||
+                                this.point?.name ||
+                                "Khác";
 
-                            // bubble nhỏ → label cực ngắn
-                            if (value < 5) {
-                                return splitLabel(name, 8, 1); // 1 dòng, ngắn
+                            const value = Number(this.point?.custom?.rawBubbleValue) || 0;
+
+                            // 🧠 split theo từ (không cắt ngu)
+                            const split = (text, maxLen, maxLines) => {
+                                const words = text.split(" ");
+                                const lines = [];
+                                let current = "";
+
+                                for (const w of words) {
+                                    if ((current + " " + w).trim().length <= maxLen) {
+                                        current = (current + " " + w).trim();
+                                    } else {
+                                        lines.push(current);
+                                        current = w;
+                                    }
+                                    if (lines.length === maxLines) break;
+                                }
+
+                                if (lines.length < maxLines && current) {
+                                    lines.push(current);
+                                }
+
+                                // nếu vẫn còn dư chữ → thêm ...
+                                if (words.join(" ").length > lines.join(" ").length) {
+                                    lines[lines.length - 1] += "...";
+                                }
+
+                                return lines.join("<br/>");
+                            };
+
+                            // 🎯 scale theo size bubble
+                            if (value < 4) {
+                                return `<span style="font-size:9px">${split(name, 8, 1)}</span>`;
                             }
 
-                            // bubble vừa
-                            if (value < 15) {
-                                return splitLabel(name, 10, 2);
+                            if (value < 10) {
+                                return `<span style="font-size:10px">${split(name, 10, 2)}</span>`;
                             }
 
-                            // bubble to
-                            return splitLabel(name, 14, 2);
+                            if (value < 20) {
+                                return `<span style="font-size:11px">${split(name, 12, 2)}</span>`;
+                            }
+
+                            return `<span style="font-size:12px;font-weight:600">${split(name, 14, 3)}</span>`;
                         },
+                        backgroundColor: "transparent",
+                        borderWidth: 0,
+                        borderRadius: 0,
+                        padding: 0,
                         style: {
-                            color: "#0f172a",
+                            color: "#15803d",
                             textOutline: "none",
                             fontSize:
-                                variant === "modal" ? "11px" : "9px",
-                            fontWeight: "600",
+                                variant === "modal" ? "10px" : "9px",
+                            fontWeight: "700",
                             textAlign: "center",
                             pointerEvents: "none", // 🔥 tránh chặn hover tooltip
+                            zIndex: 1,
                         },
                     },
 
                     marker: {
-                        lineColor: "#1e40af",
-                        lineWidth: 1.5,
+                        lineColor: "transparent",
+                        lineWidth: 0,
+                        fillOpacity: 0.92,
                     },
                 },
+            },
+
+            responsive: {
+                rules: isModal
+                    ? [
+                        {
+                            condition: { maxWidth: 640 },
+                            chartOptions: {
+                                chart: { height: 320 },
+                                plotOptions: {
+                                    packedbubble: {
+                                        dataLabels: { style: { fontSize: "9px" } },
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            condition: { minWidth: 641, maxWidth: 1024 },
+                            chartOptions: {
+                                chart: { height: 420 },
+                            },
+                        },
+                        {
+                            condition: { minWidth: 1025 },
+                            chartOptions: {
+                                chart: { height: 560 },
+                                plotOptions: {
+                                    packedbubble: {
+                                        dataLabels: { style: { fontSize: "11px" } },
+                                    },
+                                },
+                            },
+                        },
+                    ]
+                    : [
+                        {
+                            condition: { maxWidth: 640 },
+                            chartOptions: {
+                                chart: { height: 220 },
+                                plotOptions: {
+                                    packedbubble: {
+                                        dataLabels: { style: { fontSize: "8px" }, padding: 3 },
+                                    },
+                                },
+                            },
+                        },
+                        {
+                            condition: { minWidth: 641 },
+                            chartOptions: {
+                                chart: { height: 280 },
+                            },
+                        },
+                    ],
             },
 
             series: [
@@ -224,26 +351,35 @@ const QuestionChapterBubbleClusterCard = ({
     }, [chartHeight, isModal, maxSize, minSize, points, variant]);
 
     return (
-        <Card className="w-full rounded-2xl border-slate-200 p-4">
+        <Card className={`w-full rounded-2xl border-slate-200 ${isModal ? "p-3 sm:p-4" : "p-4"}`}>
             <div className="flex flex-col gap-2">
                 <div className="flex items-start justify-between gap-2">
                     <p className="text-xs uppercase text-slate-500">
-                        Theo chapter
+                        Theo Chương
                     </p>
 
                     {showExpandButton ? (
                         <button
                             type="button"
                             onClick={onExpand}
-                            className="inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                            className="cursor-pointer inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
                         >
-                            <Search size={14} />
+                            <ZoomIn size={14} />
                         </button>
                     ) : null}
+                    {onClose && (
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                            aria-label="Đóng modal"
+                        >
+                            <X size={16} />
+                        </button>)}
                 </div>
 
                 {!points.length ? (
-                    <div className="mt-2 text-center text-xs text-slate-500">
+                    <div className="mt-2 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-5 text-center text-xs text-slate-500">
                         Chưa có dữ liệu.
                     </div>
                 ) : (

@@ -1,7 +1,11 @@
-import { memo } from "react";
-import { Card, CustomTooltip } from "../../../../shared/components";
+import { memo, useState } from "react";
+import ReactECharts from "echarts-for-react";
+import { ZoomIn, X } from "lucide-react";
+import { Card } from "../../../../shared/components";
+import { Modal } from "../../../../shared/components/modal/Modal";
 import QuestionStatsSummaryDonutCard from "./QuestionStatsSummaryDonutCard";
 import QuestionChapterBubbleClusterCard from "./QuestionChapterBubbleClusterCard";
+import QuestionDifficultyStatsCard from "./QuestionDifficultyStatsCard";
 
 const normalizeHistoryItems = (data) => {
     if (!data) return [];
@@ -41,6 +45,11 @@ const formatXAxisLabel = (value) => {
     const mi = String(date.getMinutes()).padStart(2, "0");
 
     return `${dd}/${mm} ${hh}:${mi}`;
+};
+
+const formatXAxisLabelMultiline = (value) => {
+    const [datePart = "--", timePart = ""] = String(value || "").split(" ");
+    return timePart ? `${datePart}\n${timePart}` : datePart;
 };
 
 const toPercent = (item) => {
@@ -119,64 +128,150 @@ const buildChartData = (items, options = {}) => {
     return rows;
 };
 
-const BarChart = ({ title, subtitle, items, chartType, onlySubmitted = false }) => {
+const SmoothLineChartCard = ({
+    title,
+    subtitle,
+    items,
+    chartType,
+    onlySubmitted = false,
+    variant = "compact",
+    showExpandButton = true,
+    onExpand,
+    onClose,
+}) => {
     const chartData = buildChartData(items, { onlySubmitted });
+    const isModal = variant === "modal";
+    const chartHeight = isModal ? 420 : 260;
+    const maxVisibleTicks = isModal ? 10 : 5;
+    const axisInterval = chartData.length > maxVisibleTicks ? Math.ceil(chartData.length / maxVisibleTicks) - 1 : 0;
+
+    const chartOption = {
+        grid: {
+            left: 38,
+            right: 14,
+            top: 18,
+            bottom: 28,
+        },
+        xAxis: {
+            type: "category",
+            boundaryGap: false,
+            data: chartData.map((row) => formatXAxisLabel(row.at)),
+            axisLabel: {
+                color: "#64748b",
+                fontSize: isModal ? 10 : 9,
+                interval: axisInterval,
+                hideOverlap: true,
+                lineHeight: isModal ? 14 : 12,
+                margin: 10,
+                formatter: (value) => formatXAxisLabelMultiline(value),
+            },
+            axisTick: { show: false },
+            axisLine: { lineStyle: { color: "#e2e8f0" } },
+        },
+        yAxis: {
+            type: "value",
+            min: 0,
+            max: 100,
+            axisLabel: {
+                color: "#64748b",
+                fontSize: 10,
+                formatter: "{value}%",
+            },
+            splitLine: {
+                lineStyle: { color: "#e2e8f0", type: "dashed" },
+            },
+        },
+        tooltip: {
+            trigger: "axis",
+            confine: true,
+            backgroundColor: "rgba(255,255,255,0.98)",
+            borderColor: "#e2e8f0",
+            borderWidth: 1,
+            textStyle: {
+                color: "#0f172a",
+                fontSize: 12,
+            },
+            formatter: (params) => {
+                const row = chartData[params?.[0]?.dataIndex] || null;
+                if (!row) return "";
+
+                const titleLabel = getTitleByType(row.item, chartType);
+                const scoreLabel = formatScorePair(row.item);
+                const timeSpentLabel = formatTimeSpent(row.item);
+                const percentLabel = Number(row.percent || 0).toFixed(2);
+
+                return `
+                    <div style="display:flex;flex-direction:column;gap:4px;min-width:180px;">
+                        <div style="font-weight:700;color:#0f172a;">${titleLabel}</div>
+                        <div>Thời điểm: ${formatXAxisLabel(row.at)}</div>
+                        <div>Điểm: ${scoreLabel}</div>
+                        <div>Tỷ lệ: ${percentLabel}%</div>
+                        <div>Thời gian làm bài: ${timeSpentLabel}</div>
+                    </div>
+                `;
+            },
+        },
+        series: [
+            {
+                data: chartData.map((row) => Number(row.percent.toFixed(2))),
+                type: "line",
+                smooth: true,
+                symbol: "circle",
+                symbolSize: 7,
+                lineStyle: {
+                    width: 3,
+                    color: "#2563eb",
+                },
+                itemStyle: {
+                    color: "#2563eb",
+                    borderColor: "#ffffff",
+                    borderWidth: 1,
+                },
+                areaStyle: {
+                    color: "rgba(37, 99, 235, 0.12)",
+                },
+            },
+        ],
+    };
 
     return (
-        <Card>
-            <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-            <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+        <Card className={`rounded-2xl border-slate-200 ${isModal ? "p-3 sm:p-4" : "p-4"}`}>
+            <div className="flex items-start justify-between gap-2">
+                <div>
+                    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
+                    <p className="mt-1 text-xs text-slate-500">{subtitle}</p>
+                </div>
+
+                {showExpandButton ? (
+                    <button
+                        type="button"
+                        onClick={onExpand}
+                        className="cursor-pointer inline-flex h-7 w-7 items-center justify-center rounded-md border border-slate-200 bg-white text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                        aria-label="Phóng to biểu đồ"
+                    >
+                        <ZoomIn size={14} />
+                    </button>
+                ) : null}
+
+                {onClose ? (
+                    <button
+                        type="button"
+                        onClick={onClose}
+                        className="cursor-pointer inline-flex h-8 w-8 items-center justify-center rounded-md border border-slate-200 text-slate-500 transition-colors hover:bg-slate-50 hover:text-slate-700"
+                        aria-label="Đóng modal"
+                    >
+                        <X size={16} />
+                    </button>
+                ) : null}
+            </div>
 
             {chartData.length === 0 ? (
                 <div className="mt-4 rounded-lg border border-dashed border-slate-200 bg-slate-50 px-3 py-6 text-center text-xs text-slate-500">
                     Chưa có dữ liệu điểm để vẽ biểu đồ.
                 </div>
             ) : (
-                <div className="mt-4">
-                    <div className="flex items-end justify-between gap-2 border-b border-slate-200 pb-2">
-                        <span className="text-[11px] font-medium text-slate-500">0%</span>
-                        <span className="text-[11px] font-medium text-slate-500">50%</span>
-                        <span className="text-[11px] font-semibold text-slate-700">100%</span>
-                    </div>
-
-                    <div className="mt-3 overflow-x-auto">
-                        <div className="flex min-w-[320px] items-end gap-2 pb-1">
-                            {chartData.map((row, index) => {
-                                const height = Math.max(8, Math.round((row.percent / 100) * 140));
-                                const percentLabel = row.percent.toFixed(2);
-                                const titleLabel = getTitleByType(row.item, chartType);
-                                const scoreLabel = formatScorePair(row.item);
-                                const timeSpentLabel = formatTimeSpent(row.item);
-                                const tooltipContent = (
-                                    <div className="space-y-1 text-xs text-slate-700">
-                                        <p className="font-semibold text-slate-900">{titleLabel}</p>
-                                        <p>Điểm: {scoreLabel}</p>
-                                        <p>Thời gian làm bài: {timeSpentLabel}</p>
-                                    </div>
-                                );
-
-                                return (
-                                    <div key={`bar-${index}`} className="flex w-9 shrink-0 flex-col items-center gap-1">
-                                        <CustomTooltip text={tooltipContent} className="w-full">
-                                            <div className="h-36 w-full rounded-md bg-slate-100 p-0.5">
-                                                <div
-                                                    className="w-full rounded-sm bg-blue-500 transition-all duration-300"
-                                                    style={{
-                                                        height: `${height}px`,
-                                                        marginTop: `${140 - height}px`,
-                                                    }}
-                                                />
-                                            </div>
-                                        </CustomTooltip>
-                                        <span className="text-[10px] font-semibold text-slate-700">{percentLabel}%</span>
-                                        <span className="w-full text-center text-[10px] text-slate-500 leading-tight">
-                                            {formatXAxisLabel(row.at)}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </div>
+                <div className="mt-3 rounded-xl border border-slate-100 bg-white px-2 py-2">
+                    <ReactECharts option={chartOption} style={{ height: chartHeight, width: "100%" }} notMerge lazyUpdate />
                 </div>
             )}
         </Card>
@@ -184,17 +279,41 @@ const BarChart = ({ title, subtitle, items, chartType, onlySubmitted = false }) 
 };
 
 export const CompetitionHistoryStatsSidebar = memo(({ submittedHistory }) => {
+    const [isChartModalOpen, setIsChartModalOpen] = useState(false);
     const items = normalizeHistoryItems(submittedHistory);
     const submittedCount = items.filter((item) => isSubmittedItem(item)).length;
 
     return (
-        <BarChart
-            title="Thống kê cuộc thi"
-            subtitle={`Đã nộp ${submittedCount} bài`}
-            items={items}
-            chartType="competition"
-            onlySubmitted
-        />
+        <>
+            <SmoothLineChartCard
+                title="Thống kê cuộc thi"
+                subtitle={`Đã nộp ${submittedCount} bài`}
+                items={items}
+                chartType="competition"
+                onlySubmitted
+                onExpand={() => setIsChartModalOpen(true)}
+            />
+
+            <Modal isOpen={isChartModalOpen} onClose={() => setIsChartModalOpen(false)}>
+                <div
+                    className="w-full max-h-[90vh] max-w-[96vw] overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-w-[92vw] lg:max-w-6xl"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <div className="max-h-[calc(90vh-64px)] overflow-y-auto">
+                        <SmoothLineChartCard
+                            title="Thống kê cuộc thi"
+                            subtitle={`Đã nộp ${submittedCount} bài`}
+                            items={items}
+                            chartType="competition"
+                            onlySubmitted
+                            variant="modal"
+                            showExpandButton={false}
+                            onClose={() => setIsChartModalOpen(false)}
+                        />
+                    </div>
+                </div>
+            </Modal>
+        </>
     );
 });
 
@@ -207,6 +326,7 @@ export const QuestionHistoryStatsSidebar = memo(({ questionHistory, questionStat
     const correctCount = summary?.totalCorrect ?? items.filter((item) => item?.isCorrect === true).length;
     const incorrectCount = summary?.totalIncorrect ?? items.filter((item) => item?.isCorrect === false).length;
     const byChapter = Array.isArray(questionStatistics?.byChapter) ? questionStatistics.byChapter : [];
+    const byDifficulty = Array.isArray(questionStatistics?.byDifficulty) ? questionStatistics.byDifficulty : [];
 
     return (
         <div className="space-y-4">
@@ -216,6 +336,7 @@ export const QuestionHistoryStatsSidebar = memo(({ questionHistory, questionStat
                 fallbackCorrect={correctCount}
                 fallbackIncorrect={incorrectCount}
             />
+            <QuestionDifficultyStatsCard byDifficulty={byDifficulty} />
             <QuestionChapterBubbleClusterCard byChapter={byChapter} onExpand={onOpenChapterModal} />
         </div>
     );
@@ -224,17 +345,41 @@ export const QuestionHistoryStatsSidebar = memo(({ questionHistory, questionStat
 QuestionHistoryStatsSidebar.displayName = "QuestionHistoryStatsSidebar";
 
 export const ExamHistoryStatsSidebar = memo(({ examHistory }) => {
+    const [isChartModalOpen, setIsChartModalOpen] = useState(false);
     const items = normalizeHistoryItems(examHistory);
     const submittedCount = items.filter((item) => isSubmittedItem(item)).length;
 
     return (
-        <BarChart
-            title="Thống kê đề mẫu"
-            subtitle={`Đã nộp ${submittedCount} lượt`}
-            items={items}
-            chartType="exam"
-            onlySubmitted
-        />
+        <>
+            <SmoothLineChartCard
+                title="Thống kê đề mẫu"
+                subtitle={`Đã nộp ${submittedCount} lượt`}
+                items={items}
+                chartType="exam"
+                onlySubmitted
+                onExpand={() => setIsChartModalOpen(true)}
+            />
+
+            <Modal isOpen={isChartModalOpen} onClose={() => setIsChartModalOpen(false)}>
+                <div
+                    className="w-full max-h-[90vh] max-w-[96vw] overflow-hidden rounded-2xl bg-white shadow-2xl sm:max-w-[92vw] lg:max-w-6xl"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <div className="max-h-[calc(90vh-64px)] overflow-y-auto">
+                        <SmoothLineChartCard
+                            title="Thống kê đề mẫu"
+                            subtitle={`Đã nộp ${submittedCount} lượt`}
+                            items={items}
+                            chartType="exam"
+                            onlySubmitted
+                            variant="modal"
+                            showExpandButton={false}
+                            onClose={() => setIsChartModalOpen(false)}
+                        />
+                    </div>
+                </div>
+            </Modal>
+        </>
     );
 });
 
