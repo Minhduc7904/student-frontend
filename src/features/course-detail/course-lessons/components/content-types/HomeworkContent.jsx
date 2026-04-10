@@ -117,7 +117,7 @@ const TabButton = ({ tab, isActive, onClick, disabled }) => {
             onClick={disabled ? undefined : onClick}
             disabled={disabled}
             title={disabled ? 'Không có quyền truy cập' : tab.label}
-            className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap ${disabled
+            className={`relative w-full sm:w-auto flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all duration-200 ${disabled
                 ? 'cursor-not-allowed text-gray-300'
                 : isActive
                     ? 'bg-blue-800 text-white shadow-sm cursor-pointer'
@@ -125,7 +125,7 @@ const TabButton = ({ tab, isActive, onClick, disabled }) => {
                 }`}
         >
             <Icon size={14} className="shrink-0" />
-            <span>{tab.label}</span>
+            <span className="truncate">{tab.label}</span>
             {disabled && <Lock size={11} className="shrink-0 text-gray-300" />}
         </button>
     );
@@ -403,7 +403,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                     </div>
 
                     {/* Tabs */}
-                    <div className="flex gap-1 overflow-x-auto border-t border-gray-100 pt-3">
+                    <div className="grid grid-cols-2 sm:flex gap-1 border-t border-gray-100 pt-3">
                         {tabConfig.map((tab) => (
                             <TabButton
                                 key={tab.id}
