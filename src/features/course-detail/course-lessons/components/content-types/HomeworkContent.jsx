@@ -82,6 +82,12 @@ const BASE_TAB_CONFIG = [
         requirePermission: null
     },
     {
+        id: TABS.SOLUTION_VIDEO,
+        label: 'Video lời giải',
+        icon: Play,
+        requirePermission: 'allowViewSolutionYoutubeUrl'
+    },
+    {
         id: TABS.RANKING,
         label: 'Xếp hạng',
         icon: Trophy,
@@ -99,12 +105,7 @@ const BASE_TAB_CONFIG = [
         icon: History,
         requirePermission: null
     },
-    {
-        id: TABS.SOLUTION_VIDEO,
-        label: 'Video lời giải',
-        icon: Play,
-        requirePermission: 'allowViewSolutionYoutubeUrl'
-    }
+
 ];
 
 // Tab Button Component
@@ -117,10 +118,10 @@ const TabButton = ({ tab, isActive, onClick, disabled }) => {
             disabled={disabled}
             title={disabled ? 'Không có quyền truy cập' : tab.label}
             className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap ${disabled
-                    ? 'cursor-not-allowed text-gray-300'
-                    : isActive
-                        ? 'bg-blue-800 text-white shadow-sm cursor-pointer'
-                        : 'text-gray-500 hover:bg-gray-100 hover:text-blue-800 cursor-pointer'
+                ? 'cursor-not-allowed text-gray-300'
+                : isActive
+                    ? 'bg-blue-800 text-white shadow-sm cursor-pointer'
+                    : 'text-gray-500 hover:bg-gray-100 hover:text-blue-800 cursor-pointer'
                 }`}
         >
             <Icon size={14} className="shrink-0" />
@@ -359,8 +360,8 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                             type="button"
                             onClick={() => { setSelectedIndex(idx); setActiveTab(TABS.DETAIL); }}
                             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-all cursor-pointer ${selectedIndex === idx
-                                    ? 'bg-blue-800 text-white shadow-sm'
-                                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-blue-800 text-white shadow-sm'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                                 }`}
                         >
                             <span>Đề {idx + 1}</span>
@@ -392,8 +393,8 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                             disabled={isButtonDisabled}
                             onClick={isButtonDisabled ? undefined : handleActionButton}
                             className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${isButtonDisabled
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
+                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
                                 }`}
                         >
                             <Play size={15} />
