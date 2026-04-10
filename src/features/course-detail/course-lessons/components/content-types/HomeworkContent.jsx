@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Play, Lock, Info, Trophy, FileSearch, History, ChevronRight } from "lucide-react";
 import CompetitionDetailInfoTab from "../../../../competition/competitionDetail/component/CompetitionDetailInfoTab";
 import CompetitionRankingPage from "../../../../competition/ranking";
@@ -7,6 +7,7 @@ import CompetitionHistoryPage from "../../../../competition/history";
 import CompetitionResultPage from "../../../../competition/result";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../../../core/constants";
+import HomeworkSolutionVideoTab from "./HomeworkSolutionVideoTab";
 
 // Status configuration
 const STATUS_CONFIG = {
@@ -69,10 +70,11 @@ const TABS = {
     RANKING: 'ranking',
     REVIEW: 'review',
     HISTORY: 'history',
-    RESULT: 'result'
+    RESULT: 'result',
+    SOLUTION_VIDEO: 'solutionVideo'
 };
 
-const TAB_CONFIG = [
+const BASE_TAB_CONFIG = [
     {
         id: TABS.DETAIL,
         label: 'Chi tiết',
@@ -96,6 +98,12 @@ const TAB_CONFIG = [
         label: 'Lịch sử',
         icon: History,
         requirePermission: null
+    },
+    {
+        id: TABS.SOLUTION_VIDEO,
+        label: 'Video lời giải',
+        icon: Play,
+        requirePermission: 'allowViewSolutionYoutubeUrl'
     }
 ];
 
@@ -108,13 +116,12 @@ const TabButton = ({ tab, isActive, onClick, disabled }) => {
             onClick={disabled ? undefined : onClick}
             disabled={disabled}
             title={disabled ? 'Không có quyền truy cập' : tab.label}
-            className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap ${
-                disabled
+            className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-[12px] sm:text-[13px] font-medium transition-all duration-200 whitespace-nowrap ${disabled
                     ? 'cursor-not-allowed text-gray-300'
                     : isActive
                         ? 'bg-blue-800 text-white shadow-sm cursor-pointer'
                         : 'text-gray-500 hover:bg-gray-100 hover:text-blue-800 cursor-pointer'
-            }`}
+                }`}
         >
             <Icon size={14} className="shrink-0" />
             <span>{tab.label}</span>
@@ -137,6 +144,14 @@ export const HomeworkContent = ({ learningItemDetail }) => {
 
     const currentContent = homeworkContents[selectedIndex] || null;
     const competition = currentContent?.competition;
+    const solutionYoutubeUrl = competition?.exam?.solutionYoutubeUrl;
+
+    const tabConfig = useMemo(() => {
+        return BASE_TAB_CONFIG.filter((tab) => {
+            if (tab.id !== TABS.SOLUTION_VIDEO) return true;
+            return !!(competition?.allowViewSolutionYoutubeUrl && solutionYoutubeUrl);
+        });
+    }, [competition?.allowViewSolutionYoutubeUrl, solutionYoutubeUrl]);
 
     // Get status config from current content
     const currentStatus = currentContent?.progress?.status || 'DO_NOW';
@@ -153,16 +168,22 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     };
 
     const getFirstAvailableTab = () => {
-        const availableTab = TAB_CONFIG.find(tab => !isTabDisabled(tab));
+        const availableTab = tabConfig.find(tab => !isTabDisabled(tab));
         return availableTab ? availableTab.id : TABS.DETAIL;
     };
 
     useEffect(() => {
+        const isCurrentTabVisible = tabConfig.some(tab => tab.id === activeTab);
+        if (!isCurrentTabVisible) {
+            setActiveTab(getFirstAvailableTab());
+            return;
+        }
+
         const firstAvailable = getFirstAvailableTab();
-        if (isTabDisabled(TAB_CONFIG.find(t => t.id === activeTab))) {
+        if (isTabDisabled(tabConfig.find(t => t.id === activeTab))) {
             setActiveTab(firstAvailable);
         }
-    }, [competition]);
+    }, [competition, tabConfig, activeTab]);
 
     useEffect(() => {
         if (!competitionSubmitId) {
@@ -233,7 +254,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     };
 
     const handleTabChange = (tabId) => {
-        const tab = TAB_CONFIG.find(t => t.id === tabId);
+        const tab = tabConfig.find(t => t.id === tabId);
         if (tab && isTabDisabled(tab)) return;
 
         if (competitionSubmitId) {
@@ -284,7 +305,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
             policies: competition?.policies,
         };
 
-        const currentTabConfig = TAB_CONFIG.find(t => t.id === activeTab);
+        const currentTabConfig = tabConfig.find(t => t.id === activeTab);
         if (currentTabConfig && isTabDisabled(currentTabConfig)) {
             return <LockedContent title="Nội dung bị khóa" desc="Bạn không có quyền truy cập nội dung này" />;
         }
@@ -309,6 +330,8 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                         onViewResult={({ submitId }) => goToHomeworkResult(submitId)}
                     />
                 );
+            case TABS.SOLUTION_VIDEO:
+                return <HomeworkSolutionVideoTab youtubeUrl={solutionYoutubeUrl} />;
             case TABS.RESULT:
                 if (!competitionSubmitId || !competitionId) {
                     return <LockedContent title="Không tìm thấy kết quả" desc="Thiếu thông tin để hiển thị kết quả bài làm" />;
@@ -335,11 +358,10 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                             key={hw.homeworkContentId ?? idx}
                             type="button"
                             onClick={() => { setSelectedIndex(idx); setActiveTab(TABS.DETAIL); }}
-                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-all cursor-pointer ${
-                                selectedIndex === idx
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-medium whitespace-nowrap transition-all cursor-pointer ${selectedIndex === idx
                                     ? 'bg-blue-800 text-white shadow-sm'
                                     : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                            }`}
+                                }`}
                         >
                             <span>Đề {idx + 1}</span>
                             {selectedIndex === idx && <ChevronRight size={12} />}
@@ -369,11 +391,10 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                             type="button"
                             disabled={isButtonDisabled}
                             onClick={isButtonDisabled ? undefined : handleActionButton}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${
-                                isButtonDisabled
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${isButtonDisabled
                                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                                     : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
-                            }`}
+                                }`}
                         >
                             <Play size={15} />
                             <span>{statusConfig.buttonText}</span>
@@ -382,7 +403,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
 
                     {/* Tabs */}
                     <div className="flex gap-1 overflow-x-auto border-t border-gray-100 pt-3">
-                        {TAB_CONFIG.map((tab) => (
+                        {tabConfig.map((tab) => (
                             <TabButton
                                 key={tab.id}
                                 tab={tab}
