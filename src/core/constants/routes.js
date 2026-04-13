@@ -15,6 +15,7 @@ export const ROUTES = {
     // Dashboard
     DASHBOARD: '/dashboard',
     PRACTICE: '/practice',
+    PRACTICE_BY_CHAPTER: '/practice/by-chapter',
     COMPETITION: '/competition',
     COMPETITION_DETAIL: (competitionId) => `/competition/${competitionId}`,
 

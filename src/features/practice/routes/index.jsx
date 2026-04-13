@@ -1,5 +1,6 @@
 import PracticeLayout from '../layout/PracticeLayout';
 import PracticePage from '../index';
+import PracticeByChapterPage from '../by-chapter';
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 
@@ -22,6 +23,14 @@ export const practiceRoutes = [
                         meta: {
                             title: 'Luyện tập',
                             description: 'Trang luyện tập của học sinh',
+                        },
+                    },
+                    {
+                        path: 'by-chapter',
+                        element: <PracticeByChapterPage />,
+                        meta: {
+                            title: 'Luyện theo chương',
+                            description: 'Trang luyện tập theo chương',
                         },
                     },
                 ],

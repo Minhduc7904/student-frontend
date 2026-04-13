@@ -12,19 +12,13 @@ import AuthenticatedLayout from "../../../shared/components/layout/Authenticated
 const PracticeLayout = () => {
     return (
         <AuthenticatedLayout>
-            <div className="flex-1 flex flex-col lg:flex-row h-full bg-white overflow-y-auto lg:overflow-hidden custom-scrollbar">
-                {/* Right Sidebar - custom cho Practice */}
-                <div className="order-first lg:order-last">
-                    <PracticeRightSidebar />
-                </div>
-
-                {/* Page content */}
-                <main className="flex-1 px-4 xl:px-6 2xl:px-15 pt-10 lg:overflow-y-auto custom-scrollbar">
+            <main className="relative z-10 flex-1 bg-[#F7F8FA] flex items-center flex-col px-4 xl:px-6 2xl:px-15 py-4 pt-4 md:pt-4 lg:pt-10 lg:overflow-y-auto overflow-x-hidden custom-scrollbar">
+                <div className="w-full max-w-7xl flex items-center justify-center mb-6">
                     <Suspense fallback={<ContentLoading />}>
                         <Outlet />
                     </Suspense>
-                </main>
-            </div>
+                </div>
+            </main>
         </AuthenticatedLayout>
     );
 };
