@@ -141,7 +141,9 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const { courseId, lessonId, learningItemId, competitionSubmitId } = useParams();
     const homeworkContents = learningItemDetail?.homeworkContents || [];
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const [activeTab, setActiveTab] = useState(TABS.DETAIL);
+    const [activeTab, setActiveTab] = useState(() => (
+        competitionSubmitId ? TABS.RESULT : TABS.DETAIL
+    ));
 
     const currentContent = homeworkContents[selectedIndex] || null;
     const competition = currentContent?.competition;
@@ -174,6 +176,11 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     };
 
     useEffect(() => {
+        // Keep RESULT tab while being on result route.
+        if (competitionSubmitId && activeTab === TABS.RESULT) {
+            return;
+        }
+
         const isCurrentTabVisible = tabConfig.some(tab => tab.id === activeTab);
         if (!isCurrentTabVisible) {
             setActiveTab(getFirstAvailableTab());
@@ -184,7 +191,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         if (isTabDisabled(tabConfig.find(t => t.id === activeTab))) {
             setActiveTab(firstAvailable);
         }
-    }, [competition, tabConfig, activeTab]);
+    }, [competitionSubmitId, competition, tabConfig, activeTab]);
 
     useEffect(() => {
         if (!competitionSubmitId) {

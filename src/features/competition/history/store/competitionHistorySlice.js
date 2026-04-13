@@ -51,7 +51,7 @@ const competitionHistorySlice = createSlice({
                 state.error = null;
 
                 const data = action.payload?.data ?? {};
-                state.history = Array.isArray(data?.history) ? data.history : [];
+                state.history = Array.isArray(data) ? data : [];
                 state.pagination = data?.pagination || action.payload?.pagination || action.payload?.meta || null;
             })
             .addCase(fetchCompetitionStudentHistory.rejected, (state, action) => {
