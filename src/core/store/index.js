@@ -24,6 +24,7 @@ import examHistoryPageReducer from '../../features/history/exam/store/examHistor
 import questionHistoryPageReducer from '../../features/history/question/store/questionHistoryPageSlice'
 import practiceByChapterReducer from '../../features/practice/by-chapter/store/practiceByChapterSlice'
 import redoWrongReducer from '../../features/practice/redo-wrong/store/redoWrongSlice'
+import questionDetailReducer from '../../features/practice/question-detail/store/questionDetailSlice'
 // Import your reducers here
 
 export const store = configureStore({
@@ -54,6 +55,7 @@ export const store = configureStore({
     questionHistoryPage: questionHistoryPageReducer,
     practiceByChapter: practiceByChapterReducer,
     redoWrong: redoWrongReducer,
+    questionDetail: questionDetailReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

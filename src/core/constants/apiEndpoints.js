@@ -141,6 +141,9 @@ export const API_ENDPOINTS = {
     // Questions
     QUESTIONS: {
         PUBLIC_STUDENT: '/questions/public/student',
+        PUBLIC_STUDENT_DETAIL: (questionId) => `/questions/public/student/${questionId}`,
+        PUBLIC_STUDENT_SEARCH: '/questions/public/student/search',
+        PUBLIC_STUDENT_RELATED: (questionId) => `/questions/public/student/${questionId}/related`,
     },
 
     // Question Chats

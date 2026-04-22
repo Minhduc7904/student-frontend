@@ -2,6 +2,7 @@ import PracticeLayout from '../layout/PracticeLayout';
 import PracticePage from '../index';
 import PracticeByChapterPage from '../by-chapter';
 import RedoWrongQuestionsPage from '../redo-wrong';
+import QuestionDetailPage from '../question-detail';
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 
@@ -40,6 +41,14 @@ export const practiceRoutes = [
                         meta: {
                             title: 'Làm lại câu sai',
                             description: 'Trang làm lại các câu hỏi đã trả lời sai',
+                        },
+                    },
+                    {
+                        path: 'questions/:questionId',
+                        element: <QuestionDetailPage />,
+                        meta: {
+                            title: 'Chi tiết câu hỏi',
+                            description: 'Trang chi tiết câu hỏi và câu liên quan',
                         },
                     },
                 ],

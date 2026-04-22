@@ -17,6 +17,8 @@ export const ROUTES = {
     PRACTICE: '/practice',
     PRACTICE_BY_CHAPTER: '/practice/by-chapter',
     PRACTICE_REDO_WRONG: '/practice/redo-wrong',
+    PRACTICE_QUESTION_DETAIL_BASE: '/practice/questions',
+    PRACTICE_QUESTION_DETAIL: (questionId) => `/practice/questions/${questionId}`,
     COMPETITION: '/competition',
     COMPETITION_DETAIL: (competitionId) => `/competition/${competitionId}`,
 

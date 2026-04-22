@@ -16,6 +16,13 @@ const PracticeLayout = () => {
     const breadcrumbItems = useMemo(() => {
         const pathname = location.pathname || "";
 
+        if (pathname.startsWith(ROUTES.PRACTICE_QUESTION_DETAIL_BASE)) {
+            return [
+                { label: "Luyện tập", to: ROUTES.PRACTICE },
+                { label: "Chi tiết câu hỏi" },
+            ];
+        }
+
         if (pathname.startsWith(ROUTES.PRACTICE_BY_CHAPTER)) {
             return [
                 { label: "Luyện tập", to: ROUTES.PRACTICE },
