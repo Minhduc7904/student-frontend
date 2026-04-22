@@ -152,6 +152,11 @@ export const API_ENDPOINTS = {
         LIST: '/subjects',
     },
 
+    // Chapters
+    CHAPTERS: {
+        PUBLIC_STUDENT_BY_SUBJECT: (subjectId) => `/chapters/public/student/subject/${subjectId}`,
+    },
+
     // Media
     MEDIA: {
         UPLOAD: '/media/upload',

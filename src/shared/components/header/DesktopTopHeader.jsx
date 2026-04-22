@@ -25,7 +25,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
 
     const practiceItems = [
         { label: "Đề mẫu", path: ROUTES.EXAMS, image: DeMauImage },
-        { label: "Phòng luyện đề", path: ROUTES.PRACTICE, image: LuyenDeImage, locked: true },
+        { label: "Phòng luyện đề", path: ROUTES.PRACTICE, image: LuyenDeImage },
     ];
 
     const isActive = (path) => {
