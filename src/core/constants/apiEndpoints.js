@@ -143,6 +143,19 @@ export const API_ENDPOINTS = {
         PUBLIC_STUDENT: '/questions/public/student',
     },
 
+    // Question Chats
+    QUESTION_CHATS: {
+        LIST: '/question-chats',
+        DETAIL: (id) => `/question-chats/${id}`,
+        CREATE: '/question-chats',
+    },
+
+    // Question Chat Messages
+    QUESTION_CHAT_MESSAGES: {
+        LIST: '/question-chat-messages',
+        CREATE: '/question-chat-messages',
+    },
+
     // Exam Attempts
     EXAM_ATTEMPTS: {
         PUBLIC_STUDENT: '/exam-attempts/public/student',

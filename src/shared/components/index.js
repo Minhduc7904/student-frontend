@@ -17,3 +17,4 @@ export * from './radio';
 export * from './input';
 export * from './video';
 export * from './charts';
+export * from './question-chat';

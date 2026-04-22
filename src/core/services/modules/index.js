@@ -19,3 +19,4 @@ export * from './mediaService';
 export * from './tuitionPaymentService';
 export * from './markdownService';
 export * from './chapterService';
+export * from './questionChatService';

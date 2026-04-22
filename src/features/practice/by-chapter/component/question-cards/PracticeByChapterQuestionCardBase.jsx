@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { CheckCircle2, Circle, Lightbulb, User, X, XCircle, Youtube } from 'lucide-react';
 import { Modal } from '../../../../../shared/components/modal/Modal';
 import MarkdownRenderer from '../../../../../shared/components/markdown/MarkdownRenderer';
-import { YoutubeEmbed } from '../../../../../shared/components';
+import { YoutubeEmbed, QuestionChatButton } from '../../../../../shared/components';
 import { resolveDifficultyMeta } from '../../../../../shared/constants';
 import { getQuestionContent } from './questionUtils';
 import PracticeByChapterQuestionStatements from './PracticeByChapterQuestionStatements';
@@ -14,12 +14,51 @@ const mapQuestionTypeLabel = (type) => {
     return type || 'Câu hỏi';
 };
 
+const buildFullQuestionContent = (question) => {
+    const content = getQuestionContent(question);
+    const statements = question?.statements || [];
+
+    const statementsHtml = statements
+        .map((s, idx) => {
+            const prefix = String.fromCharCode(65 + idx); // A B C D
+            const statementContent =
+                s?.contentHtml || s?.content || s?.statementContent || '';
+
+            return `
+                <div style="margin-bottom:8px;">
+                    <strong>${prefix}.</strong> ${statementContent}
+                </div>
+            `;
+        })
+        .join('');
+
+    return `
+        <div>
+            <h3 style="margin-bottom:8px;">Câu hỏi</h3>
+            <div style="margin-bottom:12px;">
+                ${content || ''}
+            </div>
+
+            ${statements.length
+            ? `
+                <h4 style="margin-bottom:8px;">📌 Đáp án</h4>
+                <div>
+                    ${statementsHtml}
+                </div>
+            `
+            : ''
+        }
+        </div>
+    `;
+};
+
 const resolveChapterLabels = (question) => {
-    if (Array.isArray(question?.chapters)) {
-        return question.chapters
+    console.log('Resolving chapter labels for question:', question);
+    if (Array.isArray(question?.questionChapters)) {
+        return question.questionChapters
             .map((item) => {
                 if (typeof item === 'string') return item;
-                return item?.name || item?.title || item?.chapterName || null;
+                return item?.chapter?.name || item?.title || item?.chapterName || null;
             })
             .filter(Boolean);
     }
@@ -39,18 +78,26 @@ const resolveChapterLabels = (question) => {
 const resolveAnswerState = (answer) => {
     if (!answer) {
         return {
-            label: 'Bạn chưa chọn',
+            label: 'Chưa trả lời',
             className: 'bg-slate-100 text-slate-700 border-slate-200',
-            icon: <User size={14} />,
+            icon: <Circle size={14} />,
         };
     }
 
-    const isCorrect = answer?.isCorrect;
+    const raw = answer?.isCorrect;
+
+    // Handle boolean, string "true"/"false", and numeric 1/0
+    const isCorrect =
+        raw === true || raw === 'true' || raw === 1
+            ? true
+            : raw === false || raw === 'false' || raw === 0
+                ? false
+                : null;
 
     if (isCorrect === true) {
         return {
             label: 'Đúng',
-            className: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+            className: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             icon: <CheckCircle2 size={14} />,
         };
     }
@@ -58,14 +105,14 @@ const resolveAnswerState = (answer) => {
     if (isCorrect === false) {
         return {
             label: 'Sai',
-            className: 'bg-red-50 text-red-700 border-red-100',
+            className: 'bg-red-50 text-red-700 border-red-200',
             icon: <XCircle size={14} />,
         };
     }
 
     return {
         label: 'Chưa chấm',
-        className: 'bg-slate-100 text-slate-700 border-slate-200',
+        className: 'bg-amber-50 text-amber-700 border-amber-200',
         icon: <Circle size={14} />,
     };
 };
@@ -145,9 +192,15 @@ const PracticeByChapterQuestionCardBase = ({ question, index, statementPrefixTyp
                     ) : null}
                 </div>
 
-                <div className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${answerState.className}`}>
-                    {answerState.icon}
-                    {answerState.label}
+                <div className="flex items-center gap-2">
+                    <div className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-semibold ${answerState.className}`}>
+                        {answerState.icon}
+                        {answerState.label}
+                    </div>
+                    <QuestionChatButton
+                        questionId={question?.questionId ?? question?.id}
+                        questionTitle={buildFullQuestionContent(question)}
+                    />
                 </div>
             </div>
 
@@ -208,6 +261,8 @@ const PracticeByChapterQuestionCardBase = ({ question, index, statementPrefixTyp
                     </div>
                 </details>
             ) : null}
+
+
 
             <Modal
                 isOpen={isVideoModalOpen}

@@ -1,6 +1,7 @@
 import PracticeLayout from '../layout/PracticeLayout';
 import PracticePage from '../index';
 import PracticeByChapterPage from '../by-chapter';
+import RedoWrongQuestionsPage from '../redo-wrong';
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 
@@ -31,6 +32,14 @@ export const practiceRoutes = [
                         meta: {
                             title: 'Luyện theo chương',
                             description: 'Trang luyện tập theo chương',
+                        },
+                    },
+                    {
+                        path: 'redo-wrong',
+                        element: <RedoWrongQuestionsPage />,
+                        meta: {
+                            title: 'Làm lại câu sai',
+                            description: 'Trang làm lại các câu hỏi đã trả lời sai',
                         },
                     },
                 ],

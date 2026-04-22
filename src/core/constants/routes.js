@@ -16,6 +16,7 @@ export const ROUTES = {
     DASHBOARD: '/dashboard',
     PRACTICE: '/practice',
     PRACTICE_BY_CHAPTER: '/practice/by-chapter',
+    PRACTICE_REDO_WRONG: '/practice/redo-wrong',
     COMPETITION: '/competition',
     COMPETITION_DETAIL: (competitionId) => `/competition/${competitionId}`,
 
