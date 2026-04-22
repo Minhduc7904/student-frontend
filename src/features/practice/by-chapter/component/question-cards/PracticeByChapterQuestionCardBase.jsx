@@ -22,7 +22,7 @@ const buildFullQuestionContent = (question) => {
         .map((s, idx) => {
             const prefix = String.fromCharCode(65 + idx); // A B C D
             const statementContent =
-                s?.contentHtml || s?.content || s?.statementContent || '';
+                s?.contentHtml || s?.processedContent || s?.statementContent || '';
 
             return `
                 <div style="margin-bottom:8px;">

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { BookCheck, CheckCircle2, Circle, Lightbulb, User, X, XCircle, Youtube } from 'lucide-react';
 import MarkdownRenderer from '../../../../../shared/components/markdown/MarkdownRenderer';
-import { YoutubeEmbed } from '../../../../../shared/components';
+import { QuestionChatButton, YoutubeEmbed } from '../../../../../shared/components';
 import { resolveDifficultyMeta } from '../../../../../shared/constants';
 import { Modal } from '../../../../../shared/components/modal/Modal';
 import { getQuestionContent } from './questionUtils';
@@ -83,6 +83,44 @@ const formatTimeSpentLabel = (rawSeconds) => {
     }
 
     return `${seconds} giây`;
+};
+
+const buildFullQuestionContent = (question) => {
+    const content = getQuestionContent(question);
+    const statements = question?.statements || [];
+
+    const statementsHtml = statements
+        .map((statement, idx) => {
+            const prefix = String.fromCharCode(65 + idx);
+            const statementContent =
+                statement?.contentHtml || statement?.processedContent || statement?.content || statement?.statementContent || '';
+
+            return `
+                <div style="margin-bottom:8px;">
+                    <strong>${prefix}.</strong> ${statementContent}
+                </div>
+            `;
+        })
+        .join('');
+
+    return `
+        <div>
+            <h3 style="margin-bottom:8px;">Câu hỏi</h3>
+            <div style="margin-bottom:12px;">
+                ${content || ''}
+            </div>
+
+            ${statements.length
+            ? `
+                <h4 style="margin-bottom:8px;">📌 Đáp án</h4>
+                <div>
+                    ${statementsHtml}
+                </div>
+            `
+            : ''
+        }
+        </div>
+    `;
 };
 
 const PracticeResultQuestionCardBase = ({ question, index, children = null }) => {
@@ -182,6 +220,11 @@ const PracticeResultQuestionCardBase = ({ question, index, children = null }) =>
                         {answerState.icon}
                         {answerState.label}
                     </span>
+
+                    <QuestionChatButton
+                        questionId={question?.questionId ?? question?.id}
+                        questionTitle={buildFullQuestionContent(question)}
+                    />
                 </div>
             </div>
 

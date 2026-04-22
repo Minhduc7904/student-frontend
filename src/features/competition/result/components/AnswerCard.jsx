@@ -1,5 +1,6 @@
 import { CheckCircle, XCircle, MinusCircle, Youtube, Lightbulb, User, BookCheck } from 'lucide-react';
 import { MarkdownRenderer } from '../../../../shared/components/markdown';
+import { QuestionChatButton } from '../../../../shared/components';
 import { resolveDifficultyMeta } from '../../../../shared/constants';
 
 // ─── Question type labels ────────────────────────────────────────────────────
@@ -64,6 +65,51 @@ const buildTrueFalseMap = (answer) => {
     });
 
     return map;
+};
+
+const getQuestionContent = (question) => {
+    if (question?.processedContent) return question.processedContent;
+    if (question?.content) return question.content;
+    if (question?.questionContent) return question.questionContent;
+    return '';
+};
+
+const buildFullQuestionContent = (question) => {
+    const content = getQuestionContent(question);
+    const statements = question?.statements || [];
+
+    const statementsHtml = statements
+        .map((statement, idx) => {
+            const prefix = String.fromCharCode(65 + idx);
+            const statementContent =
+                statement?.contentHtml || statement?.processedContent || statement?.content || statement?.statementContent || '';
+
+            return `
+                <div style="margin-bottom:8px;">
+                    <strong>${prefix}.</strong> ${statementContent}
+                </div>
+            `;
+        })
+        .join('');
+
+    return `
+        <div>
+            <h3 style="margin-bottom:8px;">Câu hỏi</h3>
+            <div style="margin-bottom:12px;">
+                ${content || ''}
+            </div>
+
+            ${statements.length
+            ? `
+                <h4 style="margin-bottom:8px;">📌 Đáp án</h4>
+                <div>
+                    ${statementsHtml}
+                </div>
+            `
+            : ''
+        }
+        </div>
+    `;
 };
 
 // ─── Correctness icon ────────────────────────────────────────────────────────
@@ -252,6 +298,13 @@ const AnswerCard = ({ answer, index, rules }) => {
                             </span>
                         </div>
                     )}
+                </div>
+
+                <div className="flex items-center justify-end">
+                    <QuestionChatButton
+                        questionId={question?.questionId ?? question?.id}
+                        questionTitle={buildFullQuestionContent(question)}
+                    />
                 </div>
 
                 {showResultDetail && question && (
