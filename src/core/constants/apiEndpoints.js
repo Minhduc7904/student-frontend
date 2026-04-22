@@ -138,6 +138,11 @@ export const API_ENDPOINTS = {
         PUBLIC_STUDENT_BY_ATTEMPT: (attemptId) => `/question-answers/public/student/attempt/${attemptId}`,
     },
 
+    // Questions
+    QUESTIONS: {
+        PUBLIC_STUDENT: '/questions/public/student',
+    },
+
     // Exam Attempts
     EXAM_ATTEMPTS: {
         PUBLIC_STUDENT: '/exam-attempts/public/student',

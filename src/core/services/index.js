@@ -25,6 +25,7 @@ import * as courseService from './modules/courseService';
 import * as examService from './modules/examService';
 import * as userService from './modules/userService';
 import * as notificationService from './modules/notificationService';
+import * as questionService from './modules/questionService';
 
 export default {
     auth: authService,
@@ -32,4 +33,5 @@ export default {
     exam: examService,
     user: userService,
     notification: notificationService,
+    question: questionService,
 };

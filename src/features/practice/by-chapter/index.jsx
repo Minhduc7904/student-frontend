@@ -4,17 +4,24 @@ import { useNavigate } from 'react-router-dom';
 import OngDocSach1 from '../../../assets/images/OngDocSach1.png';
 import OngDocSach2 from '../../../assets/images/OngDocSach2.png';
 import { ROUTES } from '../../../core/constants';
+import { Pagination } from '../../../shared/components/pagination';
 import PracticeOptionCard from '../component/PracticeOptionCard';
 import PracticeByChapterSidebar from './component/PracticeByChapterSidebar';
+import PracticeByChapterQuestionCard from './component/question-cards/PracticeByChapterQuestionCard';
 import {
     fetchPracticeByChapterChapters,
+    fetchPracticeByChapterQuestions,
     fetchPracticeByChapterSubjects,
     selectPracticeByChapterChapters,
     selectPracticeByChapterChaptersError,
     selectPracticeByChapterChaptersFilters,
     selectPracticeByChapterChaptersPagination,
     selectPracticeByChapterLoadingChapters,
+    selectPracticeByChapterLoadingQuestions,
     selectPracticeByChapterLoadingSubjects,
+    selectPracticeByChapterQuestions,
+    selectPracticeByChapterQuestionsError,
+    selectPracticeByChapterQuestionsPagination,
     selectPracticeByChapterSelectedSubjectId,
     selectPracticeByChapterSubjects,
     selectPracticeByChapterSubjectsError,
@@ -67,13 +74,17 @@ const PracticeByChapterPage = () => {
 
     const subjects = useSelector(selectPracticeByChapterSubjects);
     const chapters = useSelector(selectPracticeByChapterChapters);
+    const questions = useSelector(selectPracticeByChapterQuestions);
     const selectedSubjectId = useSelector(selectPracticeByChapterSelectedSubjectId);
     const chaptersFilters = useSelector(selectPracticeByChapterChaptersFilters);
     const chaptersPagination = useSelector(selectPracticeByChapterChaptersPagination);
+    const questionsPagination = useSelector(selectPracticeByChapterQuestionsPagination);
     const loadingSubjects = useSelector(selectPracticeByChapterLoadingSubjects);
     const loadingChapters = useSelector(selectPracticeByChapterLoadingChapters);
+    const loadingQuestions = useSelector(selectPracticeByChapterLoadingQuestions);
     const subjectsError = useSelector(selectPracticeByChapterSubjectsError);
     const chaptersError = useSelector(selectPracticeByChapterChaptersError);
+    const questionsError = useSelector(selectPracticeByChapterQuestionsError);
 
     const selectedSubject = useMemo(
         () => subjects.find((subject) => String(subject.subjectId) === String(selectedSubjectId)) ?? null,
@@ -86,6 +97,7 @@ const PracticeByChapterPage = () => {
     );
 
     const isInitialChaptersLoading = loadingChapters && chapters.length === 0;
+    const isInitialQuestionsLoading = loadingQuestions && questions.length === 0;
 
     useEffect(() => {
         dispatch(fetchPracticeByChapterSubjects());
@@ -107,6 +119,19 @@ const PracticeByChapterPage = () => {
     useEffect(() => {
         setSelectedChapters([]);
     }, [selectedSubjectId]);
+
+    useEffect(() => {
+        if (!selectedSubjectId) return;
+
+        dispatch(
+            fetchPracticeByChapterQuestions({
+                subjectId: selectedSubjectId,
+                chapterIds: selectedChapterIds,
+                page: 1,
+                limit: questionsPagination?.limit || 10,
+            })
+        );
+    }, [dispatch, selectedSubjectId, selectedChapterIds, questionsPagination?.limit]);
 
     const handleSelectSubject = (subjectId) => {
         dispatch(setSelectedSubjectId(subjectId));
@@ -181,6 +206,25 @@ const PracticeByChapterPage = () => {
             })
         );
     };
+
+    const handleQuestionsPageChange = useCallback(
+        (nextPage) => {
+            if (!selectedSubjectId || loadingQuestions) return;
+
+            const normalizedPage = Number(nextPage) || 1;
+            if (normalizedPage === (questionsPagination?.page || 1)) return;
+
+            dispatch(
+                fetchPracticeByChapterQuestions({
+                    subjectId: selectedSubjectId,
+                    chapterIds: selectedChapterIds,
+                    page: normalizedPage,
+                    limit: questionsPagination?.limit || 10,
+                })
+            );
+        },
+        [dispatch, selectedSubjectId, selectedChapterIds, loadingQuestions, questionsPagination?.page, questionsPagination?.limit]
+    );
 
     const chapterOptionCards = CHAPTER_OPTIONS.map((option, index) => ({
         ...option,
@@ -267,22 +311,86 @@ const PracticeByChapterPage = () => {
                         </div>
                     </div>
 
-                    <div className="mt-5 grid grid-cols-1 gap-3 md:grid-cols-2">
-                        {chapterOptionCards.map((option) => (
-                            <PracticeOptionCard
-                                key={option.id}
-                                title={option.title}
-                                subtitle={option.subtitle}
-                                badge={option.badge}
-                                action={option.action}
-                                imageSrc={option.imageSrc}
-                                metricCount={option.metricCount}
-                                gradientFrom={option.gradientFrom}
-                                gradientTo={option.gradientTo}
-                                disabled={!option.to}
-                                onClick={() => option.to && handleOpenPath(option.to)}
-                            />
-                        ))}
+
+                    <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3 md:p-4">
+                        <div className="flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                            <div>
+                                <p className="text-base font-semibold text-slate-900">Danh sách câu hỏi theo chương</p>
+                                <p className="mt-1 text-xs text-slate-500">
+                                    {selectedChapterIds.length > 0
+                                        ? `Đang lọc theo ${selectedChapterIds.length} chương đã chọn.`
+                                        : 'Chưa chọn chương, đang hiển thị tất cả câu hỏi theo môn.'}
+                                </p>
+                            </div>
+                            <p className="text-xs font-medium text-slate-500">
+                                Tổng: {questionsPagination?.total ?? questions.length} câu
+                            </p>
+                        </div>
+
+                        {isInitialQuestionsLoading ? (
+                            <div className="mt-4 space-y-3">
+                                <div className="h-24 animate-pulse rounded-xl bg-slate-200/70" />
+                                <div className="h-24 animate-pulse rounded-xl bg-slate-200/70" />
+                            </div>
+                        ) : null}
+
+                        {!isInitialQuestionsLoading && questionsError ? (
+                            <div className="mt-4 rounded-xl border border-red-100 bg-red-50 p-3 text-xs text-red-700">
+                                <p>{questionsError}</p>
+                                <button
+                                    type="button"
+                                    onClick={() =>
+                                        selectedSubjectId &&
+                                        dispatch(
+                                            fetchPracticeByChapterQuestions({
+                                                subjectId: selectedSubjectId,
+                                                chapterIds: selectedChapterIds,
+                                                page: questionsPagination?.page || 1,
+                                                limit: questionsPagination?.limit || 10,
+                                            })
+                                        )
+                                    }
+                                    className="mt-2 cursor-pointer rounded-lg bg-red-600 px-2.5 py-1 text-xs font-medium text-white"
+                                >
+                                    Tải lại
+                                </button>
+                            </div>
+                        ) : null}
+
+                        {!isInitialQuestionsLoading && !questionsError && questions.length === 0 ? (
+                            <div className="mt-4 rounded-xl border border-dashed border-slate-200 bg-white px-3 py-3 text-sm text-slate-500">
+                                Không có câu hỏi phù hợp với bộ lọc hiện tại.
+                            </div>
+                        ) : null}
+
+                        {!isInitialQuestionsLoading && !questionsError && questions.length > 0 ? (
+                            <>
+                                <div className="mt-4 space-y-3">
+                                    {questions.map((question, index) => {
+                                        const absoluteIndex =
+                                            ((questionsPagination?.page || 1) - 1) *
+                                            (questionsPagination?.limit || 10) +
+                                            index;
+
+                                        return (
+                                            <PracticeByChapterQuestionCard
+                                                key={question.questionId || `question-${absoluteIndex + 1}`}
+                                                question={question}
+                                                index={absoluteIndex}
+                                            />
+                                        );
+                                    })}
+                                </div>
+
+                                <Pagination
+                                    className="mt-4"
+                                    currentPage={questionsPagination?.page || 1}
+                                    totalPages={Math.max(1, questionsPagination?.totalPages || 1)}
+                                    onPageChange={handleQuestionsPageChange}
+                                    disabled={loadingQuestions}
+                                />
+                            </>
+                        ) : null}
                     </div>
 
                     {isInitialChaptersLoading ? (
