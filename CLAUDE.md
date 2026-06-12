@@ -41,3 +41,20 @@ This project is indexed by GitNexus as **student_frontend** (5635 symbols, 7532 
 | Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
+
+# Local Taste Skills
+
+Read `AGENTS.md` first. This project vendors Taste Skill files in `skills/`.
+
+Before every UI, UX, visual design, redesign, animation, motion, image-to-code, or mobile screen implementation task, read `skills/llms.txt`, select the relevant `skills/<skill-folder>/SKILL.md`, and combine it with Beacon Flutter UI rules in `.agents/instructions/ui-design.instructions.md`.
+
+Default choices:
+
+- Mobile UI concepts and visual direction: `skills/imagegen-frontend-mobile/SKILL.md`
+- Existing screen redesign or polish: `skills/redesign-skill/SKILL.md`
+- UI/UX animation and motion quality: `skills/gpt-tasteskill/SKILL.md`
+- Clean product UI: `skills/minimalist-skill/SKILL.md`
+- Premium soft UI polish: `skills/soft-skill/SKILL.md`
+- Image-to-code work: `skills/image-to-code-skill/SKILL.md`
+- Complete implementation output: `skills/output-skill/SKILL.md`
+- Broad redesign taste guidance: `skills/taste-skill/SKILL.md`

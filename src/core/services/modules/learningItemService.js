@@ -22,6 +22,10 @@ export const learningItemService = {
         return axiosClient.get(API_ENDPOINTS.LEARNING_ITEMS.STUDENT_DETAIL(learningItemId));
     },
 
+    markLearned: (learningItemId) => {
+        return axiosClient.post(API_ENDPOINTS.LEARNING_ITEMS.MARK_LEARNED(learningItemId));
+    },
+
     /**
      * Lấy URL để stream video với Range Request support
      * Sử dụng URL này trong video element để browser tự động handle Range Request
