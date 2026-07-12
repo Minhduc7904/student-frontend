@@ -53,7 +53,7 @@ const buildFullQuestionContent = (question) => {
 };
 
 const resolveChapterLabels = (question) => {
-    console.log('Resolving chapter labels for question:', question);
+    // console.log('Resolving chapter labels for question:', question);
     if (Array.isArray(question?.questionChapters)) {
         return question.questionChapters
             .map((item) => {

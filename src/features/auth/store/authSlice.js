@@ -5,6 +5,7 @@ import {
     getAccessToken,
     getRefreshToken,
     setAuthTokens,
+    setUserInfo,
     clearAuthData,
     isAuthenticated as checkAuth
 } from "../../../shared/utils";
@@ -25,6 +26,17 @@ export const loginAsync = createAsyncThunk(
             successTitle: "Đăng nhập thành công",
             successMessage: "Chào mừng bạn quay trở lại!",
             errorTitle: "Đăng nhập thất bại",
+        });
+    }
+);
+
+export const registerAsync = createAsyncThunk(
+    "auth/register",
+    async (studentData, thunkAPI) => {
+        return handleAsyncThunk(() => authService.register(studentData), thunkAPI, {
+            successTitle: "Tạo tài khoản thành công",
+            successMessage: "Đang đăng nhập vào tài khoản mới.",
+            errorTitle: "Đăng ký thất bại",
         });
     }
 );
@@ -55,12 +67,15 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         setCredentials: (state, action) => {
-            const { accessToken, refreshToken } = action.payload;
+            const { accessToken, refreshToken, user } = action.payload;
             state.accessToken = accessToken;
             state.refreshToken = refreshToken;
             state.isAuthenticated = true;
 
             setAuthTokens(accessToken, refreshToken);
+            if (user) {
+                setUserInfo(user);
+            }
         },
         clearAuth: (state) => {
             state.accessToken = null;
@@ -83,7 +98,7 @@ const authSlice = createSlice({
             })
             .addCase(loginAsync.fulfilled, (state, action) => {
                 const responseData = action.payload.data;
-                const { tokens } = responseData;
+                const { tokens, user } = responseData;
                 state.loading = false;
                 state.accessToken = tokens.accessToken;
                 state.refreshToken = tokens.refreshToken;
@@ -91,10 +106,26 @@ const authSlice = createSlice({
                 state.error = null;
 
                 setAuthTokens(tokens.accessToken, tokens.refreshToken);
+                if (user) {
+                    setUserInfo(user);
+                }
             })
             .addCase(loginAsync.rejected, (state, action) => {
                 state.loading = false;
                 state.isAuthenticated = false;
+                state.error = action.payload;
+            })
+            // Register
+            .addCase(registerAsync.pending, (state) => {
+                state.loading = true;
+                state.error = null;
+            })
+            .addCase(registerAsync.fulfilled, (state) => {
+                state.loading = false;
+                state.error = null;
+            })
+            .addCase(registerAsync.rejected, (state, action) => {
+                state.loading = false;
                 state.error = action.payload;
             })
             // Logout

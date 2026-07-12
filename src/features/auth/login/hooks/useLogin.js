@@ -5,6 +5,28 @@ import { loginAsync, selectAuthLoading, selectAuthError } from '../../store/auth
 import { getItem, setItem, removeItem } from '../../../../shared/utils/storage';
 import { STORAGE_KEYS } from '../../../../core/constants';
 import { ROUTES } from '../../../../core/constants';
+import { authService } from '../../../../core/services/modules/authService';
+
+const buildDeviceFingerprint = () => {
+    const existingFingerprint = getItem(STORAGE_KEYS.DEVICE_ID);
+    if (existingFingerprint) return existingFingerprint;
+
+    const fingerprint = `web-${window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(16).slice(2)}`}`;
+    setItem(STORAGE_KEYS.DEVICE_ID, fingerprint);
+    return fingerprint;
+};
+
+const buildLoginPayload = ({ username, password }) => {
+    const identity = username.trim();
+    const identityKey = identity.includes('@') ? 'email' : 'username';
+
+    return {
+        [identityKey]: identity,
+        password,
+        deviceFingerprint: buildDeviceFingerprint(),
+        userAgent: navigator.userAgent,
+    };
+};
 /**
  * Custom hook để xử lý logic đăng nhập
  * @returns {Object} Object chứa các state và handlers cho login form
@@ -78,7 +100,7 @@ export const useLogin = () => {
         const errors = {};
 
         if (!formData.username.trim()) {
-            errors.username = 'Vui lòng nhập tên đăng nhập';
+            errors.username = 'Vui lòng nhập tên đăng nhập hoặc email';
         }
 
         if (!formData.password.trim()) {
@@ -106,10 +128,7 @@ export const useLogin = () => {
 
         try {
             // Dispatch login action (không truyền rememberMe)
-            const resultAction = await dispatch(loginAsync({
-                username: formData.username,
-                password: formData.password
-            }));
+            const resultAction = await dispatch(loginAsync(buildLoginPayload(formData)));
 
             // Kiểm tra kết quả
             if (loginAsync.fulfilled.match(resultAction)) {
@@ -153,6 +172,10 @@ export const useLogin = () => {
         removeItem(STORAGE_KEYS.REMEMBER_ME);
     };
 
+    const handleGoogleLogin = () => {
+        window.location.assign(authService.getGoogleStudentUrl());
+    };
+
     return {
         // State
         formData,
@@ -165,6 +188,7 @@ export const useLogin = () => {
         handleChange,
         handleRememberMeChange,
         handleSubmit,
+        handleGoogleLogin,
         resetForm
     };
 };

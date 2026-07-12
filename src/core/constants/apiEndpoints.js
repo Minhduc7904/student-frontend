@@ -9,6 +9,7 @@ export const API_ENDPOINTS = {
         LOGOUT: '/auth/logout',
         REGISTER: '/auth/student/register',
         REFRESH: '/auth/refresh',
+        GOOGLE_STUDENT: '/auth/google/student',
     },
 
     PROFILE: {

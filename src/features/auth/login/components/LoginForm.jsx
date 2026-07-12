@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import Eye from "../../../../assets/icons/Eye.svg";
 import EyeHide from "../../../../assets/icons/EyeHide.svg";
 import { SvgIcon, ButtonLoading, ComingSoonModal } from "../../../../shared/components";
@@ -138,14 +139,14 @@ const InputWithLabel = ({ label, children, showToggle, isVisible, onToggleVisibi
 
 const InputUserName = ({ value, onChange, error }) => {
     return (
-        <InputWithLabel label="Tài khoản">
+        <InputWithLabel label="Tài khoản hoặc email">
             <input
                 type="text"
                 name="username"
                 value={value}
                 onChange={onChange}
                 className={`py-3 px-[10px] w-full text-start text-text-5 sm:text-text-4 text-gray-700 rounded-lg outline-1 outline-offset-[-0.50px] ${error ? 'outline-red-500 focus:outline-red-500' : 'outline-gray-700 focus:outline-blue-800'}`}
-                placeholder="Nhập tài khoản của bạn"
+                placeholder="Nhập tên đăng nhập hoặc email"
             />
             {error && (
                 <p className="text-text-4 text-red-500 mt-1">{error}</p>
@@ -188,7 +189,8 @@ function LoginForm({
     validationErrors = {},
     handleSubmit,
     handleChange,
-    handleRememberMeChange
+    handleRememberMeChange,
+    handleGoogleLogin
 }) {
     const [showComingSoon, setShowComingSoon] = useState(false);
     const openComingSoon = () => setShowComingSoon(true);
@@ -207,8 +209,6 @@ function LoginForm({
                     <div className="w-full flex flex-col">
                         <div className="w-full flex flex-col justify-center items-center gap-2">
                             <div className="w-full flex flex-col justify-center items-center gap-1">
-                                <EmailLoginButton onClick={openComingSoon} />
-
                                 <div className="w-full flex flex-col justify-center items-center gap-4 sm:gap-5 lg:gap-6">
                                     <InputUserName
                                         value={formData.username}
@@ -239,15 +239,15 @@ function LoginForm({
 
                         <div className="flex-1 h-px bg-gray-300" />
                     </div>
-                    <GoogleLoginButton onClick={openComingSoon} />
+                    <GoogleLoginButton onClick={handleGoogleLogin} />
                 </div>
             </form>
 
             <p className="mt-6 text-center text-text-5 text-gray-700">
-                Nếu bạn chưa có tài khoản, hãy liên hệ với{' '}
-                <span className="font-semibold text-blue-800">thầy giáo</span> hoặc{' '}
-                <span className="font-semibold text-blue-800">trợ giảng</span>{' '}
-                để được hỗ trợ sớm nhất.
+                Chưa có tài khoản?{' '}
+                <Link to="/register" className="font-semibold text-blue-800 hover:underline">
+                    Đăng ký học sinh
+                </Link>
             </p>
 
             <ComingSoonModal isOpen={showComingSoon} onClose={closeComingSoon} />

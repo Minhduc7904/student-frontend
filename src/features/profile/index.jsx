@@ -5,6 +5,7 @@ import DifficultyCircleChart from "./components/DifficultyCircleChart";
 import TotalPointCard from "./components/TotalPointCard";
 import HeatmapChart from "./components/HeatmapChart";
 import HistoryListCard from "./components/HistoryListCard";
+import { getStudentTotalPoint } from "./utils/studentPointUtils";
 /**
  * ProfilePage
  * Trang thông tin cá nhân học sinh
@@ -12,6 +13,7 @@ import HistoryListCard from "./components/HistoryListCard";
 const ProfilePage = () => {
     const outletContext = useOutletContext();
     const profile = outletContext?.profile;
+    const totalPoint = getStudentTotalPoint(profile);
 
     return (
         <div className="flex flex-col gap-4">
@@ -20,7 +22,7 @@ const ProfilePage = () => {
                     <DifficultyCircleChart />
                 </Card>
                 <Card className="flex-1">
-                    <TotalPointCard totalPoint={profile?.totalPoint} />
+                    <TotalPointCard totalPoint={totalPoint} />
                 </Card>
             </div>
             <Card>

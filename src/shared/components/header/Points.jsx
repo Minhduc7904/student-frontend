@@ -7,6 +7,8 @@ import PointIcon from "../../../assets/icons/Point.svg";
  * Hiển thị điểm của user
  */
 const Points = memo(({ points = 0, compact = false }) => {
+    const safePoints = Number.isFinite(Number(points)) ? Number(points) : 0;
+
     return (
         <div className="flex flex-row items-center justify-center">
             <div className="flex items-center justify-center p-0.5">
@@ -14,7 +16,7 @@ const Points = memo(({ points = 0, compact = false }) => {
             </div>
             <div className="flex items-center justify-center p-0.5">
                 <span className={`text-gray-900 font-680 ${compact ? 'text-xs' : 'text-h4'}`}>
-                    {points}
+                    {safePoints.toLocaleString("vi-VN")}
                 </span>
             </div>
         </div>

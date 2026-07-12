@@ -15,7 +15,8 @@ function LoginPage() {
         validationErrors,
         handleChange,
         handleRememberMeChange,
-        handleSubmit
+        handleSubmit,
+        handleGoogleLogin
     } = useLogin();
 
     if (isAuthenticated) {
@@ -38,6 +39,7 @@ function LoginPage() {
                 handleSubmit={handleSubmit}
                 handleChange={handleChange}
                 handleRememberMeChange={handleRememberMeChange}
+                handleGoogleLogin={handleGoogleLogin}
             />
         </div>
     );

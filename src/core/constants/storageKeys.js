@@ -8,6 +8,7 @@ export const STORAGE_KEYS = {
     REFRESH_TOKEN: 'refresh_token',
     USER_INFO: 'user_info',
     REMEMBER_ME: 'remember_me',
+    DEVICE_ID: 'device_id',
     PROFILE_UPDATE_REMINDER_DONE: 'profile_update_reminder_done',
 };
 

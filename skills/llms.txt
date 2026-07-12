@@ -9,5 +9,6 @@ redesign-skill: For upgrading existing projects by auditing and fixing design pr
 soft-skill: Focuses on an expensive, soft UI look with premium fonts, whitespace, depth, and smooth animations.
 output-skill: Prevents AI from being lazy, skipping code blocks, or using placeholder comments.
 minimalist-skill: Enforces clean, editorial-style interfaces (Notion/Linear style) with strict monochrome palettes.
+student-lms-blue-skill: Project-specific LMS web design skill using tailwind.config.js colors: primary blue-800 (#194DB6) and secondary yellow-500 (#FDD22C). Use for student dashboards, course pages, lesson pages, homework pages, and learning workflows.
 brutalist-skill: Raw mechanical interfaces, Swiss typography, extreme scale contrast. (Beta)
 stitch-skill: Google Stitch-compatible semantic design rules for premium AI UI generation.

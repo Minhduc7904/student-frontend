@@ -10,6 +10,7 @@ export const ROUTES = {
     FORGOT_PASSWORD: '/forgot-password',
     RESET_PASSWORD: '/reset-password',
     VERIFY_EMAIL: '/verify-email',
+    GOOGLE_CALLBACK: '/auth/google/callback',
     LOADING_REDIRECT: '/loading-redirect',
 
     // Dashboard
@@ -96,6 +97,7 @@ export const ROUTE_META = {
         ROUTES.HOME,
         ROUTES.LOGIN,
         ROUTES.REGISTER,
+        ROUTES.GOOGLE_CALLBACK,
         ROUTES.FORGOT_PASSWORD,
         ROUTES.RESET_PASSWORD,
         ROUTES.VERIFY_EMAIL,

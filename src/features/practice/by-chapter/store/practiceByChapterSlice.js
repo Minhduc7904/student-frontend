@@ -102,20 +102,6 @@ const mergeUniqueChapters = (previous = [], incoming = []) => {
     return Array.from(chapterMap.values());
 };
 
-const mergeUniqueByKey = (previous = [], incoming = [], keyName = 'id') => {
-    const map = new Map();
-
-    previous.forEach((item) => {
-        map.set(String(item?.[keyName]), item);
-    });
-
-    incoming.forEach((item) => {
-        map.set(String(item?.[keyName]), item);
-    });
-
-    return Array.from(map.values());
-};
-
 const resolveChaptersPagination = (payload, fallbackQuery = {}, fallbackTotal = 0) => {
     const source =
         payload?.meta ||
@@ -612,31 +598,28 @@ const practiceByChapterSlice = createSlice({
                     search: String(action.meta.arg?.search || '').trim(),
                 };
 
-                if (requestedPage === 1) {
-                    state.questions = [];
-                    state.questionsPagination = {
-                        ...createInitialQuestionsPagination(),
-                        limit: requestedLimit,
-                    };
-                }
+                state.questions = [];
+                state.submitAnswerLoading = {};
+                state.submitAnswerError = {};
+                state.questionsPagination = {
+                    ...createInitialQuestionsPagination(),
+                    page: requestedPage,
+                    limit: requestedLimit,
+                };
             })
             .addCase(fetchPracticeByChapterQuestions.fulfilled, (state, action) => {
                 const requestedPage = toSafeNumber(action.meta.arg?.page, 1);
                 const requestedLimit = toSafeNumber(action.meta.arg?.limit, state.questionsFilters.limit);
                 const questions = normalizeQuestions(action.payload);
-                const mergedQuestions =
-                    requestedPage === 1
-                        ? questions
-                        : mergeUniqueByKey(state.questions, questions, 'questionId');
                 const normalizedPagination = resolveChaptersPagination(
                     action.payload,
                     { page: requestedPage, limit: requestedLimit },
-                    mergedQuestions.length
+                    questions.length
                 );
 
                 state.loadingQuestions = false;
                 state.questionsError = null;
-                state.questions = mergedQuestions;
+                state.questions = questions;
                 state.questionsFilters.page = normalizedPagination.page;
                 state.questionsFilters.limit = normalizedPagination.limit;
                 state.questionsPagination = normalizedPagination;
@@ -647,13 +630,14 @@ const practiceByChapterSlice = createSlice({
                 state.loadingQuestions = false;
                 state.questionsError = action.payload || action.error.message;
 
-                if (requestedPage === 1) {
-                    state.questions = [];
-                    state.questionsPagination = {
-                        ...createInitialQuestionsPagination(),
-                        limit: state.questionsFilters.limit,
-                    };
-                }
+                state.questions = [];
+                state.submitAnswerLoading = {};
+                state.submitAnswerError = {};
+                state.questionsPagination = {
+                    ...createInitialQuestionsPagination(),
+                    page: requestedPage,
+                    limit: state.questionsFilters.limit,
+                };
             })
             .addCase(submitPracticeByChapterQuestionAnswer.pending, (state, action) => {
                 const questionId =
