@@ -20,6 +20,8 @@ import {
     LessonOverview,
 } from "./components";
 import {
+    applyLearnedStateToChapters,
+    applyLearnedStateToLesson,
     findLessonInChapters,
     flattenLearningItems,
     getId,
@@ -63,9 +65,16 @@ export const CourseLessonsPage = () => {
     const [markLearnedLoading, setMarkLearnedLoading] = useState(false);
     const [markLearnedError, setMarkLearnedError] = useState("");
 
-    const flatItems = useMemo(() => flattenLearningItems(chapters), [chapters]);
-    const listLesson = useMemo(() => findLessonInChapters(chapters, lessonId), [chapters, lessonId]);
-    const activeLesson = lessonDetail || listLesson;
+    const viewChapters = useMemo(
+        () => applyLearnedStateToChapters(chapters, locallyLearnedItems),
+        [chapters, locallyLearnedItems]
+    );
+    const flatItems = useMemo(() => flattenLearningItems(viewChapters), [viewChapters]);
+    const listLesson = useMemo(() => findLessonInChapters(viewChapters, lessonId), [viewChapters, lessonId]);
+    const activeLesson = useMemo(
+        () => applyLearnedStateToLesson(lessonDetail || listLesson, locallyLearnedItems),
+        [lessonDetail, listLesson, locallyLearnedItems]
+    );
     const activeItemIndex = useMemo(
         () => flatItems.findIndex((row) => getId(row.learningItem?.learningItemId) === getId(learningItemId)),
         [flatItems, learningItemId]
@@ -112,15 +121,25 @@ export const CourseLessonsPage = () => {
         ? activeLesson.learningItems.findIndex((item) => getId(item.learningItemId) === getId(learningItemId)) + 1
         : 0;
     const currentItemId = getId(learningItemId);
+    const localLearningItemDetail = useMemo(() => {
+        if (!learningItemDetail || !currentItemId || !locallyLearnedItems.has(currentItemId) || learningItemDetail.isLearned) {
+            return learningItemDetail;
+        }
+
+        return {
+            ...learningItemDetail,
+            isLearned: true,
+        };
+    }, [currentItemId, learningItemDetail, locallyLearnedItems]);
     const isCurrentItemLearned = Boolean(
         currentItemId
         && (
             locallyLearnedItems.has(currentItemId)
-            || learningItemDetail?.isLearned
+            || localLearningItemDetail?.isLearned
             || currentNavItem?.isLearned
         )
     );
-    const currentTypeMeta = getItemMeta(learningItemDetail?.type || currentNavItem?.type);
+    const currentTypeMeta = getItemMeta(localLearningItemDetail?.type || currentNavItem?.type);
 
     const goToRow = useCallback((row) => {
         if (!row) {
@@ -185,7 +204,7 @@ export const CourseLessonsPage = () => {
         <main className="flex h-dvh min-h-[560px] w-full overflow-hidden bg-blue-50 text-blue-950">
             <div className={`hidden shrink-0 border-r border-blue-100 bg-blue-50/70 md:block ${shellMotion} ${isRailCollapsed ? "w-0 overflow-hidden" : "w-[320px] lg:w-[348px]"}`}>
                 <CourseSidebar
-                    chapters={chapters}
+                    chapters={viewChapters}
                     chaptersLoading={chaptersLoading}
                     chaptersError={chaptersError}
                     courseId={courseId}
@@ -215,7 +234,7 @@ export const CourseLessonsPage = () => {
                 </div>
                 <div className="h-[calc(100%-56px)]">
                     <CourseSidebar
-                        chapters={chapters}
+                        chapters={viewChapters}
                         chaptersLoading={chaptersLoading}
                         chaptersError={chaptersError}
                         courseId={courseId}
@@ -233,7 +252,7 @@ export const CourseLessonsPage = () => {
                     showLearningItem={showLearningItem}
                     activePositionInLesson={activePositionInLesson}
                     totalItemsInLesson={totalItemsInLesson}
-                    learningItemDetail={learningItemDetail}
+                    learningItemDetail={localLearningItemDetail}
                     currentNavItem={currentNavItem}
                     activeLesson={activeLesson}
                     currentTypeMeta={currentTypeMeta}
@@ -250,7 +269,7 @@ export const CourseLessonsPage = () => {
                             ) : (
                                 <article className="rounded-2xl border border-blue-100 bg-white p-3 shadow-sm sm:p-5">
                                     <LearningItemBody
-                                        learningItemDetail={learningItemDetail}
+                                        learningItemDetail={localLearningItemDetail}
                                         loading={learningItemLoading}
                                     />
                                 </article>
@@ -271,7 +290,7 @@ export const CourseLessonsPage = () => {
                 <LessonLearningFooter
                     showLearningItem={showLearningItem}
                     learningItemLoading={learningItemLoading}
-                    learningItemDetail={learningItemDetail}
+                    learningItemDetail={localLearningItemDetail}
                     currentNavItem={currentNavItem}
                     previousRow={previousRow}
                     nextRow={nextRow}

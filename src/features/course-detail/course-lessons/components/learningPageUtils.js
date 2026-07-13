@@ -51,6 +51,86 @@ export const getLessonProgress = (lesson) => {
 
 export const getItemMeta = (type) => ITEM_TYPE_META[type] || ITEM_TYPE_META.DOCUMENT;
 
+const hasLearnedIds = (learnedItemIds) => learnedItemIds instanceof Set && learnedItemIds.size > 0;
+
+export const applyLearnedStateToLesson = (lesson, learnedItemIds) => {
+    if (!lesson || !hasLearnedIds(learnedItemIds)) {
+        return lesson;
+    }
+
+    const learningItems = lesson.learningItems || [];
+    let hasLocalChange = false;
+
+    const nextLearningItems = learningItems.map((item) => {
+        const shouldBeLearned = learnedItemIds.has(getId(item?.learningItemId));
+
+        if (!shouldBeLearned || item?.isLearned) {
+            return item;
+        }
+
+        hasLocalChange = true;
+        return {
+            ...item,
+            isLearned: true,
+        };
+    });
+
+    if (!hasLocalChange) {
+        return lesson;
+    }
+
+    const totalLearningItems = Number.isFinite(Number(lesson.totalLearningItems))
+        ? Number(lesson.totalLearningItems)
+        : nextLearningItems.length;
+    const learnedCount = nextLearningItems.filter((item) => item?.isLearned).length;
+    const completedLearningItems = Math.max(Number(lesson.completedLearningItems) || 0, learnedCount);
+    const localCompletionPercentage = totalLearningItems > 0
+        ? Math.round((completedLearningItems / totalLearningItems) * 100)
+        : getLessonProgress(lesson);
+
+    return {
+        ...lesson,
+        learningItems: nextLearningItems,
+        totalLearningItems,
+        completedLearningItems,
+        completionPercentage: Math.max(getLessonProgress(lesson), localCompletionPercentage),
+    };
+};
+
+export const applyLearnedStateToChapters = (chapters = [], learnedItemIds) => {
+    if (!hasLearnedIds(learnedItemIds)) {
+        return chapters;
+    }
+
+    return chapters.map((chapter) => {
+        let hasLocalChange = false;
+
+        const lessons = (chapter?.lessons || []).map((lesson) => {
+            const nextLesson = applyLearnedStateToLesson(lesson, learnedItemIds);
+
+            if (nextLesson !== lesson) {
+                hasLocalChange = true;
+            }
+
+            return nextLesson;
+        });
+
+        if (!hasLocalChange) {
+            return chapter;
+        }
+
+        const localCompletionPercentage = lessons.length
+            ? Math.round(lessons.reduce((total, lesson) => total + getLessonProgress(lesson), 0) / lessons.length)
+            : getLessonProgress(chapter);
+
+        return {
+            ...chapter,
+            lessons,
+            completionPercentage: Math.max(getLessonProgress(chapter), localCompletionPercentage),
+        };
+    });
+};
+
 export const flattenLearningItems = (chapters = []) => {
     const rows = [];
 
