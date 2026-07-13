@@ -1,34 +1,24 @@
 <!-- gitnexus:start -->
-# GitNexus - Code Intelligence
+# GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **student-frontend** at `C:\Users\Admin\Desktop\Job\student_frontend`.
-
-Current indexed snapshot, as of July 13, 2026:
-
-- 442 files
-- 7046 nodes
-- 9801 edges
-- 226 communities
-- 130 execution flows
-
-Use the GitNexus MCP tools to understand code, assess impact, and navigate safely. When multiple repos are indexed, always pass `repo: "student-frontend"` to GitNexus tools.
+This project is indexed by GitNexus as **student-frontend** (7282 symbols, 10154 relationships, 143 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
-- **MUST run impact analysis before editing any function, class, method, exported constant, Redux slice, route config, service module, or shared component.** Before modifying it, run `gitnexus_impact({ repo: "student-frontend", target: "symbolName", direction: "upstream" })` and report the blast radius: direct callers, affected processes, and risk level.
-- **MUST run `gitnexus_detect_changes({ repo: "student-frontend", scope: "all" })` before committing** to verify changes only affect expected symbols and execution flows.
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
 - **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({ repo: "student-frontend", query: "concept" })` to find execution flows instead of relying only on text search.
-- When you need full context on a symbol, use `gitnexus_context({ repo: "student-frontend", name: "symbolName" })`.
+- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
 
 ## Never Do
 
-- NEVER edit a function, class, method, exported constant, Redux slice, route config, service module, or shared component without first running GitNexus impact analysis.
-- NEVER ignore HIGH or CRITICAL impact warnings.
-- NEVER rename symbols with broad find-and-replace. Use GitNexus-aware rename tooling when available, or perform a scoped refactor with impact checks.
-- NEVER commit changes without running `gitnexus_detect_changes({ repo: "student-frontend", scope: "all" })`.
+- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
+- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
+- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
 
 ## Resources
 
@@ -43,12 +33,12 @@ Use the GitNexus MCP tools to understand code, assess impact, and navigate safel
 
 | Task | Read this skill file |
 |------|---------------------|
-| Understand architecture / "How does X work?" | `.agents/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.agents/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.agents/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.agents/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.agents/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.agents/skills/gitnexus/gitnexus-cli/SKILL.md` |
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
 
 <!-- gitnexus:end -->
 

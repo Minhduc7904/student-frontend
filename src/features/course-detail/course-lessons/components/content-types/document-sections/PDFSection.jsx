@@ -38,7 +38,6 @@ export const PDFSection = ({ pdfFiles, onDownload }) => {
                         <iframe
                             src={getPdfViewerUrl(file.viewUrl)}
                             title={file.filename}
-                            sandbox="allow-scripts allow-same-origin allow-downloads"
                             className="h-full w-full"
                         />
                     </div>
