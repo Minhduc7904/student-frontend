@@ -155,6 +155,10 @@ export const CourseLessonsPage = () => {
         setIsSidebarOpen(false);
     }, [navigate]);
 
+    const handleMobileSidebarNavigate = useCallback((path) => {
+        navigate(path);
+    }, [navigate]);
+
     const handleMarkLearned = async () => {
         if (!currentItemId || markLearnedLoading || isCurrentItemLearned) {
             return;
@@ -242,7 +246,7 @@ export const CourseLessonsPage = () => {
                         currentLessonId={lessonId}
                         currentLearningItemId={learningItemId}
                         learnedItemIds={locallyLearnedItems}
-                        onNavigate={handleNavigate}
+                        onNavigate={handleMobileSidebarNavigate}
                     />
                 </div>
             </div>
