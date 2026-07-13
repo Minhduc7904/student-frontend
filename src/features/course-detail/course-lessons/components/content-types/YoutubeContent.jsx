@@ -48,18 +48,18 @@ export const YoutubeContent = ({ learningItemDetail }) => {
     const videoId = currentContent ? getYoutubeVideoId(currentContent.youtubeUrl) : null;
 
     return (
-        <div className="w-full flex flex-col gap-4 sm:gap-6 lg:gap-8">
+        <div className="w-full flex flex-col gap-4 sm:gap-6">
             <div className="flex flex-col gap-3 sm:gap-4 lg:gap-6">
                 {/* Tab để switch video */}
                 {youtubeContents.length > 1 && (
-                    <div className="flex gap-1.5 sm:gap-2 overflow-x-auto w-full justify-center items-center pb-2">
+                    <div className="flex gap-2 overflow-x-auto w-full justify-center items-center rounded-2xl border border-blue-100 bg-blue-50/70 p-2">
                         {youtubeContents.map((content, index) => (
                             <button
                                 key={content.youtubeContentId}
                                 onClick={() => setSelectedIndex(index)}
-                                className={`px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-text-5 sm:text-subhead-5 transition whitespace-nowrap cursor-pointer ${selectedIndex === index
-                                    ? 'bg-blue-800 text-white'
-                                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                className={`min-h-10 cursor-pointer whitespace-nowrap rounded-xl px-3 py-2 text-sm font-bold transition ${selectedIndex === index
+                                    ? 'bg-blue-800 text-white shadow-sm'
+                                    : 'bg-white text-blue-800 hover:bg-blue-100'
                                     }`}
                             >
                                 Video {index + 1}
@@ -70,7 +70,7 @@ export const YoutubeContent = ({ learningItemDetail }) => {
 
                 {/* Video youtube player */}
                 {videoId ? (
-                    <div className="w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden shadow-lg">
+                    <div className="w-full aspect-video rounded-2xl overflow-hidden border border-blue-100 bg-blue-950 shadow-sm">
                         <iframe
                             width="100%"
                             height="100%"
@@ -82,7 +82,7 @@ export const YoutubeContent = ({ learningItemDetail }) => {
                         />
                     </div>
                 ) : (
-                    <div className="w-full aspect-video rounded-xl sm:rounded-2xl bg-gray-100 flex items-center justify-center">
+                    <div className="w-full aspect-video rounded-2xl border border-blue-100 bg-blue-50/70 flex items-center justify-center">
                         <p className="text-text-5 sm:text-text-4 text-gray-500">Không có video</p>
                     </div>
                 )}
@@ -90,9 +90,9 @@ export const YoutubeContent = ({ learningItemDetail }) => {
 
             {/* Content text */}
             {currentContent?.content && (
-                <div className="flex flex-col gap-3 sm:gap-4">
+                <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
                     <h3 className="text-subhead-5 sm:text-h4 lg:text-h3 text-gray-900 font-semibold">Nội dung video</h3>
-                    <div className="text-text-5 sm:text-text-4 text-gray-700 whitespace-pre-wrap">
+                    <div className="mt-2 whitespace-pre-wrap text-sm leading-6 text-gray-700">
                         {currentContent.content}
                     </div>
                 </div>

@@ -1,60 +1,49 @@
-<!-- gitnexus:start -->
-# GitNexus — Code Intelligence
+# Claude Project Instructions
 
-This project is indexed by GitNexus as **student_frontend** (5635 symbols, 7532 relationships, 66 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+Read `AGENTS.md` first. It is the source of truth for this project.
 
-> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
+This workspace is the **student-frontend** React LMS app at:
 
-## Always Do
+`C:\Users\Admin\Desktop\Job\student_frontend`
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
-- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
+The app is built with React 19, Vite 7, Tailwind CSS 4, Redux Toolkit, React Router 7, Axios, and lucide-react.
 
-## Never Do
+This is **not** the Beacon Flutter project.
 
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
-- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+## GitNexus
 
-## Resources
+Use GitNexus with `repo: "student-frontend"`.
 
-| Resource | Use for |
-|----------|---------|
-| `gitnexus://repo/student_frontend/context` | Codebase overview, check index freshness |
-| `gitnexus://repo/student_frontend/clusters` | All functional areas |
-| `gitnexus://repo/student_frontend/processes` | All execution flows |
-| `gitnexus://repo/student_frontend/process/{name}` | Step-by-step execution trace |
+Before editing any function, class, method, exported constant, Redux slice, route config, service module, or shared component, run impact analysis:
 
-## CLI
+`gitnexus_impact({ repo: "student-frontend", target: "symbolName", direction: "upstream" })`
 
-| Task | Read this skill file |
-|------|---------------------|
-| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
-| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
-| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
-| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
-| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
-| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+Before committing, run:
 
-<!-- gitnexus:end -->
+`gitnexus_detect_changes({ repo: "student-frontend", scope: "all" })`
 
-# Local Taste Skills
+If GitNexus says the index is stale, run:
 
-Read `AGENTS.md` first. This project vendors Taste Skill files in `skills/`.
+`npx gitnexus analyze`
 
-Before every UI, UX, visual design, redesign, animation, motion, image-to-code, or mobile screen implementation task, read `skills/llms.txt`, select the relevant `skills/<skill-folder>/SKILL.md`, and combine it with Beacon Flutter UI rules in `.agents/instructions/ui-design.instructions.md`.
+## UI Work
 
-Default choices:
+For every UI, UX, redesign, animation, motion, mobile screen, or image-to-code task:
 
-- Mobile UI concepts and visual direction: `skills/imagegen-frontend-mobile/SKILL.md`
-- Existing screen redesign or polish: `skills/redesign-skill/SKILL.md`
-- UI/UX animation and motion quality: `skills/gpt-tasteskill/SKILL.md`
-- Clean product UI: `skills/minimalist-skill/SKILL.md`
-- Premium soft UI polish: `skills/soft-skill/SKILL.md`
-- Image-to-code work: `skills/image-to-code-skill/SKILL.md`
-- Complete implementation output: `skills/output-skill/SKILL.md`
-- Broad redesign taste guidance: `skills/taste-skill/SKILL.md`
+1. Read `skills/llms.txt`.
+2. Choose the relevant `skills/<skill-folder>/SKILL.md`.
+3. Prefer `skills/student-lms-blue-skill/SKILL.md` for student LMS workflows.
+4. Use the existing Tailwind 4 design tokens from `tailwind.config.js`.
+
+Do not use Beacon Flutter UI rules in this project.
+
+## Engineering Defaults
+
+- Use `rg` or `rg --files` for searching.
+- Use `apply_patch` for manual edits.
+- Keep code split by feature and responsibility.
+- Put API endpoints in `src/core/constants/apiEndpoints.js`.
+- Put service calls in `src/core/services/modules`.
+- Put route paths in `src/core/constants/routes.js`.
+- Put Redux logic in the relevant feature store folder.
+- Keep student-facing flows easy on mobile first.

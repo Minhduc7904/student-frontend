@@ -7,6 +7,7 @@ import CompetitionHistoryPage from "../../../../competition/history";
 import CompetitionResultPage from "../../../../competition/result";
 import { useNavigate, useParams } from "react-router-dom";
 import { ROUTES } from "../../../../../core/constants";
+import FileHomeworkSubmission from "./FileHomeworkSubmission";
 import HomeworkSolutionVideoTab from "./HomeworkSolutionVideoTab";
 
 // Status configuration
@@ -144,10 +145,29 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const [activeTab, setActiveTab] = useState(() => (
         competitionSubmitId ? TABS.RESULT : TABS.DETAIL
     ));
+    const [localSubmissions, setLocalSubmissions] = useState({});
 
-    const currentContent = homeworkContents[selectedIndex] || null;
+    const rawCurrentContent = homeworkContents[selectedIndex] || null;
+    const localSubmission = rawCurrentContent?.homeworkContentId
+        ? localSubmissions[String(rawCurrentContent.homeworkContentId)]
+        : null;
+    const currentContent = localSubmission
+        ? {
+            ...rawCurrentContent,
+            homeworkSubmit: localSubmission,
+            progress: {
+                ...rawCurrentContent?.progress,
+                homeworkSubmit: localSubmission,
+                isDone: true,
+                status: rawCurrentContent?.progress?.status === 'OVERDUE'
+                    ? rawCurrentContent?.progress?.status
+                    : 'COMPLETED',
+            },
+        }
+        : rawCurrentContent;
     const competition = currentContent?.competition;
     const solutionYoutubeUrl = competition?.exam?.solutionYoutubeUrl;
+    const isFileUploadHomework = currentContent?.type === 'FILE_UPLOAD';
 
     const tabConfig = useMemo(() => {
         return BASE_TAB_CONFIG.filter((tab) => {
@@ -273,6 +293,15 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         setActiveTab(tabId);
     };
 
+    const handleFileHomeworkSubmitted = (homeworkContentId, submitData) => {
+        if (!homeworkContentId || !submitData) return;
+
+        setLocalSubmissions((current) => ({
+            ...current,
+            [String(homeworkContentId)]: submitData,
+        }));
+    };
+
     const LockedContent = ({ title, desc }) => (
         <div className="py-12 flex flex-col gap-3 w-full justify-center items-center rounded-2xl bg-gray-50 border border-gray-100">
             <div className="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
@@ -286,6 +315,16 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     );
 
     const renderTabContent = () => {
+        if (isFileUploadHomework) {
+            return (
+                <FileHomeworkSubmission
+                    homeworkContent={currentContent}
+                    statusConfig={statusConfig}
+                    onSubmitted={handleFileHomeworkSubmitted}
+                />
+            );
+        }
+
         const competitionId = currentContent?.competition?.competitionId;
         const studentId = currentContent?.progress?.studentId;
         const attemptStatusMap = {
@@ -395,32 +434,36 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                                 </span>
                             </div>
                         </div>
-                        <button
-                            type="button"
-                            disabled={isButtonDisabled}
-                            onClick={isButtonDisabled ? undefined : handleActionButton}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${isButtonDisabled
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
-                                }`}
-                        >
-                            <Play size={15} />
-                            <span>{statusConfig.buttonText}</span>
-                        </button>
+                        {!isFileUploadHomework ? (
+                            <button
+                                type="button"
+                                disabled={isButtonDisabled}
+                                onClick={isButtonDisabled ? undefined : handleActionButton}
+                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${isButtonDisabled
+                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                    : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
+                                    }`}
+                            >
+                                <Play size={15} />
+                                <span>{statusConfig.buttonText}</span>
+                            </button>
+                        ) : null}
                     </div>
 
                     {/* Tabs */}
-                    <div className="grid grid-cols-2 sm:flex gap-1 border-t border-gray-100 pt-3">
-                        {tabConfig.map((tab) => (
-                            <TabButton
-                                key={tab.id}
-                                tab={tab}
-                                isActive={activeTab === tab.id}
-                                disabled={isTabDisabled(tab)}
-                                onClick={() => handleTabChange(tab.id)}
-                            />
-                        ))}
-                    </div>
+                    {!isFileUploadHomework ? (
+                        <div className="grid grid-cols-2 sm:flex gap-1 border-t border-gray-100 pt-3">
+                            {tabConfig.map((tab) => (
+                                <TabButton
+                                    key={tab.id}
+                                    tab={tab}
+                                    isActive={activeTab === tab.id}
+                                    disabled={isTabDisabled(tab)}
+                                    onClick={() => handleTabChange(tab.id)}
+                                />
+                            ))}
+                        </div>
+                    ) : null}
                 </div>
             </div>
 

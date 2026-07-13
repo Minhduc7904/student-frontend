@@ -238,7 +238,7 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
     return (
         <div
             ref={containerRef}
-            className={`relative w-full aspect-video bg-black rounded-2xl overflow-hidden ${className}`}
+            className={`relative w-full aspect-video overflow-hidden rounded-2xl border border-blue-100 bg-blue-950 shadow-sm ${className}`}
             onMouseEnter={() => setShowControls(true)}
             onMouseLeave={() => setShowControls(false)}
         >
@@ -252,11 +252,11 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
 
             {/* Custom Controls - CUSTOM AREA START */}
             <div
-                className={`absolute flex flex-row justify-center items-center bottom-0 left-0 right-0 bg-[#2F5F59CC]/80 px-6 py-3 transition-opacity duration-300 ${showControls ? 'opacity-100' : 'opacity-0'
+                className={`absolute bottom-0 left-0 right-0 flex flex-row items-center justify-center bg-blue-950/85 px-4 py-3 transition-opacity duration-300 sm:px-6 ${showControls ? 'opacity-100' : 'opacity-0'
                     }`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="w-6 h-6 p-[2px] rounded-[6.86px] flex justify-center bg-white items-center mr-8 cursor-pointer hover:scale-110 active:scale-95 transition-transform duration-150" onClick={togglePlay}>
+                <div className="mr-4 flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl bg-white p-1 transition-transform duration-150 hover:scale-105 active:scale-95 sm:mr-8" onClick={togglePlay}>
                     {isPlaying ? (
                         <Pause size={18} className="text-blue-800" />
                     ) : (
@@ -265,7 +265,7 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
                 </div>
                 <div
                     ref={progressBarRef}
-                    className="relative w-full h-2 bg-white/30 rounded-full cursor-pointer mr-14 group"
+                    className="group relative mr-4 h-2 w-full cursor-pointer rounded-full bg-white/30 sm:mr-10"
                     onClick={handleProgressClick}
                     onMouseDown={handleProgressMouseDown}
                 >
@@ -284,7 +284,7 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
                         style={{ left: `calc(${progressPercentage}% - 8px)` }}
                     />
                 </div>
-                <div className="flex flex-row justify-center items-center gap-6">
+                <div className="flex flex-row items-center justify-center gap-4 sm:gap-6">
                     <div 
                         ref={volumeContainerRef}
                         className="relative flex items-center justify-center"
@@ -298,7 +298,7 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
                         />
                         {/* Volume Slider */}
                         {showVolumeSlider && (
-                            <div className="absolute bottom-full mb-0 left-1/2 -translate-x-1/2 bg-[#2F5F59CC]/95 rounded-lg p-3 flex flex-col items-center gap-2">
+                            <div className="absolute bottom-full left-1/2 mb-1 flex -translate-x-1/2 flex-col items-center gap-2 rounded-xl bg-blue-950/95 p-3">
                                 <input
                                     type="range"
                                     min="0"
@@ -348,7 +348,7 @@ export const VideoPlayer = ({ videoUrl, className = "" }) => {
                     className="absolute inset-0 flex items-center justify-center cursor-pointer pointer-events-none"
                 >
                     <div 
-                        className="w-20 h-20 bg-[#2F5F59CC]/50 rounded-full flex items-center justify-center hover:bg-[#2F5F59CC]/70 hover:scale-110 active:scale-95 transition-all duration-150 pointer-events-auto"
+                        className="pointer-events-auto flex h-20 w-20 items-center justify-center rounded-full bg-blue-800/70 transition-all duration-150 hover:scale-105 hover:bg-blue-900/80 active:scale-95"
                         onClick={togglePlay}
                     >
                         <Play size={32} className="text-white" />

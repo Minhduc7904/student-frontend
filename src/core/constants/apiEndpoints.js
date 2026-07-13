@@ -76,6 +76,13 @@ export const API_ENDPOINTS = {
         STREAM_VIDEO: (learningItemId, mediaId) => `/learning-items/${learningItemId}/student/video/stream/${mediaId}`,
     },
 
+    STUDENT_HOMEWORK_SUBMISSIONS: {
+        LIST: '/student/homework-submissions',
+        UPLOAD_FILES: '/student/homework-submissions/files',
+        SUBMIT: '/student/homework-submissions',
+        RESUBMIT: (homeworkContentId) => `/student/homework-submissions/${homeworkContentId}`,
+    },
+
     // Exams
     EXAMS: {
         LIST: '/exams',

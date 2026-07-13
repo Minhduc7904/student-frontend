@@ -26,6 +26,38 @@ export const learningItemService = {
         return axiosClient.post(API_ENDPOINTS.LEARNING_ITEMS.MARK_LEARNED(learningItemId));
     },
 
+    uploadHomeworkSubmissionFiles: (files = []) => {
+        const formData = new FormData();
+        files.forEach((file) => {
+            formData.append('files', file);
+        });
+
+        return axiosClient.post(API_ENDPOINTS.STUDENT_HOMEWORK_SUBMISSIONS.UPLOAD_FILES, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+    },
+
+    getMyFileHomeworkSubmissions: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.STUDENT_HOMEWORK_SUBMISSIONS.LIST, { params });
+    },
+
+    submitFileHomework: ({ homeworkContentId, content, mediaIds }) => {
+        return axiosClient.post(API_ENDPOINTS.STUDENT_HOMEWORK_SUBMISSIONS.SUBMIT, {
+            homeworkContentId,
+            content,
+            mediaIds,
+        });
+    },
+
+    resubmitFileHomework: ({ homeworkContentId, content, mediaIds }) => {
+        return axiosClient.put(API_ENDPOINTS.STUDENT_HOMEWORK_SUBMISSIONS.RESUBMIT(homeworkContentId), {
+            content,
+            mediaIds,
+        });
+    },
+
     /**
      * Lấy URL để stream video với Range Request support
      * Sử dụng URL này trong video element để browser tự động handle Range Request
