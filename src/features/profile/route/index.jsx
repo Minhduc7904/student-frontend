@@ -2,6 +2,7 @@ import ProfileLayout from "../layout/ProfileLayout";
 import ProfilePage from "../index";
 import ProfileEditInforPage from "../edit-infor";
 import ProfileSettingPage from "../setting";
+import ProfilePointsPage from "../points";
 import { ROUTES } from "../../../core/constants";
 import { ProtectedRoute } from "../../../shared/components/protected/ProtectedRoute";
 import { Outlet } from "react-router-dom";
@@ -29,6 +30,20 @@ export const profileRoutes = [
                         meta: {
                             title: "Thông tin cá nhân",
                             description: "Trang thông tin cá nhân học sinh",
+                        },
+                    },
+                ],
+            },
+            {
+                path: ROUTES.PROFILE_POINTS,
+                element: <ProtectedRoute />,
+                children: [
+                    {
+                        index: true,
+                        element: <ProfilePointsPage />,
+                        meta: {
+                            title: "Điểm của tôi",
+                            description: "Xem tổng điểm và lịch sử cộng trừ điểm",
                         },
                     },
                 ],

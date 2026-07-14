@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { User } from "lucide-react";
 import { ROUTES } from "../../../core/constants/routes";
 import UserAvatarDropdown from "./UserAvatarDropdown";
-import { ComingSoonModal } from "../modal/ComingSoonModal";
 
 /**
  * UserAvatar Component
@@ -14,7 +13,6 @@ import { ComingSoonModal } from "../modal/ComingSoonModal";
  */
 const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
     const dropdownRef = useRef(null);
     const navigate = useNavigate();
 
@@ -81,12 +79,9 @@ const UserAvatar = memo(({ avatarUrl, fullName, email, compact = false }) => {
                         onNavigate={handleNavigate}
                         onLogout={handleLogout}
                         onClose={() => setIsOpen(false)}
-                        onOpenComingSoon={() => setIsComingSoonOpen(true)}
                     />
                 )}
             </div>
-
-            <ComingSoonModal isOpen={isComingSoonOpen} onClose={() => setIsComingSoonOpen(false)} />
         </>
     );
 });

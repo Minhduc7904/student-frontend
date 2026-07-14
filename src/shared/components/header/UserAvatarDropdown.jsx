@@ -6,7 +6,7 @@ import { ROUTES } from "../../../core/constants/routes";
  * UserAvatarDropdown
  * Menu dropdown của avatar người dùng.
  */
-const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout, onClose, onOpenComingSoon }) => {
+const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLogout, onClose }) => {
     const quickMenus = [
         {
             key: "progress",
@@ -18,7 +18,7 @@ const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLog
             key: "points",
             label: "Điểm",
             icon: Coins,
-            path: ROUTES.DASHBOARD,
+            path: ROUTES.PROFILE_POINTS,
         },
         // {
         //     key: "notebook",
@@ -41,12 +41,6 @@ const UserAvatarDropdown = memo(({ avatarUrl, fullName, email, onNavigate, onLog
     ];
 
     const handleQuickMenuClick = (item) => {
-
-        if (item.key === "points") {
-            onClose();
-            onOpenComingSoon?.();
-            return;
-        }
 
         onNavigate(item.path);
         onClose();

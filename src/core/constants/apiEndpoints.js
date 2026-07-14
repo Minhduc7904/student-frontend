@@ -19,6 +19,7 @@ export const API_ENDPOINTS = {
         CHANGE_PASSWORD: '/student/profile/change-password',
         STATS_DIFFICULTY: '/student/profile/stats/difficulty',
         STATS_ACTIVITY_YEAR: '/student/profile/stats/activity-year',
+        POINT_LOGS_MY: '/student-point-logs/my',
     },
 
     // User/Profile

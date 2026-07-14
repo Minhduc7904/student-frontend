@@ -48,6 +48,7 @@ export const ROUTES = {
     COMPETITION_RESULT: (competitionId, submitId) => `/competition/${competitionId}/result/${submitId}`,
     // User Routes
     PROFILE: '/profile',
+    PROFILE_POINTS: '/profile/points',
     STUDENT_PROFILE: '/profile/:id',
     STUDENT_PROFILE_DETAIL: (id) => `/profile/${id}`,
     HISTORY: '/history',
@@ -111,6 +112,7 @@ export const ROUTE_META = {
         ROUTES.COURSES,
         ROUTES.EXAMS,
         ROUTES.PROFILE,
+        ROUTES.PROFILE_POINTS,
         ROUTES.HISTORY,
         ROUTES.HISTORY_COMPETITION,
         ROUTES.HISTORY_QUESTION,

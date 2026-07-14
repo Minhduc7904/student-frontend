@@ -82,4 +82,10 @@ export const profileService = {
             },
         });
     },
+
+    getMyPointLogs: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.PROFILE.POINT_LOGS_MY, {
+            params,
+        });
+    },
 };
