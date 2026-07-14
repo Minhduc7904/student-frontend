@@ -1,0 +1,66 @@
+name: Student Frontend CI/CD
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["**/*.md"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: student-frontend-production
+  cancel-in-progress: false
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: production
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+        run: |
+          install -m 700 -d "$HOME/.ssh"
+          printf '%s\n' "$SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/id_ed25519" "$HOME/.ssh/known_hosts"
+
+      - name: Deploy tested commit
+        env:
+          VPS_HOST: ${{ vars.VPS_HOST }}
+          VPS_PORT: ${{ vars.VPS_PORT }}
+          VPS_USER: ${{ vars.VPS_USER }}
+          VPS_CONFIG_DIR: ${{ vars.VPS_CONFIG_DIR }}
+          VPS_STUDENT_FRONTEND_DIR: ${{ vars.VPS_STUDENT_FRONTEND_DIR }}
+          REVISION: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          VPS_HOST="$(printf '%s' "$VPS_HOST" | tr -d '\r\n' | xargs)"
+          VPS_PORT="$(printf '%s' "$VPS_PORT" | tr -d '\r\n' | xargs)"
+          VPS_USER="$(printf '%s' "$VPS_USER" | tr -d '\r\n' | xargs)"
+          VPS_CONFIG_DIR="$(printf '%s' "$VPS_CONFIG_DIR" | tr -d '\r\n' | xargs)"
+          VPS_STUDENT_FRONTEND_DIR="$(printf '%s' "$VPS_STUDENT_FRONTEND_DIR" | tr -d '\r\n' | xargs)"
+          REMOTE_SCRIPT="$VPS_CONFIG_DIR/scripts/deploy-student-frontend.sh"
+
+          ssh -p "$VPS_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes \
+            "$VPS_USER@$VPS_HOST" \
+            "test -f '$REMOTE_SCRIPT' && STUDENT_FRONTEND_DIR='$VPS_STUDENT_FRONTEND_DIR' VPS_DIR='$VPS_CONFIG_DIR' bash '$REMOTE_SCRIPT' '$REVISION'"
