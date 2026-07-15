@@ -18,4 +18,23 @@ export const courseService = {
       API_ENDPOINTS.COURSES.STUDENT_DETAIL(courseId)
     );
   },
+
+  getStudentOnlineCoursesNotEnrolled: async (params = {}) => {
+    return await axiosClient.get(
+      API_ENDPOINTS.COURSES.STUDENT_ONLINE_NOT_ENROLLED,
+      { params }
+    );
+  },
+
+  registerManualInvoice: async (courseIdOrCode) => {
+    return await axiosClient.post(
+      API_ENDPOINTS.COURSES.REGISTER_MANUAL_INVOICE(courseIdOrCode)
+    );
+  },
+
+  getOnlineCourseInvoicePaymentStatus: async (invoiceId) => {
+    return await axiosClient.get(
+      API_ENDPOINTS.ONLINE_COURSE_INVOICES.PAYMENT_STATUS(invoiceId)
+    );
+  },
 };

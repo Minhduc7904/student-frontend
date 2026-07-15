@@ -25,6 +25,8 @@ export const ROUTES = {
 
     // Course Routes
     COURSE_ENROLLMENTS: '/courses/enrollments',
+    COURSE_MARKETPLACE: '/courses/purchase',
+    COURSE_PURCHASE_DETAIL: (id) => `/courses/purchase/${id}`,
     COURSE_DETAIL: (id) => `/courses/${id}`,
     COURSE_LESSON: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
     COURSE_LEARNING_ITEM: (courseId, lessonId, learningItemId) => `/courses/${courseId}/lessons/${lessonId}/learning-items/${learningItemId}`,
@@ -134,6 +136,7 @@ export const ROUTE_META = {
  * Route Patterns for matching
  */
 export const ROUTE_PATTERNS = {
+    COURSE_PURCHASE_DETAIL: /^\/courses\/purchase\/(\d+)$/,
     COURSE_DETAIL: /^\/courses\/(\d+)$/,
     COURSE_LESSON: /^\/courses\/(\d+)\/lessons\/(\d+)$/,
     EXAM_DETAIL: /^\/exams\/(\d+)$/,

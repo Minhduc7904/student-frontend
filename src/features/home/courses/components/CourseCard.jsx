@@ -1,91 +1,79 @@
 import { memo } from "react";
-import { Image } from "../../../../shared/components/images";
-import MathCourseImage from "../../../../assets/images/MathCourseImage.png";
-import EnglishCourseImage from "../../../../assets/images/EnglishCourseImage.png";
-import PhysicCourseImage from "../../../../assets/images/PhysicCourseImage.png";
-import { SUBJECT_IDS } from "../../../../core/constants/subject";
-import { PartyPopper } from "lucide-react";
+import { ArrowUpRight } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Avatar, Image } from "../../../../shared/components/images";
 import { ROUTES } from "../../../../core/constants";
-import { useNavigate } from "react-router-dom";
+import {
+    getEnrollmentGrade,
+    getEnrollmentProgress,
+    getEnrollmentSubject,
+    getEnrollmentTeacher,
+    getEnrollmentThumbnail,
+} from "./courseCardUtils";
 
-/**
- * Course Card Component
- * Hiển thị thông tin khóa học đã đăng ký
- */
-const CourseCard = memo(({ enrollment, bgColor = 'bg-blue-lighter' }) => {
-    const { course, status, completionPercentage = 0 } = enrollment;
-    const navigate = useNavigate();
-
-    const progress = Math.min(100, Math.max(0, completionPercentage));
-
-    const getProgressColor = () => {
-        if (progress < 30) return "from-red-400 to-red-500";
-        if (progress < 70) return "from-yellow-400 to-yellow-500";
-        return "from-green-400 to-green-500";
-    };
-
-    const getSubjectImage = (subjectId) => {
-        switch (subjectId) {
-            case SUBJECT_IDS.MATH:
-                return MathCourseImage;
-            case SUBJECT_IDS.ENGLISH:
-                return EnglishCourseImage;
-            case SUBJECT_IDS.PHYSICS:
-                return PhysicCourseImage;
-            default:
-                return MathCourseImage;
-        }
-    };
+const CourseCard = memo(({ enrollment }) => {
+    const course = enrollment?.course || {};
+    const progress = getEnrollmentProgress(enrollment);
+    const teacher = getEnrollmentTeacher(enrollment);
 
     return (
-        <div className="w-full flex justify-start items-center">
-            <div
-                onClick={() => navigate(ROUTES.COURSE_DETAIL(course.courseId))}
-                className={`hover:scale-105 transition active:scale-105 cursor-pointer w-full px-4 sm:px-5 lg:px-6 py-3 gap-4 flex flex-col justify-center items-center rounded-2xl ${bgColor}`}>
-
-                {/* Header */}
-                <div className="flex flex-row gap-4 items-center w-full">
-                    <div className="w-10 h-10 rounded flex-shrink-0">
-                        <Image
-                            src={course.imageUrl || getSubjectImage(course.subjectId)}
-                            alt={course.title}
-                            className="w-full h-full object-contain rounded"
-                        />
-                    </div>
-
-                    <div className="flex flex-col gap-1 flex-1 min-w-0">
-                        <span className="text-subhead-4 font-semibold text-black truncate">
-                            {course.title || "Tên khóa học"}
-                        </span>
-                        <span className="text-text-5 text-blue-900 truncate">
-                            {course.teacherName || "Giáo viên"}
-                        </span>
-                    </div>
-                </div>
-
-                {/* Progress */}
-                <div className="w-full flex flex-col gap-2">
-                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
-                        <div
-                            className={`h-full bg-gradient-to-r ${getProgressColor()} transition-all duration-700 ease-out rounded-full`}
-                            style={{ width: `${progress}%` }}
-                        />
-                    </div>
-
-                    <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-500">
-                            {true ? <>Đã hoàn thành <PartyPopper className="inline-block w-4 h-4 text-red-500" /></> : "Hoàn thành"}
-                        </span>
-                        <span className="font-semibold text-blue-600">
-                            {progress}%
-                        </span>
-                    </div>
-                </div>
-
+        <Link
+            to={ROUTES.COURSE_DETAIL(course.courseId)}
+            className="group block cursor-pointer overflow-hidden rounded-xl border border-blue-100 bg-white shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-800 focus-visible:ring-offset-2"
+            aria-label={`Xem khóa học ${course.title || ""}`}
+        >
+            <div className="relative aspect-[16/9] overflow-hidden bg-blue-100">
+                <Image
+                    src={getEnrollmentThumbnail(enrollment)}
+                    alt={course.title || "Ảnh khóa học"}
+                    className="h-full w-full"
+                    loading="lazy"
+                />
+                <span className="absolute right-3 top-3 rounded-lg bg-blue-950/85 px-2.5 py-1 text-xs font-bold text-white">
+                    {enrollment?.statusDisplay || "Đang học"}
+                </span>
             </div>
-        </div>
+
+            <div className="p-4 sm:p-5">
+                <div className="flex flex-wrap gap-2">
+                    <span className="rounded-lg bg-blue-50 px-2.5 py-1 text-xs font-bold text-blue-800">
+                        {getEnrollmentSubject(enrollment)}
+                    </span>
+                    <span className="rounded-lg bg-yellow-50 px-2.5 py-1 text-xs font-bold text-blue-950">
+                        {getEnrollmentGrade(enrollment)}
+                    </span>
+                    {course.academicYear ? <span className="rounded-lg bg-gray-100 px-2.5 py-1 text-xs font-bold text-gray-700">{course.academicYear}</span> : null}
+                </div>
+
+                <div className="mt-3 flex items-start justify-between gap-3">
+                    <h2 className="line-clamp-2 min-h-12 text-base font-bold leading-6 text-blue-950">
+                        {course.title || "Khóa học đang cập nhật"}
+                    </h2>
+                    <ArrowUpRight size={18} className="mt-1 shrink-0 text-blue-800 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
+
+                <div className="mt-5">
+                    <div className="mb-2 flex items-center justify-between gap-3 text-xs font-semibold">
+                        <span className="text-gray-600">Tiến độ học</span>
+                        <span className="text-blue-800">{progress}%</span>
+                    </div>
+                    <div className="h-2 overflow-hidden rounded-full bg-blue-100" aria-label={`Tiến độ ${progress}%`}>
+                        <div className="h-full rounded-full bg-blue-800 transition-[width] duration-500" style={{ width: `${progress}%` }} />
+                    </div>
+                </div>
+
+                <div className="mt-5 flex items-center gap-3 border-t border-blue-100 pt-4">
+                    <Avatar src={teacher.avatarUrl} alt={teacher.name} size="sm" className="shrink-0 ring-2 ring-blue-50" />
+                    <div className="min-w-0">
+                        <p className="text-xs font-medium text-gray-500">Giáo viên</p>
+                        <p className="truncate text-sm font-bold text-blue-950">{teacher.name}</p>
+                    </div>
+                </div>
+            </div>
+        </Link>
     );
 });
+
 CourseCard.displayName = "CourseCard";
 
 export default CourseCard;

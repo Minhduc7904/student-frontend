@@ -1,25 +1,26 @@
 
 
-import { CourseList, HomeworkList } from "./components";
+import { BookOpen } from "lucide-react";
+import { CourseList, CourseModeTabs } from "./components";
+
 export const EnrollmentsPage = () => {
     return (
-        <div className="flex flex-col justify-between items-center w-full">
-            <div className="flex flex-col justify-center items-center w-full gap-3">
-                <div className="flex justify-start items-center p-2 w-full ">
-                    <span className="text-h2 text-blue-800">Khóa học của tôi</span>
+        <main className="w-full text-blue-950">
+            <CourseModeTabs />
+            <header className="mb-7 mt-7 flex items-start gap-3 sm:mb-8 sm:mt-8">
+                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-800 text-white shadow-sm">
+                    <BookOpen size={21} />
+                </span>
+                <div>
+                    <h1 className="text-2xl font-bold sm:text-3xl">Khóa học của tôi</h1>
+                    <p className="mt-1 text-sm leading-6 text-gray-600">
+                        Chọn khóa học để xem lộ trình và tiếp tục bài đang học.
+                    </p>
                 </div>
-                {/* Course list */}
-                <CourseList />
-                
-            </div>
-            <div className="flex-1 flex flex-col justify-center items-center w-full gap-[14px]">
-                <div className="flex justify-start items-center p-2 w-full ">
-                    <span className="text-h2 text-blue-800">Bài tập của tôi</span>
-                </div>
-                <HomeworkList />
-            </div>
-        </div>
-    )
-}
+            </header>
+            <CourseList />
+        </main>
+    );
+};
 
 export default EnrollmentsPage;

@@ -26,3 +26,6 @@ export * from './commonUtils';
 // Storage utilities
 export * from './storage';
 export * from './storageHelpers';
+
+// User display utilities
+export * from './userDisplay';

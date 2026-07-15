@@ -16,6 +16,10 @@ export const lessonService = {
         return axiosClient.get(API_ENDPOINTS.LESSONS.COURSE_LESSONS(courseId));
     },
 
+    getLatestStudentLessons: (params = {}) => {
+        return axiosClient.get(API_ENDPOINTS.LESSONS.STUDENT_LATEST, { params });
+    },
+
     /**
      * Lấy chi tiết một lesson
      * @param {number|string} courseId - ID của course

@@ -5,5 +5,9 @@ import { API_ENDPOINTS } from '../../constants'
 export const courseEnrollmentService = {
     getMyEnrollments: (params = {}) => {
         return axiosClient.get(API_ENDPOINTS.COURSE_ENROLLMENTS.MY, { params })
+    },
+
+    getMyEnrollmentsByProgress: () => {
+        return axiosClient.get(API_ENDPOINTS.COURSE_ENROLLMENTS.MY_BY_PROGRESS)
     }
 };
