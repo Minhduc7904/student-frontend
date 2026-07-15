@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { AlertCircle, ChevronDown, LockKeyhole } from "lucide-react";
+import { AlertCircle, ChevronDown, LockKeyhole, Play } from "lucide-react";
 import {
     clampProgress,
     getLearningItemMeta,
@@ -26,7 +26,11 @@ const LearningItemPreview = ({ item, lesson, courseImage, onOpenItem, previewOnl
             <div className="relative h-20 w-28 shrink-0 bg-blue-50 sm:h-24 sm:w-36">
                 <img src={previewUrl} alt={`Ảnh xem trước ${item?.title || "nội dung học"}`} className="h-full w-full object-cover" />
                 <span className="absolute inset-0 grid place-items-center bg-blue-950/35 text-white">
-                    <LockKeyhole size={18} />
+                    {previewOnly ? <LockKeyhole size={18} /> : (
+                        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-800 text-white shadow-sm">
+                            <Play size={16} fill="currentColor" className="ml-0.5" />
+                        </span>
+                    )}
                 </span>
             </div>
             <div className="min-w-0 flex-1 p-3">
@@ -35,7 +39,9 @@ const LearningItemPreview = ({ item, lesson, courseImage, onOpenItem, previewOnl
                         <Icon size={13} />
                         {meta.label}
                     </span>
-                    <span className="text-[11px] font-semibold text-gray-500">Chỉ xem trước</span>
+                    <span className={`text-[11px] font-semibold ${previewOnly ? "text-gray-500" : "text-blue-800"}`}>
+                        {previewOnly ? "Chỉ xem trước" : "Bấm vào học ngay"}
+                    </span>
                 </div>
                 <p className="mt-2 line-clamp-2 text-sm font-bold leading-5 text-blue-950 group-hover:text-blue-800">
                     {item?.title || "Nội dung học tập"}
