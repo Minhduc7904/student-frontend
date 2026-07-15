@@ -37,6 +37,9 @@ export const SidebarLessonItem = ({
     }, [isActiveLesson, containsCurrentLearningItem]);
 
     const handleLessonClick = () => {
+        if (hasItems) {
+            setIsExpanded((value) => !value);
+        }
         onNavigate(ROUTES.COURSE_LESSON(courseId, lesson.lessonId));
     };
 
@@ -70,21 +73,8 @@ export const SidebarLessonItem = ({
                 </span>
                 {hasItems ? (
                     <span
-                        role="button"
-                        tabIndex={0}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            setIsExpanded((value) => !value);
-                        }}
-                        onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                setIsExpanded((value) => !value);
-                            }
-                        }}
                         className="rounded-lg p-1"
-                        aria-label={isExpanded ? "Thu gọn bài học" : "Mở rộng bài học"}
+                        aria-hidden="true"
                     >
                         <ChevronDown
                             size={14}
