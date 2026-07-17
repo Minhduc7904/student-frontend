@@ -63,6 +63,13 @@ export const LessonLearningHeader = ({
                 ) : null}
                 <Link
                     to={ROUTES.DASHBOARD}
+                    className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-blue-100 bg-white text-blue-700 transition hover:bg-blue-50 hover:text-blue-950 sm:hidden"
+                    aria-label="Về trang chủ"
+                >
+                    <Home size={18} />
+                </Link>
+                <Link
+                    to={ROUTES.DASHBOARD}
                     className="hidden h-10 items-center gap-2 rounded-xl border border-blue-100 bg-white px-3 text-xs font-bold text-blue-700 transition hover:bg-blue-50 hover:text-blue-950 sm:inline-flex"
                 >
                     <Home size={15} />
