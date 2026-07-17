@@ -31,8 +31,8 @@ import {
  *   error,
  *   refresh
  * } = useCompetitionExam(competitionId, {
- *   onSuccess: (data) => console.log('Loaded:', data),
- *   onError: (err) => console.error(err)
+ *   onSuccess: (data) => handleLoaded(data),
+ *   onError: (err) => handleError(err)
  * });
  */
 export const useCompetitionExam = (competitionId, options = {}) => {

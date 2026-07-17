@@ -6,14 +6,30 @@ import { ROUTES } from '../../../core/constants';
 import { Modal } from '../../../shared/components/modal/Modal';
 import {
     selectStartAttemptLoading,
+    resetCompetitionAttemptState,
     startCompetitionAttempt,
 } from '../../do-competition/store';
+import { getActiveAttempt } from '../../do-competition/utils/getActiveAttempt';
+import {
+    getLatestSubmittedAttemptId,
+    navigateToCompetitionResult,
+    shouldNavigateToCompetitionResult,
+} from '../../do-competition/utils/attemptResultNavigation';
 
 const CompetitionStartModal = ({ isOpen, competitionId, onClose }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const loading = useSelector(selectStartAttemptLoading);
     const [status, setStatus] = useState(null);
+
+    const navigateAfterStartFailure = async (failure) => {
+        if (!shouldNavigateToCompetitionResult(failure)) return false;
+
+        const submitId = failure?.data?.competitionSubmitId ?? failure?.competitionSubmitId ?? await getLatestSubmittedAttemptId(competitionId);
+        onClose?.();
+        navigateToCompetitionResult({ navigate, competitionId, submitId });
+        return true;
+    };
 
     if (!isOpen) return null;
 
@@ -27,13 +43,24 @@ const CompetitionStartModal = ({ isOpen, competitionId, onClose }) => {
 
             if (result?.success) {
                 const data = result?.data;
+                const autoSubmittedSubmitId = data?.autoSubmitted
+                    ? data?.competitionSubmitId ?? data?.submission?.competitionSubmitId
+                    : null;
+                if (autoSubmittedSubmitId) {
+                    dispatch(resetCompetitionAttemptState());
+                    onClose?.();
+                    navigateToCompetitionResult({ navigate, competitionId, submitId: autoSubmittedSubmitId });
+                    return;
+                }
+                const attempt = getActiveAttempt(result, competitionId);
 
-                if (data?.competitionSubmitId && data?.isInProgress) {
+                if (attempt) {
+                    dispatch(resetCompetitionAttemptState());
                     onClose?.();
                     navigate(
                         ROUTES.DO_COMPETITION_SUBMIT(
-                            data.competitionId,
-                            data.competitionSubmitId
+                            attempt.competitionId,
+                            attempt.competitionSubmitId
                         )
                     );
                     return;
@@ -46,11 +73,13 @@ const CompetitionStartModal = ({ isOpen, competitionId, onClose }) => {
                 return;
             }
 
+            if (await navigateAfterStartFailure(result)) return;
             setStatus({
                 type: 'error',
                 message: result?.message || 'Không thể bắt đầu cuộc thi.',
             });
         } catch (error) {
+            if (await navigateAfterStartFailure(error)) return;
             setStatus({
                 type: 'error',
                 message:

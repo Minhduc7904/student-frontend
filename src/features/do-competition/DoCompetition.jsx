@@ -28,7 +28,6 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
 
         if (!currentAttempt || currentAttempt.competitionSubmitId !== submitIdNum) {
             // Redirect về trang start nếu không có attempt hoặc không khớp
-            console.warn('Invalid attempt or submitId mismatch. Redirecting to start...');
             if (isHomeworkCompetition) {
                 navigate(ROUTES.DO_HOMEWORK_COMPETITION_START(courseId, lessonId, learningItemId, homeworkContentId, competitionId), { replace: true });
             } else {
@@ -62,12 +61,8 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
         refresh: refreshTime,
     } = useCompetitionTimer(submitId, {
         autoStart: true,
-        onTimeUp: (data) => {
-            console.log('Time is up! Auto submitting...', data);
+        onTimeUp: () => {
             autoSubmitRef.current?.();
-        },
-        onError: (error) => {
-            console.error('Error fetching time:', error);
         },
     });
 
@@ -85,12 +80,6 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
         refresh: refreshExam,
     } = useCompetitionExam(competitionId, {
         autoFetch: true,
-        onSuccess: (data) => {
-            console.log('Exam loaded:', data);
-        },
-        onError: (error) => {
-            console.error('Error loading exam:', error);
-        },
     });
 
     // Sử dụng custom hook để lấy câu trả lời (chỉ khi exam đã load xong)
@@ -105,12 +94,6 @@ export const DoCompetition = ({ isHomeworkCompetition = false }) => {
     } = useCompetitionAnswers(submitId, {
         autoFetch: true,
         enabled: hasExam,  // Chứ exam load xong mới gọi answers
-        onSuccess: (data) => {
-            console.log('Answers loaded:', data);
-        },
-        onError: (error) => {
-            console.error('Error loading answers:', error);
-        },
     });
 
     // ID câu hỏi đang được focus/highlight (dùng cho sidebar và scroll)

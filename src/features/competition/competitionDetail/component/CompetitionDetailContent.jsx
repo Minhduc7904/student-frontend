@@ -25,7 +25,8 @@ const CompetitionDetailContent = ({ detail, competitionId, onCountdownFinished }
     const isInProgressAttempt = attemptStatus === 'IN_PROGRESS';
     const isAttemptCompleted = attemptStatus === 'ATTEMPTED' || attemptStatus === 'SUBMITTED';
     const canStartCompetition = timelineStatus === 'ONGOING' && Boolean(competitionId);
-    const canShowAttemptAction = (canStartCompetition || isInProgressAttempt) && canAttempt;
+    // A student can resume an existing attempt even when they cannot create a new one.
+    const canShowAttemptAction = isInProgressAttempt || (canStartCompetition && canAttempt);
     const canTapStartOnMobile = canShowAttemptAction || isAttemptCompleted;
     const attemptActionLabel = isInProgressAttempt ? 'Làm tiếp' : 'Làm bài';
     const competitionTitle = detail?.title ?? `Cuộc thi #${competitionId}`;

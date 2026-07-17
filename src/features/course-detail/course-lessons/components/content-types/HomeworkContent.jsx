@@ -252,17 +252,38 @@ export const HomeworkContent = ({ learningItemDetail }) => {
      * Handle start competition navigation
      */
     const handleStartCompetition = () => {
-        if (competition?.competitionId) {
-            const learningItemId = learningItemDetail?.learningItemId;
-            const homeworkContentId = currentContent?.homeworkContentId;
-            navigate(ROUTES.DO_HOMEWORK_COMPETITION_START(
+        const routeCompetitionId = competition?.competitionId ?? competition?.id ?? currentContent?.competitionId;
+        const routeLearningItemId = learningItemDetail?.learningItemId ?? learningItemId;
+        const homeworkContentId = currentContent?.homeworkContentId ?? currentContent?.id;
+        const activeSubmitId =
+            currentContent?.progress?.homeworkSubmit?.competitionSubmitId ??
+            currentContent?.progress?.competitionSubmitId ??
+            competition?.competitionSubmitId ??
+            competition?.activeSubmitId;
+
+        if (!routeCompetitionId) return;
+
+        if (competition?.attemptStatus === 'IN_PROGRESS' && activeSubmitId) {
+            const targetRoute = ROUTES.DO_HOMEWORK_COMPETITION_SUBMIT(
                 courseId,
                 lessonId,
-                learningItemId,
+                routeLearningItemId,
                 homeworkContentId,
-                competition.competitionId
-            ));
+                routeCompetitionId,
+                activeSubmitId
+            );
+            navigate(targetRoute);
+            return;
         }
+
+        const targetRoute = ROUTES.DO_HOMEWORK_COMPETITION_START(
+            courseId,
+            lessonId,
+            routeLearningItemId,
+            homeworkContentId,
+            routeCompetitionId
+        );
+        navigate(targetRoute);
     };
 
     /**

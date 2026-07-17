@@ -4,8 +4,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import { PageLoading } from '../../shared/components/loading';
 import { Logo } from '../../shared/components';
 import { ROUTES } from '../../core/constants';
+import { getActiveAttempt } from './utils/getActiveAttempt';
+import {
+    getLatestSubmittedAttemptId,
+    navigateToCompetitionResult,
+    shouldNavigateToCompetitionResult,
+} from './utils/attemptResultNavigation';
 import {
     startCompetitionAttempt,
+    resetCompetitionAttemptState,
     selectStartAttemptLoading,
     selectCurrentAttempt
 } from './store/doCompetitionSlice';
@@ -39,87 +46,85 @@ const WarningItem = ({ icon: Icon, text, index }) => (
 // ─── Confirmation Page ───────────────────────────────────────────────────────
 const ConfirmationPage = ({ onConfirm, onCancel, loading }) => {
     const warnings = [
-        { icon: MonitorX, text: 'Không thoát trang hoặc tải lại trang khi đang làm bài' },
-        { icon: ShieldAlert, text: 'Không chuyển sang ứng dụng khác trong thời gian làm bài' },
-        { icon: AlertCircle, text: 'Hệ thống có thể tự động nộp bài nếu phát hiện gián đoạn' },
-        { icon: Wifi, text: 'Hãy đảm bảo kết nối mạng ổn định trước khi bắt đầu' },
-        { icon: Timer, text: 'Thời gian làm bài sẽ được tính ngay sau khi bắt đầu' },
+        { icon: MonitorX, text: 'Không tải lại hoặc đóng trang trong khi đang làm bài.' },
+        { icon: ShieldAlert, text: 'Mỗi lượt làm bài chỉ được ghi nhận một lần.' },
+        { icon: Timer, text: 'Đồng hồ bắt đầu ngay khi bạn vào phòng thi.' },
     ];
 
     return (
-        <div className="min-h-dvh bg-background flex flex-col">
-            {/* Header bar */}
-            <header className="bg-white border-b border-gray-100 shadow-sm shrink-0">
-                <div className="max-w-3xl mx-auto flex items-center justify-between h-14 sm:h-16 px-4 sm:px-6">
+        <div className="min-h-dvh bg-blue-50/70 text-blue-950">
+            <header className="border-b border-blue-700 bg-blue-800 text-white shadow-sm">
+                <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
                     <Logo
                         mode="default"
                         containerClassName="flex items-center"
-                        className="h-8 sm:h-10 w-auto object-contain"
+                        className="h-8 w-auto brightness-0 invert sm:h-9"
                     />
                     <button
                         onClick={onCancel}
-                        className="flex cursor-pointer items-center gap-1.5 text-text-5 sm:text-subhead-5 text-gray-500 hover:text-gray-900 transition-colors"
+                        disabled={loading}
+                        className="flex cursor-pointer items-center gap-1.5 rounded-lg px-2.5 py-2 text-sm font-semibold text-blue-100 transition hover:bg-white/10 hover:text-white disabled:opacity-60"
                     >
                         <ChevronLeft className="w-4 h-4" />
-                        Quay lại
+                        Rời trang
                     </button>
                 </div>
             </header>
 
-            {/* Content */}
-            <main className="flex-1 flex items-center justify-center px-4 py-8 sm:py-12">
-                <div className="max-w-lg w-full flex flex-col gap-6 sm:gap-8">
-                    {/* Card */}
-                    <div className="bg-white rounded-2xl sm:rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-                        {/* Card header accent */}
-                        <div className="h-1.5 bg-linear-to-r from-blue-800 to-blue-cyan" />
+            <main className="mx-auto flex w-full max-w-6xl flex-1 items-center px-4 py-8 sm:px-6 lg:py-12">
+                <div className="grid w-full overflow-hidden rounded-3xl border border-blue-100 bg-white shadow-[0_20px_55px_rgba(25,77,182,0.12)] lg:grid-cols-[1.15fr_0.85fr]">
+                    <section className="p-6 sm:p-9 lg:p-12">
+                        <div className="inline-flex items-center gap-2 rounded-lg bg-yellow-100 px-3 py-1.5 text-sm font-bold text-blue-950">
+                            <Clock className="h-4 w-4" />
+                            Chuẩn bị vào phòng thi
+                        </div>
+                        <h1 className="mt-5 max-w-xl text-h2 leading-tight text-blue-950 sm:text-h1">Sẵn sàng làm bài?</h1>
+                        <p className="mt-3 max-w-xl text-text-4 leading-7 text-gray-600">Hệ thống sẽ kiểm tra lượt làm bài và đồng bộ thời gian từ máy chủ trước khi mở đề.</p>
 
-                        {/* Card body */}
-                        <div className="px-5 sm:px-8 pt-6 sm:pt-8 pb-6 sm:pb-8 flex flex-col gap-5 sm:gap-6">
-                            {/* Title area */}
-                            <div className="flex flex-col gap-1.5 sm:gap-2 text-center">
-                                <h1 className="text-h3 sm:text-h2 text-gray-900">
-                                    Lưu ý trước khi làm bài
-                                </h1>
-                                <p className="text-text-5 sm:text-text-4 text-gray-500">
-                                    Vui lòng đọc kỹ các lưu ý dưới đây trước khi bắt đầu
-                                </p>
+                        <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                                <Wifi className="h-5 w-5 text-blue-800" />
+                                <p className="mt-3 text-sm font-bold text-blue-950">Kết nối ổn định</p>
+                                <p className="mt-1 text-sm leading-5 text-gray-600">Đáp án được lưu tự động trong lúc làm bài.</p>
                             </div>
-
-                            {/* Divider */}
-                            <div className="h-px bg-gray-100" />
-
-                            {/* Warnings */}
-                            <div className="flex flex-col gap-3.5 sm:gap-4">
-                                {warnings.map((w, i) => (
-                                    <WarningItem key={i} icon={w.icon} text={w.text} index={i} />
-                                ))}
-                            </div>
-
-                            {/* Divider */}
-                            <div className="h-px bg-gray-100" />
-
-                            {/* Buttons */}
-                            <div className="flex flex-col-reverse sm:flex-row gap-2.5 sm:gap-3">
-                                <button
-                                    onClick={onCancel}
-                                    disabled={loading}
-                                    className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] disabled:opacity-50"
-                                >
-                                    <ArrowLeft className="w-4 h-4" />
-                                    Hủy
-                                </button>
-                                <button
-                                    onClick={onConfirm}
-                                    disabled={loading}
-                                    className="flex-1 cursor-pointer flex items-center justify-center gap-2 px-5 py-2.5 sm:py-3 bg-blue-800 hover:bg-blue-900 text-white rounded-xl text-text-5 sm:text-subhead-4 transition-all active:scale-[0.98] shadow-sm disabled:opacity-70"
-                                >
-                                    <Play className="w-4 h-4" />
-                                    Bắt đầu làm bài
-                                </button>
+                            <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                                <Timer className="h-5 w-5 text-blue-800" />
+                                <p className="mt-3 text-sm font-bold text-blue-950">Thời gian chính xác</p>
+                                <p className="mt-1 text-sm leading-5 text-gray-600">Đồng hồ dùng thời gian trả về từ máy chủ.</p>
                             </div>
                         </div>
-                    </div>
+
+                        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                            <button onClick={onConfirm} disabled={loading} className="flex min-h-12 flex-1 cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-800 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-blue-900 active:scale-[0.98] disabled:cursor-wait disabled:opacity-70">
+                                <Play className="h-4 w-4 fill-current" />
+                                {loading ? 'Đang mở phòng thi...' : 'Bắt đầu làm bài'}
+                            </button>
+                            <button onClick={onCancel} disabled={loading} className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl border border-blue-200 bg-white px-5 py-3 text-sm font-bold text-blue-800 transition hover:border-blue-300 hover:bg-blue-50 disabled:opacity-60">
+                                <ArrowLeft className="h-4 w-4" />
+                                Quay lại
+                            </button>
+                        </div>
+                    </section>
+
+                    <aside className="border-t border-blue-100 bg-blue-950 p-6 text-white sm:p-9 lg:border-l lg:border-t-0 lg:p-10">
+                        <p className="text-sm font-bold uppercase tracking-[0.14em] text-yellow-500">Lưu ý quan trọng</p>
+                        <div className="mt-6 space-y-5">
+                            {warnings.map((warning, index) => (
+                                <div className="flex gap-3" key={warning.text}>
+                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-yellow-500">
+                                        <warning.icon className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-bold text-white">0{index + 1}</p>
+                                        <p className="mt-0.5 text-sm leading-6 text-blue-100">{warning.text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                        <div className="mt-8 rounded-2xl border border-white/10 bg-white/5 p-4 text-sm leading-6 text-blue-100">
+                            Nếu thời gian đã hết, hệ thống sẽ nộp bài và đưa bạn đến trang kết quả thay vì mở lại đề.
+                        </div>
+                    </aside>
                 </div>
             </main>
         </div>
@@ -250,6 +255,24 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
         message: ''
     });
 
+    const navigateToResult = (submitId) => navigateToCompetitionResult({
+        navigate,
+        isHomeworkCompetition,
+        courseId,
+        lessonId,
+        learningItemId,
+        competitionId,
+        submitId,
+    });
+
+    const navigateAfterStartFailure = async (failure) => {
+        if (!shouldNavigateToCompetitionResult(failure)) return false;
+
+        const submitId = failure?.data?.competitionSubmitId ?? failure?.competitionSubmitId ?? await getLatestSubmittedAttemptId(competitionId);
+        navigateToResult(submitId);
+        return true;
+    };
+
     const handleStartAttempt = async () => {
         setShowConfirmPage(false);
 
@@ -259,21 +282,31 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
             // Success case
             if (result.success) {
                 const { data } = result;
+                const autoSubmittedSubmitId = data?.autoSubmitted
+                    ? data?.competitionSubmitId ?? data?.submission?.competitionSubmitId
+                    : null;
+                if (autoSubmittedSubmitId) {
+                    dispatch(resetCompetitionAttemptState());
+                    navigateToResult(autoSubmittedSubmitId);
+                    return;
+                }
+                const attempt = getActiveAttempt(result, competitionId);
 
                 // Kiểm tra có competitionSubmitId và isInProgress
-                if (data?.competitionSubmitId && data?.isInProgress) {
+                if (attempt) {
                     // Navigate trực tiếp đến trang làm bài
+                    dispatch(resetCompetitionAttemptState());
                     if (isHomeworkCompetition) {
                         navigate(ROUTES.DO_HOMEWORK_COMPETITION_SUBMIT(
                             courseId,
                             lessonId,
                             learningItemId,
                             homeworkContentId,
-                            data.competitionId,
-                            data.competitionSubmitId
+                            attempt.competitionId,
+                            attempt.competitionSubmitId
                         ));
                     } else {
-                        navigate(ROUTES.DO_COMPETITION_SUBMIT(data.competitionId, data.competitionSubmitId));
+                        navigate(ROUTES.DO_COMPETITION_SUBMIT(attempt.competitionId, attempt.competitionSubmitId));
                     }
                 } else {
                     // Hiển thị thông báo nếu không có điều kiện để làm bài
@@ -286,6 +319,7 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
                 }
             } else {
                 // API trả về success: false
+                if (await navigateAfterStartFailure(result)) return;
                 setStatus({
                     show: true,
                     type: 'error',
@@ -295,6 +329,7 @@ export const DoCompetitionStart = ({ isHomeworkCompetition = false }) => {
             }
         } catch (error) {
             // Error từ API hoặc network
+            if (await navigateAfterStartFailure(error)) return;
             const errorMessage = error?.message || error?.data?.message || 'Không thể kết nối đến máy chủ';
 
             setStatus({

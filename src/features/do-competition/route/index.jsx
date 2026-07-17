@@ -1,7 +1,7 @@
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 import DoCompetitionStart from '../DoCompetitionStart';
-import DoCompetition from '../DoCompetition';
+import DoCompetitionSocket from '../DoCompetitionSocket';
 /**
  * Do Competition Routes
  */
@@ -40,7 +40,8 @@ export const doCompetitionRoutes = [
         children: [
             {
                 index: true,
-                element: <DoCompetition isHomeworkCompetition={true} />,
+                // Legacy screen remains in ../DoCompetition for an immediate rollback if needed.
+                element: <DoCompetitionSocket isHomeworkCompetition={true} />,
                 meta: {
                     title: 'Làm bài thi',
                     description: 'Thực hiện làm bài thi',
@@ -54,7 +55,7 @@ export const doCompetitionRoutes = [
         children: [
             {
                 index: true,
-                element: <DoCompetition />,
+                element: <DoCompetitionSocket />,
                 meta: {
                     title: 'Làm bài thi',
                     description: 'Thực hiện làm bài thi',

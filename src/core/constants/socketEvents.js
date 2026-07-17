@@ -32,6 +32,21 @@ export const SOCKET_EVENTS = {
         PROGRESS_UPDATED: 'lesson:progress-updated',
     },
 
+    COMPETITION: {
+        ATTEMPT_START: 'competition:attempt:start',
+        ATTEMPT_STARTED: 'competition:attempt:started',
+        ATTEMPT_SUBSCRIBE: 'competition:attempt:subscribe',
+        ATTEMPT_SUBSCRIBED: 'competition:attempt:subscribed',
+        ANSWER_SAVE: 'competition:attempt:answer:save',
+        ANSWER_SAVED: 'competition:attempt:answer:saved',
+        ATTEMPT_FINISH: 'competition:attempt:finish',
+        ATTEMPT_FINISHED: 'competition:attempt:finished',
+        EXAM_GET: 'competition:exam:get',
+        EXAM_LOADED: 'competition:exam:loaded',
+        TIME_GET: 'competition:attempt:time:get',
+        TIME_SYNC: 'competition:attempt:time:sync',
+    },
+
     // Class session events (optional - for future use)
     CLASS_SESSION: {
         STARTED: 'class-session:started',
