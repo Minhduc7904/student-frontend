@@ -22,10 +22,10 @@ const LatestLessonCard = ({ lesson }) => {
             </div>
             <div className="mt-4 min-w-0">
                 <p className="truncate text-xs font-bold uppercase tracking-wide text-blue-800">{getLessonCourseName(lesson)}</p>
-                <h3 className="mt-1 line-clamp-2 text-base font-bold leading-6 text-blue-950">{getLessonTitle(lesson)}</h3>
+                <h3 className="mt-1 line-clamp-2 break-words text-base font-bold leading-6 text-blue-950">{getLessonTitle(lesson)}</h3>
             </div>
             <div className="mt-auto border-t border-blue-100 pt-4">
-                <div className="flex items-center justify-between gap-3 text-xs font-semibold"><span className="text-gray-600">{counts.completed}/{counts.total} nội dung</span><span className="text-blue-800">{progress}%</span></div>
+                <div className="flex items-center justify-between gap-3 text-xs font-semibold"><span className="min-w-0 truncate text-gray-600">{counts.completed}/{counts.total} nội dung</span><span className="shrink-0 text-blue-800">{progress}%</span></div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-blue-100"><div className="h-full rounded-full bg-blue-800 transition-[width] duration-500" style={{ width: `${progress}%` }} /></div>
                 <div className="mt-3 flex justify-end"><ArrowUpRight size={19} className="text-blue-800 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" /></div>
             </div>

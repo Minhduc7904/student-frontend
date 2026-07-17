@@ -5,13 +5,13 @@ import DashboardHomeworkCard from "./DashboardHomeworkCard";
 import DashboardPagination from "./DashboardPagination";
 
 const DashboardHomeworkSection = ({ status, homeworks, pagination, loading, error, onChangeStatus, onPreviousPage, onNextPage }) => (
-    <section className="mt-10 border-t border-blue-100 pt-8 sm:mt-12 sm:pt-10" aria-labelledby="my-homeworks-title">
+    <section className="mt-8 border-t border-blue-100 pt-6 sm:mt-12 sm:pt-10" aria-labelledby="my-homeworks-title">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
                 <p className="text-xs font-bold uppercase tracking-wide text-blue-800">Cần xử lý</p>
                 <h2 id="my-homeworks-title" className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">Bài tập của tôi</h2>
             </div>
-            <div className="flex max-w-full gap-1 overflow-x-auto rounded-xl border border-blue-100 bg-white p-1" role="tablist" aria-label="Trạng thái bài tập">
+            <div className="flex w-full max-w-full gap-1 overflow-x-auto overscroll-x-contain rounded-xl border border-blue-100 bg-white p-1 sm:w-auto" role="tablist" aria-label="Trạng thái bài tập">
                 {HOMEWORK_TABS.map((tab) => <button key={tab.value} type="button" role="tab" aria-selected={status === tab.value} onClick={() => onChangeStatus(tab.value)} className={`shrink-0 cursor-pointer rounded-lg px-3 py-2 text-sm font-bold transition ${status === tab.value ? "bg-blue-800 text-white" : "text-gray-600 hover:bg-blue-50 hover:text-blue-800"}`}>{tab.label}</button>)}
             </div>
         </div>
@@ -27,7 +27,7 @@ const DashboardHomeworkSection = ({ status, homeworks, pagination, loading, erro
         ) : null}
         {!loading && !error && homeworks.length ? (
             <>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                     {homeworks.map((homework) => <DashboardHomeworkCard key={homework.learningItemId} homework={homework} />)}
                 </div>
                 <DashboardPagination pagination={pagination} onPrevious={onPreviousPage} onNext={onNextPage} label="bài tập" />

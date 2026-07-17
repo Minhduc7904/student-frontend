@@ -12,7 +12,7 @@ const ContinueLearningSection = ({ enrollments, loading, error, openingCourseId,
 
     return (
         <section aria-labelledby="continue-learning-title">
-            <div className="mb-5 flex items-center justify-between gap-4">
+            <div className="mb-4 flex items-center justify-between gap-4 sm:mb-5">
                 <div>
                     <p className="text-xs font-bold uppercase tracking-wide text-blue-800">Học tập</p>
                     <h1 id="continue-learning-title" className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">Học tiếp</h1>
@@ -33,7 +33,7 @@ const ContinueLearningSection = ({ enrollments, loading, error, openingCourseId,
                 </div>
             ) : null}
             {!loading && !error && enrollments.length ? (
-                <div ref={trackRef} className="-mx-4 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-3 pt-1 custom-scrollbar sm:-mx-6 sm:px-6 xl:-mx-8 xl:px-8">
+                <div ref={trackRef} className="-mx-3 flex snap-x snap-mandatory scroll-px-3 gap-3 overflow-x-auto overscroll-x-contain px-3 pb-4 pt-1 custom-scrollbar sm:-mx-4 sm:scroll-px-4 sm:gap-4 sm:px-4 md:-mx-6 md:scroll-px-6 md:px-6 xl:-mx-8 xl:scroll-px-8 xl:px-8">
                     {enrollments.map((enrollment) => {
                         const courseId = enrollment?.course?.courseId ?? enrollment?.courseId;
                         return <div key={enrollment?.enrollmentId || courseId} className="snap-start"><ContinueLearningCard enrollment={enrollment} onOpen={onOpenCourse} isOpening={openingCourseId === courseId} /></div>;

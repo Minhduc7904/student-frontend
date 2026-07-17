@@ -11,7 +11,7 @@ export const DashboardPage = () => {
     const latestLessons = useLatestLessons();
 
     return (
-        <main className="w-full py-2 sm:py-3">
+        <main className="w-full overflow-x-clip py-1.5 sm:py-3">
             <ContinueLearningSection
                 enrollments={enrollments}
                 loading={loading}

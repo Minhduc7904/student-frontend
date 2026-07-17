@@ -5,8 +5,8 @@ import { ContentLoading } from "../../../shared/components/loading";
 
 const DashboardLayout = () => (
     <AuthenticatedLayout>
-        <main className="min-h-0 flex-1 overflow-y-auto bg-[#FDFDFD] custom-scrollbar">
-            <div className="mx-auto w-full max-w-6xl px-4 pb-6 pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8">
+        <main className="min-h-0 flex-1 overflow-x-clip overflow-y-auto bg-[#FDFDFD] custom-scrollbar">
+            <div className="mx-auto w-full max-w-6xl px-3 pb-8 pt-3 sm:px-4 sm:pt-4 md:px-6 md:pt-6 xl:px-8 xl:pt-8">
                 <Suspense fallback={<ContentLoading />}>
                     <Outlet />
                 </Suspense>

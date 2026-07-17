@@ -4,7 +4,7 @@ import DashboardPagination from "./DashboardPagination";
 import LatestLessonCard from "./LatestLessonCard";
 
 const LatestLessonsSection = ({ lessons, pagination, loading, error, onPreviousPage, onNextPage }) => (
-    <section className="mt-10 border-t border-blue-100 pt-8 sm:mt-12 sm:pt-10" aria-labelledby="latest-lessons-title">
+    <section className="mt-8 border-t border-blue-100 pt-6 sm:mt-12 sm:pt-10" aria-labelledby="latest-lessons-title">
         <div>
             <p className="text-xs font-bold uppercase tracking-wide text-blue-800">Mới cập nhật</p>
             <h2 id="latest-lessons-title" className="mt-1 text-2xl font-bold text-blue-950 sm:text-3xl">Bài học mới</h2>
@@ -21,7 +21,7 @@ const LatestLessonsSection = ({ lessons, pagination, loading, error, onPreviousP
         ) : null}
         {!loading && !error && lessons.length ? (
             <>
-                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 xl:grid-cols-3">
                     {lessons.map((lesson) => <LatestLessonCard key={lesson.lessonId || lesson.id} lesson={lesson} />)}
                 </div>
                 <DashboardPagination pagination={pagination} onPrevious={onPreviousPage} onNext={onNextPage} label="bài học mới" />

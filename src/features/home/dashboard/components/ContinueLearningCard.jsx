@@ -18,7 +18,7 @@ const ContinueLearningCard = ({ enrollment, onOpen, isOpening }) => {
             type="button"
             onClick={() => onOpen(enrollment)}
             disabled={isOpening}
-            className="group relative flex w-[17.5rem] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-blue-100 bg-white p-3 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md disabled:cursor-wait disabled:opacity-75 sm:w-[19rem]"
+            className="group relative flex w-[calc(100vw-3rem)] max-w-[19rem] shrink-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-blue-100 bg-white p-3 text-left shadow-sm transition active:scale-[0.99] hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md disabled:cursor-wait disabled:opacity-75 sm:w-[19rem]"
             aria-label={`Học tiếp khóa ${course.title || "học tập"}`}
         >
             <div className="relative aspect-[16/9] overflow-hidden rounded-xl bg-blue-100">
