@@ -32,6 +32,10 @@ export const courseService = {
     );
   },
 
+  createPayosPayment: async (invoiceId) => {
+    return await axiosClient.post(API_ENDPOINTS.PAYMENTS.PAYOS, { invoiceId });
+  },
+
   getOnlineCourseInvoicePaymentStatus: async (invoiceId) => {
     return await axiosClient.get(
       API_ENDPOINTS.ONLINE_COURSE_INVOICES.PAYMENT_STATUS(invoiceId)

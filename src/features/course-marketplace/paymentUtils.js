@@ -5,6 +5,8 @@ export const unwrapApiPayload = (response) => {
     return body?.data ?? body;
 };
 
+const toBoolean = (value) => value === true || value === 1 || value === "1" || value === "true";
+
 export const getInvoiceDetails = (response) => {
     const payload = unwrapApiPayload(response);
     const invoice = payload?.invoice ?? payload?.onlineCourseInvoice ?? payload;
@@ -13,8 +15,44 @@ export const getInvoiceDetails = (response) => {
         invoice,
         invoiceId: invoice?.invoiceId ?? invoice?.id ?? payload?.invoiceId ?? payload?.id,
         status: String(invoice?.status ?? payload?.status ?? "PENDING_PAYMENT").toUpperCase(),
-        enrollmentCreated: Boolean(invoice?.enrollmentCreated ?? payload?.enrollmentCreated),
+        enrollmentCreated: toBoolean(invoice?.enrollmentCreated ?? payload?.enrollmentCreated),
     };
+};
+
+export const getPayosPaymentDetails = (response) => {
+    const payload = unwrapApiPayload(response);
+
+    return {
+        invoiceId: payload?.invoiceId,
+        invoiceCode: payload?.invoiceCode,
+        attemptId: payload?.attemptId,
+        attemptCode: payload?.attemptCode,
+        orderCode: payload?.orderCode,
+        amount: payload?.amount,
+        currency: payload?.currency,
+        expiresAt: payload?.expiresAt,
+        paymentUrl: payload?.paymentUrl,
+        status: String(payload?.status ?? "PENDING_PAYMENT").toUpperCase(),
+    };
+};
+
+const PAYOS_PAYMENT_STORAGE_KEY = "student.payos-course-payment";
+
+export const savePayosPayment = (payment) => {
+    try {
+        window.localStorage.setItem(PAYOS_PAYMENT_STORAGE_KEY, JSON.stringify(payment));
+    } catch {
+        // The return page can still be opened manually; it will show a safe recovery action.
+    }
+};
+
+export const getSavedPayosPayment = () => {
+    try {
+        const saved = window.localStorage.getItem(PAYOS_PAYMENT_STORAGE_KEY);
+        return saved ? JSON.parse(saved) : null;
+    } catch {
+        return null;
+    }
 };
 
 export const getInvoiceAmount = (invoice, course) => Number(

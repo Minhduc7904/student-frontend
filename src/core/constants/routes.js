@@ -68,6 +68,8 @@ export const ROUTES = {
     PROGRESS: '/progress',
     CALENDAR: '/calendar',
     PAYMENT: '/payment',
+    PAYOS_RETURN: '/payment/payos-return',
+    PAYOS_CANCEL: '/payment/payos-cancel',
     USER_BOOK: '/user-book',
 
     // Auth Actions

@@ -1,27 +1,22 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { ShoppingCart } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useOutletContext, useParams } from "react-router-dom";
-import { ROUTES, enrollmentStatus } from "../../core/constants";
+import { ROUTES } from "../../core/constants";
 import { courseService } from "../../core/services/modules/courseService";
 import { addNotification } from "../notification/store/notificationSlice";
-import { fetchMyEnrollments } from "../course-enrollment/store/courseEnrollmentSlice";
-import { selectMyProfile } from "../profile/store/profileSlice";
 import { CourseHero } from "../course-detail/components/CourseHero";
 import { CourseInfoPanel } from "../course-detail/components/CourseInfoPanel";
 import { CourseLearningProgram } from "../course-detail/components/CourseLearningProgram";
 import { CourseMediaGallery } from "../course-detail/components/CourseMediaGallery";
 import { getCourseBanner, getCourseImage, getCourseSummary } from "../course-detail/components/courseDetailUtils";
 import { selectChapters } from "../course-detail/store/courseDetailSlice";
-import PurchasePaymentModal from "./components/PurchasePaymentModal";
-import { useInvoicePaymentStatus } from "./hooks/useInvoicePaymentStatus";
-import { getInvoiceDetails } from "./paymentUtils";
+import { getInvoiceDetails, getPayosPaymentDetails, savePayosPayment } from "./paymentUtils";
 
 const CoursePurchaseDetailPage = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { courseId: routeCourseId } = useParams();
-    const profile = useSelector(selectMyProfile);
     const chapters = useSelector(selectChapters);
     const outletContext = useOutletContext() || {};
     const {
@@ -32,31 +27,10 @@ const CoursePurchaseDetailPage = () => {
         lessonsError,
     } = outletContext;
     const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
-    const [payment, setPayment] = useState(null);
 
     const summary = useMemo(() => getCourseSummary({ courseDetail, chapters, lessons }), [chapters, courseDetail, lessons]);
     const courseImage = getCourseImage(courseDetail);
     const bannerSrc = getCourseBanner(courseDetail);
-
-    const finishPurchase = useCallback(async () => {
-        setPayment((current) => current ? { ...current, status: "PAID" } : current);
-
-        await Promise.allSettled([
-            dispatch(fetchMyEnrollments({ status: enrollmentStatus.ACTIVE, page: 1, limit: 6 })).unwrap(),
-            courseService.getStudentOnlineCoursesNotEnrolled({ page: 1, limit: 12 }),
-            courseService.getStudentCourseDetail(courseId),
-        ]);
-
-        window.setTimeout(() => {
-            navigate(ROUTES.COURSE_DETAIL(courseId), { replace: true, state: { resetAll: true } });
-        }, 900);
-    }, [courseId, dispatch, navigate]);
-
-    const { isChecking, error: paymentError } = useInvoicePaymentStatus({
-        invoiceId: payment?.invoiceId,
-        enabled: Boolean(payment?.isOpen && payment?.status === "PENDING_PAYMENT"),
-        onPaid: finishPurchase,
-    });
 
     const startPurchase = async () => {
         if (!courseDetail || isCreatingInvoice) return;
@@ -68,11 +42,26 @@ const CoursePurchaseDetailPage = () => {
 
             if (!invoiceDetails.invoiceId) throw new Error("Không nhận được mã hóa đơn thanh toán.");
 
-            setPayment({ ...invoiceDetails, isOpen: true });
-
-            if (invoiceDetails.status === "PAID") {
-                window.setTimeout(finishPurchase, 900);
+            if (invoiceDetails.status === "PAID" && invoiceDetails.enrollmentCreated) {
+                navigate(ROUTES.COURSE_DETAIL(courseId), { replace: true, state: { resetAll: true } });
+                return;
             }
+
+            if (invoiceDetails.status !== "PENDING_PAYMENT") {
+                throw new Error("Hóa đơn không còn ở trạng thái chờ thanh toán. Vui lòng thử lại sau.");
+            }
+
+            const payosResponse = await courseService.createPayosPayment(invoiceDetails.invoiceId);
+            const payosPayment = getPayosPaymentDetails(payosResponse);
+
+            if (!payosPayment.paymentUrl) throw new Error("Không thể tạo liên kết thanh toán PayOS. Vui lòng thử lại sau.");
+
+            savePayosPayment({
+                ...payosPayment,
+                courseId,
+                courseTitle: courseDetail.title,
+            });
+            window.location.assign(payosPayment.paymentUrl);
         } catch (requestError) {
             dispatch(addNotification({
                 type: "error",
@@ -89,7 +78,7 @@ const CoursePurchaseDetailPage = () => {
         document.getElementById("course-lessons")?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    const purchaseAction = { Icon: ShoppingCart, label: isCreatingInvoice ? "Đang tạo hóa đơn..." : "Mua khóa học", onClick: startPurchase, disabled: isCreatingInvoice };
+    const purchaseAction = { Icon: ShoppingCart, label: isCreatingInvoice ? "Đang chuyển đến PayOS..." : "Mua khóa học", onClick: startPurchase, disabled: isCreatingInvoice };
 
     return (
         <main className="min-h-[calc(100dvh-80px)] overflow-x-clip bg-blue-50 text-blue-950">
@@ -120,18 +109,6 @@ const CoursePurchaseDetailPage = () => {
 
                 <CourseInfoPanel course={courseDetail} courseImage={courseImage} totalLessons={summary.totalLessons} isEnrolled={false} showPrice primaryAction={purchaseAction} />
             </div>
-
-            <PurchasePaymentModal
-                isOpen={Boolean(payment?.isOpen)}
-                onClose={() => setPayment(null)}
-                course={courseDetail}
-                invoice={payment?.invoice}
-                invoiceId={payment?.invoiceId}
-                profile={profile}
-                status={payment?.status}
-                isChecking={isChecking}
-                error={paymentError}
-            />
         </main>
     );
 };

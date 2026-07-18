@@ -70,6 +70,10 @@ export const API_ENDPOINTS = {
         PAYMENT_STATUS: (invoiceId) => `/online-course-invoices/${invoiceId}/payment-status`,
     },
 
+    PAYMENTS: {
+        PAYOS: '/payments/payos',
+    },
+
     // Class Sessions
     CLASS_SESSIONS: {
         MY_SESSIONS: '/class-sessions/student/my-sessions',
