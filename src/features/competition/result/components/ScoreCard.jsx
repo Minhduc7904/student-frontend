@@ -64,19 +64,19 @@ const ScoreCard = ({ result }) => {
     const labelColor = pct >= 80 ? 'text-emerald-700' : pct >= 65 ? 'text-blue-700' : pct >= 50 ? 'text-amber-700' : 'text-red-700';
 
     return (
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 md:p-5">
+        <section className="overflow-hidden rounded-3xl bg-blue-800 p-4 text-white shadow-[0_16px_32px_rgba(25,77,182,0.2)] [&_.text-amber-700]:!text-yellow-200 [&_.text-blue-700]:!text-blue-100 [&_.text-emerald-700]:!text-emerald-200 [&_.text-red-700]:!text-red-200 [&_.text-slate-500]:!text-blue-100 [&_.text-slate-600]:!text-blue-100 [&_.text-slate-800]:!text-white [&_.text-slate-900]:!text-white [&_h2]:!text-white md:p-5">
             <div className="mb-4 flex items-center gap-2">
-                <Trophy className="h-5 w-5 text-amber-500" />
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-yellow-500 text-blue-950"><Trophy className="h-4 w-4" /></span>
                 <h2 className="text-subhead-4 font-semibold text-gray-900">Điểm số</h2>
             </div>
 
-            <div className="flex flex-col items-center gap-5 lg:flex-row lg:items-start lg:gap-8">
+            <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-start">
                 <PercentageRing percentage={pct} />
 
-                <div className="grid flex-1 grid-cols-1 gap-3 md:grid-cols-3">
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3 md:col-span-2">
+                <div className="grid w-full flex-1 grid-cols-2 gap-2.5">
+                    <div className="col-span-2 rounded-2xl border border-white/15 bg-white/10 p-3.5">
                         <p className="text-text-5 text-slate-600">Điểm đạt được</p>
-                        <p className="mt-1 text-h3 font-bold text-slate-900">
+                        <p className="mt-1 text-h2 font-bold tabular-nums text-white">
                             {totalPoints != null ? totalPoints : '—'}
                             {maxPoints != null && (
                                 <span className="text-subhead-4 font-normal text-slate-500"> / {maxPoints}</span>
@@ -84,18 +84,18 @@ const ScoreCard = ({ result }) => {
                         </p>
                     </div>
 
-                    <div className="rounded-xl border border-slate-200 bg-white p-3">
+                    <div className="rounded-2xl border border-white/15 bg-white/10 p-3">
                         <p className="text-text-5 text-slate-600">Đánh giá</p>
                         <p className={`mt-1 text-subhead-4 font-semibold ${labelColor}`}>{label}</p>
                     </div>
 
                     {maxPoints != null && (
-                        <div className="rounded-xl border border-slate-200 bg-white p-3 md:col-span-3">
+                        <div className="rounded-2xl border border-white/15 bg-white/10 p-3">
                             <div className="mb-2 flex items-center justify-between text-text-5">
                                 <span className="text-slate-600">Tiến độ điểm</span>
                                 <span className="font-semibold text-slate-800">{pct}%</span>
                             </div>
-                            <div className="h-2.5 w-full overflow-hidden rounded-full bg-slate-100">
+                            <div className="h-2 w-full overflow-hidden rounded-full bg-white/20">
                                 <div
                                     className="h-full rounded-full transition-all duration-700"
                                     style={{
@@ -108,7 +108,7 @@ const ScoreCard = ({ result }) => {
                     )}
                 </div>
             </div>
-        </div>
+        </section>
     );
 };
 

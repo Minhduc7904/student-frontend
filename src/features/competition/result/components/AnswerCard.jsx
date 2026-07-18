@@ -1,4 +1,4 @@
-import { CheckCircle, XCircle, MinusCircle, Youtube, Lightbulb, User, BookCheck } from 'lucide-react';
+import { BookOpen, CheckCircle, Clock3, XCircle, MinusCircle, Youtube, Lightbulb, User, BookCheck } from 'lucide-react';
 import { MarkdownRenderer } from '../../../../shared/components/markdown';
 import { QuestionChatButton } from '../../../../shared/components';
 import { resolveDifficultyMeta } from '../../../../shared/constants';
@@ -10,6 +10,18 @@ const TYPE_LABEL = {
     TRUE_FALSE: 'Đúng / Sai',
     SHORT_ANSWER: 'Trả lời ngắn',
     ESSAY: 'Tự luận',
+};
+
+const formatDuration = (seconds) => {
+    if (seconds == null) return null;
+    const totalSeconds = Math.max(0, Number(seconds) || 0);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const remainingSeconds = totalSeconds % 60;
+
+    return hours > 0
+        ? `${hours}:${String(minutes).padStart(2, '0')}:${String(remainingSeconds).padStart(2, '0')}`
+        : `${minutes}:${String(remainingSeconds).padStart(2, '0')}`;
 };
 
 const parseBooleanValue = (value) => {
@@ -260,6 +272,8 @@ const AnswerCard = ({ answer, index, rules }) => {
     const { allowViewScore, showResultDetail, allowViewAnswer } = rules ?? {};
     const question = answer?.question;
     const difficultyMeta = resolveDifficultyMeta(question?.difficulty);
+    const chapters = Array.isArray(question?.chapters) ? question.chapters : [];
+    const questionTimeSpent = formatDuration(answer?.timeSpentSeconds);
 
     // Build card border accent based on correctness
     let accentClass = 'border-slate-200';
@@ -272,8 +286,8 @@ const AnswerCard = ({ answer, index, rules }) => {
     const trueFalseMap = buildTrueFalseMap(answer);
 
     return (
-        <div className={`rounded-xl border bg-white p-4 ${accentClass}`}>
-            <div className="flex flex-col gap-4">
+        <article className={`rounded-2xl border bg-white p-3.5 shadow-[0_8px_22px_rgba(25,77,182,0.04)] ${accentClass} sm:p-4`}>
+            <div className="flex flex-col gap-3.5">
                 <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                         <span className="text-text-5 font-semibold text-slate-500">#{index + 1}</span>
@@ -300,7 +314,27 @@ const AnswerCard = ({ answer, index, rules }) => {
                     )}
                 </div>
 
-                <div className="flex items-center justify-end">
+                {(chapters.length > 0 || questionTimeSpent) && (
+                    <div className="flex flex-wrap items-center gap-1.5">
+                        {chapters.map((chapter) => (
+                            <span
+                                key={chapter.chapterId ?? chapter.id ?? chapter.slug}
+                                className="inline-flex max-w-full items-center gap-1 rounded-md border border-blue-200 bg-blue-50 px-2 py-1 text-[11px] font-semibold text-blue-800"
+                            >
+                                <BookOpen className="h-3 w-3 shrink-0" />
+                                <span className="truncate">{chapter.name}</span>
+                            </span>
+                        ))}
+                        {questionTimeSpent && (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold text-slate-600">
+                                <Clock3 className="h-3 w-3" />
+                                Thời gian {questionTimeSpent}
+                            </span>
+                        )}
+                    </div>
+                )}
+
+                <div className="flex items-center justify-end border-t border-blue-50 pt-2">
                     <QuestionChatButton
                         questionId={question?.questionId ?? question?.id}
                         questionTitle={buildFullQuestionContent(question)}
@@ -308,7 +342,7 @@ const AnswerCard = ({ answer, index, rules }) => {
                 </div>
 
                 {showResultDetail && question && (
-                    <div className="rounded-xl border border-slate-100 bg-slate-50 p-3 text-gray-800">
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50/50 p-3 text-gray-800">
                         <MarkdownRenderer content={question.processedContent ?? question.content} />
                     </div>
                 )}
@@ -395,7 +429,7 @@ const AnswerCard = ({ answer, index, rules }) => {
                     </a>
                 )}
             </div>
-        </div>
+        </article>
     );
 };
 

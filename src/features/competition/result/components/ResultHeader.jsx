@@ -78,7 +78,7 @@ const ResultHeader = ({ result }) => {
     const { status, attemptNumber, startedAt, submittedAt, timeSpentSeconds, rules } = result ?? {};
 
     return (
-        <div className="rounded-2xl border border-gray-100 bg-white p-4 md:p-5">
+        <header className="rounded-3xl border border-blue-100 bg-white p-4 shadow-[0_12px_30px_rgba(25,77,182,0.06)] md:p-5">
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="flex flex-col gap-1.5">
@@ -94,26 +94,26 @@ const ResultHeader = ({ result }) => {
                     <StatusBadge status={status} />
                 </div>
 
-                <div className="grid grid-cols-1 gap-2 rounded-xl border border-slate-200 bg-slate-50 p-3 text-text-5 text-slate-700 sm:grid-cols-2 lg:grid-cols-4">
-                    <div className="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2">
+                <div className="grid grid-cols-2 gap-2 rounded-2xl bg-blue-50 p-2 text-xs text-slate-700 lg:grid-cols-4">
+                    <div className="flex min-w-0 flex-col gap-1 rounded-xl bg-white px-2.5 py-2.5">
                         <Hash className="h-3.5 w-3.5 text-slate-400" />
                         <span>Lần thứ</span>
                         <strong className="text-slate-900">{attemptNumber ?? '--'}</strong>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2">
+                    <div className="flex min-w-0 flex-col gap-1 rounded-xl bg-white px-2.5 py-2.5">
                         <Calendar className="h-3.5 w-3.5 text-slate-400" />
                         <span>Bắt đầu</span>
                         <strong className="truncate text-slate-900">{formatDate(startedAt)}</strong>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2">
+                    <div className="flex min-w-0 flex-col gap-1 rounded-xl bg-white px-2.5 py-2.5">
                         <Calendar className="h-3.5 w-3.5 text-slate-400" />
                         <span>Nộp bài</span>
                         <strong className="truncate text-slate-900">{formatDate(submittedAt)}</strong>
                     </div>
 
-                    <div className="flex items-center gap-2 rounded-lg bg-white px-2.5 py-2">
+                    <div className="flex min-w-0 flex-col gap-1 rounded-xl bg-white px-2.5 py-2.5">
                         <Clock className="h-3.5 w-3.5 text-slate-400" />
                         <span>Thời gian làm</span>
                         <strong className="text-slate-900">
@@ -122,7 +122,7 @@ const ResultHeader = ({ result }) => {
                     </div>
                 </div>
             </div>
-        </div>
+        </header>
     );
 };
 

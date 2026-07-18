@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { Play, Lock, Info, Trophy, FileSearch, History, ChevronRight } from "lucide-react";
+import { Play, Lock, Info, Trophy, FileSearch, History, ChevronRight, CalendarClock } from "lucide-react";
 import CompetitionDetailInfoTab from "../../../../competition/competitionDetail/component/CompetitionDetailInfoTab";
 import CompetitionRankingPage from "../../../../competition/ranking";
 import CompetitionExamPage from "../../../../competition/exam";
@@ -168,6 +168,8 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     const competition = currentContent?.competition;
     const solutionYoutubeUrl = competition?.exam?.solutionYoutubeUrl;
     const isFileUploadHomework = currentContent?.type === 'FILE_UPLOAD';
+    const assignedCompetitionId = competition?.competitionId ?? competition?.id ?? currentContent?.competitionId;
+    const isCompetitionAssignmentPending = !isFileUploadHomework && !assignedCompetitionId;
 
     const tabConfig = useMemo(() => {
         return BASE_TAB_CONFIG.filter((tab) => {
@@ -438,6 +440,18 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                 </div>
             )}
 
+            {isCompetitionAssignmentPending ? (
+                <section className="flex min-h-64 flex-col items-center justify-center rounded-3xl border border-blue-100 bg-white px-5 py-10 text-center shadow-[0_12px_30px_rgba(25,77,182,0.06)] sm:px-8">
+                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-800">
+                        <CalendarClock size={25} />
+                    </div>
+                    <h2 className="mt-4 text-h4 font-bold text-blue-950">Thầy giáo chưa giao bài tập về nhà</h2>
+                    <p className="mt-2 max-w-md text-text-5 leading-relaxed text-gray-600">
+                        Bài tập này chưa được gán nội dung. Em quay lại sau nhé.
+                    </p>
+                </section>
+            ) : (
+                <>
             {/* Header Card */}
             <div className="w-full bg-white rounded-2xl shadow-[0px_4px_12px_0px_rgba(0,0,0,0.06)] overflow-hidden">
                 {/* Status strip */}
@@ -490,6 +504,8 @@ export const HomeworkContent = ({ learningItemDetail }) => {
 
             {/* Tab Content */}
             {renderTabContent()}
+                </>
+            )}
         </div>
     );
 };

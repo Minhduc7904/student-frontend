@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AlertTriangle, FileText, Lock, RefreshCw } from 'lucide-react';
 
-import { ResultHeader, ScoreCard, StatsBar, AnswerCard } from './components';
+import { ResultHeader, ScoreCard, StatsBar, ResultInsights, AnswerCard } from './components';
+import AnswerTimeChart from './components/AnswerTimeChart';
 import { ROUTES } from '../../../core/constants';
 
 import {
@@ -147,23 +148,25 @@ const CompetitionResultPage = ({ submitId: submitIdProp, competitionId: competit
     const noVisibleContent = !rules?.allowViewScore && !rules?.showResultDetail;
 
     return (
-        <div className="mt-5 flex flex-col gap-4">
+        <main className="mt-4 flex flex-col gap-4 pb-8 sm:mt-5 sm:gap-5">
             <ResultHeader result={result} />
             <ScoreCard result={result} />
             <StatsBar result={result} />
+            <ResultInsights answers={answers} rules={rules} />
+            {rules?.showResultDetail && <AnswerTimeChart answers={answers} />}
 
             {noVisibleContent && <RestrictedResult result={result} />}
 
             {rules?.showResultDetail && answers?.length > 0 && (
-                <section className="rounded-2xl border border-gray-100 bg-white p-4 md:p-5">
-                    <div className="mb-3 flex items-center justify-between gap-3 border-b border-gray-100 pb-3">
+                <section className="rounded-3xl border border-blue-100 bg-white p-4 shadow-[0_12px_30px_rgba(25,77,182,0.06)] sm:p-5">
+                    <div className="mb-4 flex items-center justify-between gap-3 border-b border-blue-100 pb-3">
                         <h2 className="text-subhead-4 font-semibold text-gray-900">Chi tiết câu trả lời</h2>
                         <span className="rounded-full bg-slate-100 px-2.5 py-1 text-text-5 font-semibold text-slate-700">
                             {answers.length} câu
                         </span>
                     </div>
 
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-4">
                         {answers.map((answer, idx) => (
                             <AnswerCard
                                 key={answer.competitionAnswerId}
@@ -177,14 +180,14 @@ const CompetitionResultPage = ({ submitId: submitIdProp, competitionId: competit
             )}
 
             {rules?.showResultDetail && (!answers || answers.length === 0) && (
-                <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-gray-100 bg-white py-12 text-center">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-100 text-slate-600">
+                <div className="flex flex-col items-center justify-center gap-2 rounded-3xl border border-blue-100 bg-white py-12 text-center">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
                         <FileText size={18} />
                     </div>
                     <p className="text-text-5 text-slate-600">Không có câu trả lời nào được ghi nhận.</p>
                 </div>
             )}
-        </div>
+        </main>
     );
 };
 
