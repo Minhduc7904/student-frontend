@@ -352,7 +352,7 @@ const AnswerCard = ({ answer, index, rules }) => {
                         <div className={`p-3 rounded-xl border text-text-4 text-gray-800
                             ${!answer?.answer ? 'text-gray-400 italic border-gray-100 bg-gray-50' : 'border-blue-200 bg-blue-50/50'}`}>
                             {answer?.answer
-                                ? <MarkdownRenderer content={answer.answer} />
+                                ? String(answer.answer)
                                 : 'Không có câu trả lời'}
                         </div>
 
@@ -362,7 +362,7 @@ const AnswerCard = ({ answer, index, rules }) => {
                                     <BookCheck className="w-3.5 h-3.5 shrink-0" /> Đáp án đúng:
                                 </span>
                                 <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
-                                    <MarkdownRenderer content={question.correctAnswer} />
+                                    {String(question.correctAnswer)}
                                 </div>
                             </div>
                         )}

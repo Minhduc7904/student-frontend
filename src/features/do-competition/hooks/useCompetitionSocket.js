@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SOCKET_EVENTS } from '../../../core/constants/socketEvents';
 import { socketService } from '../../../core/services/socket/socket.service';
@@ -36,6 +36,25 @@ export const useCompetitionSocket = ({ competitionId, submitId, onFinishError })
     const queuedAnswersRef = useRef(new Map());
     const activeSaveRef = useRef(null);
     const mountedRef = useRef(true);
+    const [timeSpentSeconds, setTimeSpentSeconds] = useState(0);
+    const timeSpentSecondsRef = useRef(0);
+
+    const resetTimeSpent = useCallback(() => {
+        timeSpentSecondsRef.current = 0;
+        setTimeSpentSeconds(0);
+    }, []);
+
+    useEffect(() => {
+        const interval = window.setInterval(() => {
+            setTimeSpentSeconds((previous) => {
+                const next = previous + 1;
+                timeSpentSecondsRef.current = next;
+                return next;
+            });
+        }, 1000);
+
+        return () => window.clearInterval(interval);
+    }, []);
 
     const requestTimeSync = useCallback(() => {
         const socket = socketService.socket;
@@ -65,11 +84,14 @@ export const useCompetitionSocket = ({ competitionId, submitId, onFinishError })
         next.inFlight = true;
         next.sentRevision = next.revision;
         activeSaveRef.current = next;
+        const elapsedSeconds = timeSpentSecondsRef.current;
         socket.emit(SOCKET_EVENTS.COMPETITION.ANSWER_SAVE, {
             submitId: Number(submitId),
             answerId: next.answerId ?? 0,
             ...next.body,
+            timeSpentSeconds: elapsedSeconds,
         });
+        resetTimeSpent();
         next.timeout = window.setTimeout(() => {
             if (activeSaveRef.current !== next) return;
             logAnswerSaveFailure({
@@ -81,7 +103,7 @@ export const useCompetitionSocket = ({ competitionId, submitId, onFinishError })
             next.errored = true;
             dispatch(socketAnswerFailed({ questionId: next.questionId, revision: next.sentRevision }));
         }, SAVE_TIMEOUT_MS);
-    }, [dispatch, submitId]);
+    }, [dispatch, resetTimeSpent, submitId]);
 
     const saveAnswer = useCallback(({ questionId, answerId, body }) => {
         const previous = queuedAnswersRef.current.get(questionId);
@@ -275,7 +297,7 @@ export const useCompetitionSocket = ({ competitionId, submitId, onFinishError })
         });
     }, []);
 
-    return { saveAnswer, retryAnswer, flushPending, finishAttempt, requestTimeSync, synchronizeAttempt };
+    return { saveAnswer, retryAnswer, flushPending, finishAttempt, requestTimeSync, synchronizeAttempt, timeSpentSeconds };
 };
 
 export default useCompetitionSocket;
