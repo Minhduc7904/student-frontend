@@ -162,7 +162,7 @@ const InsightItem = ({ icon: Icon, label, item, type }) => {
         : item ? `${item.correct}/${item.total} câu đúng` : 'Chưa có câu đúng để so sánh';
 
     return (
-        <div className={`rounded-xl border p-3 ${type === 'struggled'
+        <div className={`rounded-xl border p-3 [&_.truncate]:!overflow-visible [&_.truncate]:!text-clip [&_.truncate]:!whitespace-normal [&_.truncate]:break-words ${type === 'struggled'
             ? 'border-amber-200 bg-amber-50'
             : 'border-emerald-200 bg-emerald-50'}`}>
             <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-700">

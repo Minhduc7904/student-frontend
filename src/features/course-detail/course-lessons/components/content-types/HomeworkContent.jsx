@@ -41,6 +41,13 @@ const STATUS_CONFIG = {
         dotClass: 'bg-yellow-400',
         buttonText: 'Làm bài (Muộn)'
     },
+    LATE_REDO: {
+        label: 'Nộp muộn · Làm lại',
+        bgClass: 'bg-orange-50',
+        textClass: 'text-orange-600',
+        dotClass: 'bg-orange-400',
+        buttonText: 'Làm lại (muộn)'
+    },
     OVERDUE: {
         label: 'Quá hạn',
         bgClass: 'bg-gray-100',
@@ -181,10 +188,24 @@ export const HomeworkContent = ({ learningItemDetail }) => {
     // Get status config from current content
     const currentStatus = currentContent?.progress?.status || 'DO_NOW';
     const statusConfig = STATUS_CONFIG[currentStatus] || STATUS_CONFIG.DO_NOW;
+    const progress = currentContent?.progress;
+    const latestCompetitionSubmit = progress?.competitionSubmit;
+    const latestCompetitionSubmitId =
+        latestCompetitionSubmit?.competitionSubmitId ??
+        progress?.homeworkSubmit?.competitionSubmitId ??
+        currentContent?.homeworkSubmit?.competitionSubmitId;
+    const hasLatestSubmittedAttempt = Boolean(latestCompetitionSubmitId) && latestCompetitionSubmit?.status !== 'IN_PROGRESS';
 
     // COMPLETED: chỉ cho phép bấm nếu competition có ít nhất 1 rule xem kết quả
     const hasViewRules = !!(competition?.allowViewScore || competition?.showResultDetail || competition?.allowViewAnswer);
-    const isButtonDisabled = statusConfig.disabled || (currentStatus === 'COMPLETED' && !hasViewRules);
+    const canViewLatestAttempt = hasLatestSubmittedAttempt && hasViewRules;
+    const isAttemptActionDisabled = statusConfig.disabled || progress?.canAttempt === false || currentStatus === 'COMPLETED';
+    const attemptButtonText = currentStatus === 'COMPLETED' ? 'Đã dùng hết lượt' : statusConfig.buttonText;
+    const reviewButtonText = ['REDO', 'LATE_REDO'].includes(currentStatus)
+        ? 'Xem lượt trước'
+        : currentStatus === 'COMPLETED'
+            ? 'Xem bài làm gần nhất'
+            : 'Xem lại bài làm';
 
     const isTabDisabled = (tab) => {
         if (!tab) return false;
@@ -228,7 +249,10 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         if (!competitionSubmitId || !homeworkContents.length) return;
 
         const foundIndex = homeworkContents.findIndex(
-            (item) => String(item?.progress?.homeworkSubmit?.competitionSubmitId) === String(competitionSubmitId)
+            (item) => String(
+                item?.progress?.competitionSubmit?.competitionSubmitId ??
+                item?.progress?.homeworkSubmit?.competitionSubmitId
+            ) === String(competitionSubmitId)
         );
 
         if (foundIndex >= 0 && foundIndex !== selectedIndex) {
@@ -258,6 +282,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         const routeLearningItemId = learningItemDetail?.learningItemId ?? learningItemId;
         const homeworkContentId = currentContent?.homeworkContentId ?? currentContent?.id;
         const activeSubmitId =
+            currentContent?.progress?.competitionSubmit?.competitionSubmitId ??
             currentContent?.progress?.homeworkSubmit?.competitionSubmitId ??
             currentContent?.progress?.competitionSubmitId ??
             competition?.competitionSubmitId ??
@@ -265,7 +290,7 @@ export const HomeworkContent = ({ learningItemDetail }) => {
 
         if (!routeCompetitionId) return;
 
-        if (competition?.attemptStatus === 'IN_PROGRESS' && activeSubmitId) {
+        if ((currentStatus === 'RESUME' || latestCompetitionSubmit?.status === 'IN_PROGRESS' || competition?.attemptStatus === 'IN_PROGRESS') && activeSubmitId) {
             const targetRoute = ROUTES.DO_HOMEWORK_COMPETITION_SUBMIT(
                 courseId,
                 lessonId,
@@ -294,14 +319,12 @@ export const HomeworkContent = ({ learningItemDetail }) => {
      * - Các trạng thái khác → bắt đầu / tiếp tục làm bài
      */
     const handleActionButton = () => {
-        if (currentStatus === 'COMPLETED' && hasViewRules) {
-            const submitId = currentContent?.progress?.homeworkSubmit?.competitionSubmitId;
-            if (submitId) {
-                goToHomeworkResult(submitId);
-            }
-            return;
-        }
         handleStartCompetition();
+    };
+
+    const handleViewLatestAttempt = () => {
+        if (!canViewLatestAttempt) return;
+        goToHomeworkResult(latestCompetitionSubmitId);
     };
 
     const handleTabChange = (tabId) => {
@@ -368,10 +391,14 @@ export const HomeworkContent = ({ learningItemDetail }) => {
         const mappedDetail = {
             timelineStatus: competition?.timelineStatus ?? timelineStatusMap[currentStatus] ?? 'ONGOING',
             attemptStatus: competition?.attemptStatus ?? attemptStatusMap[currentStatus] ?? 'NOT_ATTEMPTED',
-            attemptedCount: currentContent?.progress?.attemptedCount ?? (currentContent?.progress?.homeworkSubmit ? 1 : 0),
+            attemptedCount: progress?.attemptCount ?? progress?.attemptedCount ?? (progress?.competitionSubmit ? 1 : 0),
             durationMinutes: competition?.durationMinutes ?? competition?.duration ?? '--',
-            maxAttempts: competition?.maxAttempts ?? 1,
-            canAttempt: typeof competition?.canAttempt === 'boolean' ? competition.canAttempt : !statusConfig.disabled,
+            maxAttempts: progress?.maxAttempts ?? competition?.maxAttempts ?? 1,
+            canAttempt: typeof progress?.canAttempt === 'boolean'
+                ? progress.canAttempt
+                : typeof competition?.canAttempt === 'boolean'
+                    ? competition.canAttempt
+                    : !statusConfig.disabled,
             policies: competition?.policies,
         };
 
@@ -470,18 +497,32 @@ export const HomeworkContent = ({ learningItemDetail }) => {
                             </div>
                         </div>
                         {!isFileUploadHomework ? (
-                            <button
-                                type="button"
-                                disabled={isButtonDisabled}
-                                onClick={isButtonDisabled ? undefined : handleActionButton}
-                                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl w-full sm:w-auto justify-center font-semibold text-[13px] transition-all shrink-0 ${isButtonDisabled
-                                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                    : 'bg-blue-800 hover:bg-blue-900 text-white cursor-pointer active:scale-95 shadow-sm'
-                                    }`}
-                            >
-                                <Play size={15} />
-                                <span>{statusConfig.buttonText}</span>
-                            </button>
+                            <div className="grid w-full grid-cols-1 gap-2 sm:flex sm:w-auto">
+                                {hasLatestSubmittedAttempt && (
+                                    <button
+                                        type="button"
+                                        disabled={!canViewLatestAttempt}
+                                        onClick={canViewLatestAttempt ? handleViewLatestAttempt : undefined}
+                                        className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-[13px] font-semibold transition-all ${canViewLatestAttempt
+                                            ? 'border-blue-200 bg-white text-blue-800 hover:bg-blue-50 active:scale-95 cursor-pointer'
+                                            : 'border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed'}`}
+                                    >
+                                        <FileSearch size={15} />
+                                        <span>{canViewLatestAttempt ? reviewButtonText : 'Chưa thể xem bài làm'}</span>
+                                    </button>
+                                )}
+                                <button
+                                    type="button"
+                                    disabled={isAttemptActionDisabled}
+                                    onClick={isAttemptActionDisabled ? undefined : handleActionButton}
+                                    className={`flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold transition-all ${isAttemptActionDisabled
+                                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                        : 'bg-blue-800 text-white shadow-sm hover:bg-blue-900 active:scale-95 cursor-pointer'}`}
+                                >
+                                    <Play size={15} />
+                                    <span>{attemptButtonText}</span>
+                                </button>
+                            </div>
                         ) : null}
                     </div>
 
