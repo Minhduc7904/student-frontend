@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AlertTriangle, CheckCircle2, CloudUpload, Flag, RotateCw } from 'lucide-react';
 import { MarkdownRenderer } from '../../../shared/components';
 import { getQuestionSyncState } from './questionUtils';
@@ -15,6 +15,9 @@ const AnswerState = ({ state, onRetry, theme }) => {
 const CompetitionQuestionPanel = ({ item, onAnswer, onRetry, onToggleFlag, isFlagged, theme, fontScale }) => {
     const { question, number, sectionName } = item;
     const [textValue, setTextValue] = useState(question.answer?.answer ?? '');
+    const latestTextValueRef = useRef(textValue);
+    const lastQueuedTextRef = useRef(question.answer?.answer ?? '');
+    const onAnswerRef = useRef(onAnswer);
     const syncState = getQuestionSyncState(question);
     const selectedIds = useMemo(() => new Set(question.answer?.selectedStatementIds ?? []), [question.answer]);
     const trueFalseAnswers = useMemo(() => new Map((question.answer?.trueFalseAnswers ?? []).map((answer) => [answer.statementId, answer.isTrue])), [question.answer]);
@@ -22,14 +25,42 @@ const CompetitionQuestionPanel = ({ item, onAnswer, onRetry, onToggleFlag, isFla
     const isDark = theme === 'dark';
 
     useEffect(() => {
-        setTextValue(question.answer?.answer ?? '');
+        onAnswerRef.current = onAnswer;
+    }, [onAnswer]);
+
+    useEffect(() => {
+        const savedText = question.answer?.answer ?? '';
+        setTextValue(savedText);
+        latestTextValueRef.current = savedText;
+        lastQueuedTextRef.current = savedText;
     }, [question.questionId]);
+
+    const commitTextAnswer = useCallback((value = latestTextValueRef.current) => {
+        const nextValue = value ?? '';
+        if (!isText || nextValue === lastQueuedTextRef.current) return;
+
+        lastQueuedTextRef.current = nextValue;
+        onAnswerRef.current?.({ type: question.type, answer: nextValue });
+    }, [isText, question.type]);
 
     useEffect(() => {
         if (!isText || textValue === (question.answer?.answer ?? '')) return undefined;
-        const timer = window.setTimeout(() => onAnswer({ type: question.type, answer: textValue }), 650);
+        const timer = window.setTimeout(() => commitTextAnswer(textValue), 650);
         return () => window.clearTimeout(timer);
-    }, [isText, onAnswer, question.answer?.answer, question.type, textValue]);
+    }, [commitTextAnswer, isText, question.answer?.answer, textValue]);
+
+    const handleTextChange = useCallback((event) => {
+        const nextValue = event.currentTarget.value;
+        latestTextValueRef.current = nextValue;
+        setTextValue(nextValue);
+    }, []);
+
+    const handleTextCommit = useCallback((event) => {
+        const nextValue = event.currentTarget.value;
+        latestTextValueRef.current = nextValue;
+        setTextValue((currentValue) => currentValue === nextValue ? currentValue : nextValue);
+        commitTextAnswer(nextValue);
+    }, [commitTextAnswer]);
 
     const surface = isDark ? 'border-slate-700 bg-slate-900 text-slate-100 shadow-black/20' : 'border-blue-100 bg-white text-blue-950 shadow-blue-950/5';
     const divider = isDark ? 'border-slate-700' : 'border-blue-100';
@@ -59,7 +90,7 @@ const CompetitionQuestionPanel = ({ item, onAnswer, onRetry, onToggleFlag, isFla
                     </div>
                 </div>
                 {isText ? (
-                    <textarea value={textValue} onChange={(event) => setTextValue(event.target.value)} rows={question.type === 'ESSAY' ? 10 : 4} placeholder={question.type === 'ESSAY' ? 'Nhập bài làm của bạn...' : 'Nhập câu trả lời...'} className={`mt-6 w-full resize-y rounded-xl border px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 ${isDark ? 'border-slate-600 bg-slate-800 text-white placeholder:text-slate-500' : 'border-blue-100 bg-white text-blue-950 placeholder:text-gray-400'}`} />
+                    <textarea value={textValue} onChange={handleTextChange} onBlur={handleTextCommit} onCompositionEnd={handleTextCommit} rows={question.type === 'ESSAY' ? 10 : 4} placeholder={question.type === 'ESSAY' ? 'Nhập bài làm của bạn...' : 'Nhập câu trả lời...'} className={`mt-6 w-full resize-y rounded-xl border px-4 py-3 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:focus:ring-blue-900 ${isDark ? 'border-slate-600 bg-slate-800 text-white placeholder:text-slate-500' : 'border-blue-100 bg-white text-blue-950 placeholder:text-gray-400'}`} />
                 ) : question.type === 'TRUE_FALSE' ? (
                     <div className="mt-6 space-y-3">
                         {statements.map((statement, index) => {
