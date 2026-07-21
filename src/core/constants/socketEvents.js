@@ -47,6 +47,15 @@ export const SOCKET_EVENTS = {
         TIME_SYNC: 'competition:attempt:time:sync',
     },
 
+    TUITION_PAYMENT_INTENT: {
+        SUBSCRIBE: 'tuition-payment:intent:subscribe',
+        SUBSCRIBED: 'tuition-payment:intent:subscribed',
+        STATUS: 'tuition-payment:intent:status',
+        UNSUBSCRIBE: 'tuition-payment:intent:unsubscribe',
+        UNSUBSCRIBED: 'tuition-payment:intent:unsubscribed',
+        PAID: 'tuition-payment:intent:paid',
+    },
+
     // Class session events (optional - for future use)
     CLASS_SESSION: {
         STARTED: 'class-session:started',

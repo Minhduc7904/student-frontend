@@ -68,6 +68,7 @@ export const ROUTES = {
     PROGRESS: '/progress',
     CALENDAR: '/calendar',
     PAYMENT: '/payment',
+    TUITION_PAYMENT_INTENT: (tuitionPaymentId, paymentIntentId) => `/tuitionPayment/${tuitionPaymentId}/paymentIntent/${paymentIntentId}/`,
     PAYOS_RETURN: '/payment/payos-return',
     PAYOS_CANCEL: '/payment/payos-cancel',
     USER_BOOK: '/user-book',

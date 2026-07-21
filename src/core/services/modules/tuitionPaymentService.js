@@ -15,6 +15,26 @@ export const tuitionPaymentService = {
         return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENTS.MY, { params });
     },
 
+    getDetail: (paymentId) => {
+        return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENTS.DETAIL(paymentId));
+    },
+
+    getPaymentInstructions: (paymentId) => {
+        return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENTS.PAYMENT_INSTRUCTIONS(paymentId));
+    },
+
+    refreshPaymentInstructions: (paymentId) => {
+        return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENTS.REFRESH_PAYMENT_INSTRUCTIONS(paymentId));
+    },
+
+    getPaymentIntentStatus: (paymentId) => {
+        return axiosClient.get(API_ENDPOINTS.TUITION_PAYMENTS.PAYMENT_INTENT_STATUS(paymentId));
+    },
+
+    cancelPaymentAttempt: (paymentId, paymentAttemptId) => {
+        return axiosClient.post(API_ENDPOINTS.TUITION_PAYMENTS.CANCEL_PAYMENT_ATTEMPT(paymentId, paymentAttemptId));
+    },
+
     /**
      * GET /tuition-payments/my/stats/status
      * STUDENT: Thống kê học phí theo trạng thái (paid/unpaid/overdue...)

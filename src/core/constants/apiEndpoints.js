@@ -136,6 +136,11 @@ export const API_ENDPOINTS = {
     // Tuition Payments
     TUITION_PAYMENTS: {
         MY: '/tuition-payments/my',
+        DETAIL: (paymentId) => `/tuition-payments/my/${paymentId}`,
+        PAYMENT_INSTRUCTIONS: (paymentId) => `/tuition-payments/my/${paymentId}/payment-instructions`,
+        REFRESH_PAYMENT_INSTRUCTIONS: (paymentId) => `/tuition-payments/my/${paymentId}/payment-instructions/refresh`,
+        PAYMENT_INTENT_STATUS: (paymentId) => `/tuition-payments/my/${paymentId}/payment-intent-status`,
+        CANCEL_PAYMENT_ATTEMPT: (paymentId, paymentAttemptId) => `/tuition-payments/my/${paymentId}/payment-attempts/${paymentAttemptId}/cancel`,
         MY_STATS_STATUS: '/tuition-payments/my/stats/status',
         MY_STATS_MONEY: '/tuition-payments/my/stats/money',
     },

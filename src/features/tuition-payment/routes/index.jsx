@@ -1,5 +1,6 @@
 import PaymentLayout from "../layout/PaymentLayout";
 import PaymentPage from "..";
+import PaymentIntentPage from "../PaymentIntentPage";
 import { ROUTES } from "../../../core/constants";
 import { ProtectedRoute } from "../../../shared/components/protected/ProtectedRoute";
 
@@ -21,6 +22,16 @@ export const paymentRoutes = [
                         },
                     },
                 ],
+            },
+        ],
+    },
+    {
+        path: ROUTES.TUITION_PAYMENT_INTENT(':paymentId', ':paymentIntentId'),
+        element: <ProtectedRoute />,
+        children: [
+            {
+                index: true,
+                element: <PaymentIntentPage />,
             },
         ],
     },
