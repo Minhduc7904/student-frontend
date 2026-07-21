@@ -148,13 +148,27 @@ const PaymentIntentPage = () => {
         if (!paymentIntentId || paymentIsPaid) return undefined;
         let retryTimer;
         let socket;
+        let disposed = false;
+        let subscribed = false;
         let detachSocket = () => {};
+
+        const isPaidSnapshot = (snapshot) => (
+            String(snapshot?.tuitionPaymentStatus || "").toUpperCase() === "PAID"
+            || String(snapshot?.intentStatus || "").toUpperCase() === "PAID"
+        );
+
+        const leaveIntentRoom = () => {
+            if (!subscribed || !socket?.connected) return;
+            socket.emit(SOCKET_EVENTS.TUITION_PAYMENT_INTENT.UNSUBSCRIBE, { paymentIntentId: Number(paymentIntentId) });
+            subscribed = false;
+        };
 
         const applyIntent = (payload) => {
             const intent = payload?.intent ?? payload;
             if (!intent || String(intent.paymentIntentId) !== String(paymentIntentId)) return;
             setIntentStatus(intent.intentStatus || "");
-            if (intent.tuitionPaymentStatus === "PAID" || intent.intentStatus === "PAID") {
+            if (isPaidSnapshot(intent)) {
+                leaveIntentRoom();
                 setInstructions(null);
                 setPayment((current) => current ? { ...current, status: "PAID", paidAt: intent.paidAt ?? current.paidAt, paymentIntent: { ...current.paymentIntent, status: "PAID" } } : current);
             }
@@ -169,8 +183,13 @@ const PaymentIntentPage = () => {
 
             const subscribe = async () => {
                 try {
-                    await refreshIntentStatus();
+                    const snapshot = await refreshIntentStatus();
+                    if (disposed || isPaidSnapshot(snapshot)) {
+                        leaveIntentRoom();
+                        return;
+                    }
                     socket.emit(SOCKET_EVENTS.TUITION_PAYMENT_INTENT.SUBSCRIBE, { paymentIntentId: Number(paymentIntentId) });
+                    subscribed = true;
                 } catch {
                     // A later reconnect or the socket status event will retry the snapshot.
                 }
@@ -190,7 +209,7 @@ const PaymentIntentPage = () => {
             if (socket.connected) subscribe();
 
             detachSocket = () => {
-                socket.emit(SOCKET_EVENTS.TUITION_PAYMENT_INTENT.UNSUBSCRIBE, { paymentIntentId: Number(paymentIntentId) });
+                leaveIntentRoom();
                 socket.off(SOCKET_EVENTS.TUITION_PAYMENT_INTENT.STATUS, handleStatus);
                 socket.off(SOCKET_EVENTS.TUITION_PAYMENT_INTENT.PAID, handlePaid);
                 socket.off("error", handleSocketError);
@@ -200,6 +219,7 @@ const PaymentIntentPage = () => {
 
         attach();
         return () => {
+            disposed = true;
             window.clearTimeout(retryTimer);
             detachSocket();
         };
