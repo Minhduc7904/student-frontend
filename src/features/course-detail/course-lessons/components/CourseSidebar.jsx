@@ -14,7 +14,10 @@ export const CourseSidebar = ({
     currentLearningItemId,
     learnedItemIds,
     onNavigate,
-}) => (
+}) => {
+    const newestFirstChapters = [...(chapters || [])].reverse();
+
+    return (
     <aside className="flex h-full min-h-0 flex-col bg-white">
         <div className="border-b border-blue-100 p-3">
             <Link
@@ -43,20 +46,23 @@ export const CourseSidebar = ({
                 <div className="rounded-2xl border border-red-100 bg-red-50 p-3 text-xs leading-5 text-red-700">
                     {chaptersError}
                 </div>
-            ) : chapters?.length ? (
+            ) : newestFirstChapters.length ? (
                 <div className="space-y-4">
-                    {chapters.map((chapter, chapterIndex) => (
+                    {newestFirstChapters.map((chapter, chapterIndex) => {
+                        const newestFirstLessons = [...(chapter.lessons || [])].reverse();
+
+                        return (
                         <section key={chapter.chapterId}>
                             <div className="mb-2 flex items-center justify-between gap-2 px-1">
                                 <p className="truncate text-[11px] font-bold uppercase tracking-wide text-blue-700">
                                     {chapter.name || `Chương ${chapterIndex + 1}`}
                                 </p>
                                 <span className="shrink-0 rounded-lg bg-white px-2 py-0.5 text-[10px] font-bold tabular-nums text-blue-700">
-                                    {chapter.lessons?.length || 0}
+                                    {newestFirstLessons.length}
                                 </span>
                             </div>
                             <div className="space-y-1.5">
-                                {(chapter.lessons || []).map((lesson, lessonIndex) => (
+                                {newestFirstLessons.map((lesson, lessonIndex) => (
                                     <SidebarLessonItem
                                         key={lesson.lessonId}
                                         lesson={lesson}
@@ -70,7 +76,8 @@ export const CourseSidebar = ({
                                 ))}
                             </div>
                         </section>
-                    ))}
+                        );
+                    })}
                 </div>
             ) : (
                 <div className="rounded-2xl border border-blue-100 bg-white p-4 text-center text-xs text-gray-600">
@@ -79,4 +86,5 @@ export const CourseSidebar = ({
             )}
         </div>
     </aside>
-);
+    );
+};
