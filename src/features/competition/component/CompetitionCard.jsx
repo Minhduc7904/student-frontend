@@ -43,6 +43,7 @@ const CompetitionCard = ({ competition }) => {
     const durationMinutes = competition?.durationMinutes;
     const startDate = competition?.startDate;
     const endDate = competition?.endDate;
+    const isUnlimited = competition?.isUnlimited === true || competition?.competition?.isUnlimited === true;
 
     const isOngoing = timelineStatus === 'ONGOING';
     const isUpcoming = timelineStatus === 'UPCOMING';
@@ -149,15 +150,17 @@ const CompetitionCard = ({ competition }) => {
                 {isOngoing && (
                     <div className="absolute top-3 right-3 z-10">
                         <div className="rounded-xl bg-white/90 backdrop-blur px-3 py-1.5 border border-white/70 shadow-sm">
-                            {endDate ? (
-                                <p className="text-text-5 font-semibold text-orange-700">
-                                    {ongoingCountdownLabel}
-                                </p>
-                            ) : (
+                            {isUnlimited ? (
                                 <div className="flex items-center gap-1 text-orange-700">
                                     <InfinityIcon size={16} />
                                     <span className="text-text-5 font-semibold">Không giới hạn</span>
                                 </div>
+                            ) : endDate ? (
+                                <p className="text-text-5 font-semibold text-orange-700">
+                                    {ongoingCountdownLabel}
+                                </p>
+                            ) : (
+                                <p className="text-text-5 font-semibold text-orange-700">Đang diễn ra</p>
                             )}
                         </div>
                     </div>
@@ -182,7 +185,7 @@ const CompetitionCard = ({ competition }) => {
 
                             {isOngoing && (
                                 <p className="mt-1 text-text-5 text-blue-800 font-medium">
-                                    {isInProgress ? 'Đang làm bài' : `${durationMinutes ?? '--'} phút`}
+                                    {isInProgress ? 'Đang làm bài' : isUnlimited ? 'Không giới hạn thời gian' : durationMinutes ? `${durationMinutes} phút` : 'Theo hạn chung'}
                                 </p>
                             )}
 

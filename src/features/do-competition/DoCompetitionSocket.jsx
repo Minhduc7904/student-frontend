@@ -9,6 +9,7 @@ import {
     selectFinishSubmitResult,
     selectSections,
     selectSocketConnection,
+    selectSocketIsUnlimited,
     selectSocketTimeIsOver,
     selectSocketRemainingSeconds,
     selectSocketTimeInitialized,
@@ -37,6 +38,7 @@ export const DoCompetitionSocket = ({ isHomeworkCompetition = false }) => {
     const unassignedQuestions = useSelector(selectUnassignedQuestions);
     const connection = useSelector(selectSocketConnection);
     const remainingSeconds = useSelector(selectSocketRemainingSeconds);
+    const isUnlimited = useSelector(selectSocketIsUnlimited);
     const timeInitialized = useSelector(selectSocketTimeInitialized);
     const timeSyncVersion = useSelector(selectSocketTimeSyncVersion);
     const timeIsOver = useSelector(selectSocketTimeIsOver);
@@ -148,6 +150,11 @@ export const DoCompetitionSocket = ({ isHomeworkCompetition = false }) => {
     }, [finishResult, resetAndNavigateToResult, submitId]);
 
     useEffect(() => {
+        if (isUnlimited) {
+            autoSubmitStartedRef.current = false;
+            autoSubmitTimeSyncVersionRef.current = null;
+            return;
+        }
         if (!timeInitialized || !questions.length || autoSubmitStartedRef.current) return;
         if (remainingSeconds > 0) {
             autoSubmitTimeSyncVersionRef.current = null;
@@ -183,16 +190,16 @@ export const DoCompetitionSocket = ({ isHomeworkCompetition = false }) => {
         };
 
         submitExpiredAttempt();
-    }, [finishAttempt, flushPending, homeworkContentId, isHomeworkCompetition, questions.length, remainingSeconds, requestTimeSync, timeInitialized, timeIsOver, timeSyncVersion]);
+    }, [finishAttempt, flushPending, homeworkContentId, isHomeworkCompetition, isUnlimited, questions.length, remainingSeconds, requestTimeSync, timeInitialized, timeIsOver, timeSyncVersion]);
 
     const pageTheme = isDark ? 'dark bg-slate-950 text-slate-100' : 'bg-blue-50/60 text-blue-950';
     const surface = isDark ? 'border-slate-700 bg-slate-900 text-slate-100' : 'border-blue-100 bg-white text-blue-950';
 
-    if (!currentItem) return <div className={`min-h-dvh ${pageTheme}`}><CompetitionRoomHeader title="Đang kết nối phòng thi" remainingTime="--:--" connected={connection === 'connected'} theme={preferences.theme} onOpenNavigator={() => setNavigatorOpen(true)} onOpenSettings={() => setSettingsOpen(true)} onSubmit={() => setSubmitModalOpen(true)} /><main className="mx-auto flex min-h-[70dvh] max-w-xl flex-col items-center justify-center px-5 text-center"><div className={`rounded-2xl border p-7 shadow-sm ${surface}`}><WifiOff className="mx-auto text-blue-700 dark:text-blue-300" size={30} /><h2 className="mt-4 text-lg font-bold">Đang tải đề và bài làm của bạn</h2><p className={`mt-2 text-sm leading-6 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Hệ thống sẽ tự đồng bộ lại ngay khi kết nối ổn định.</p></div></main></div>;
+    if (!currentItem) return <div className={`min-h-dvh ${pageTheme}`}><CompetitionRoomHeader title="Đang kết nối phòng thi" remainingTime={isUnlimited ? '∞' : '--:--'} isUnlimited={isUnlimited} connected={connection === 'connected'} theme={preferences.theme} onOpenNavigator={() => setNavigatorOpen(true)} onOpenSettings={() => setSettingsOpen(true)} onSubmit={() => setSubmitModalOpen(true)} /><main className="mx-auto flex min-h-[70dvh] max-w-xl flex-col items-center justify-center px-5 text-center"><div className={`rounded-2xl border p-7 shadow-sm ${surface}`}><WifiOff className="mx-auto text-blue-700 dark:text-blue-300" size={30} /><h2 className="mt-4 text-lg font-bold">Đang tải đề và bài làm của bạn</h2><p className={`mt-2 text-sm leading-6 ${isDark ? 'text-slate-400' : 'text-gray-600'}`}>Hệ thống sẽ tự đồng bộ lại ngay khi kết nối ổn định.</p></div></main></div>;
 
     const progressWidth = questions.length ? (savedCount / questions.length) * 100 : 0;
 
-    return <div className={`min-h-dvh ${pageTheme}`}><CompetitionRoomHeader title={competition?.title ?? competition?.name} remainingTime={formatCompetitionTime(remainingSeconds)} connected={connection === 'connected'} theme={preferences.theme} onOpenNavigator={() => setNavigatorOpen(true)} onOpenSettings={() => setSettingsOpen(true)} onSubmit={() => setSubmitModalOpen(true)} />
+    return <div className={`min-h-dvh ${pageTheme}`}><CompetitionRoomHeader title={competition?.title ?? competition?.name} remainingTime={isUnlimited ? '∞' : formatCompetitionTime(remainingSeconds)} isUnlimited={isUnlimited} connected={connection === 'connected'} theme={preferences.theme} onOpenNavigator={() => setNavigatorOpen(true)} onOpenSettings={() => setSettingsOpen(true)} onSubmit={() => setSubmitModalOpen(true)} />
         <main className="mx-auto grid max-w-[1440px] gap-5 px-3 py-4 sm:px-5 lg:grid-cols-[minmax(0,1fr)_21rem] lg:px-7">
             <section className="min-w-0">
                 {preferences.viewMode === 'single' ? <><div className="mb-4 flex flex-wrap items-center justify-between gap-3"><p className={`text-sm font-semibold ${isDark ? 'text-slate-300' : 'text-gray-600'}`}>{currentItem.sectionName} · Câu {currentItem.number}/{currentItem.totalInSection}</p><div className={`h-2 min-w-40 flex-1 overflow-hidden rounded-full sm:max-w-xs ${isDark ? 'bg-slate-800' : 'bg-blue-100'}`}><div className="h-full rounded-full bg-blue-800 transition-[width] duration-300" style={{ width: `${progressWidth}%` }} /></div><p className="text-sm font-bold text-blue-700 dark:text-blue-300">{savedCount}/{questions.length} đã lưu</p></div><CompetitionQuestionPanel item={currentItem} onAnswer={(change) => handleAnswer(currentItem, change)} onRetry={() => retryAnswer(currentItem.question.questionId)} onToggleFlag={() => toggleFlag(currentItem.question.questionId)} isFlagged={flaggedIds.has(currentItem.question.questionId)} theme={preferences.theme} fontScale={preferences.fontScale} /><CompetitionQuestionControls hasPrevious={currentIndex > 0} hasNext={currentIndex < questions.length - 1} onPrevious={() => selectQuestion(questions[Math.max(0, currentIndex - 1)]?.question.questionId)} onNext={() => selectQuestion(questions[Math.min(questions.length - 1, currentIndex + 1)]?.question.questionId)} onSubmit={() => setSubmitModalOpen(true)} theme={preferences.theme} /></> : <CompetitionQuestionList groups={questionGroups} currentQuestionId={currentQuestionId} flaggedIds={flaggedIds} onAnswer={handleAnswer} onRetry={retryAnswer} onToggleFlag={toggleFlag} onSubmit={() => setSubmitModalOpen(true)} theme={preferences.theme} fontScale={preferences.fontScale} />}

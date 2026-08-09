@@ -11,7 +11,8 @@ import { CourseLearningProgram } from "../course-detail/components/CourseLearnin
 import { CourseMediaGallery } from "../course-detail/components/CourseMediaGallery";
 import { getCourseBanner, getCourseImage, getCourseSummary } from "../course-detail/components/courseDetailUtils";
 import { selectChapters } from "../course-detail/store/courseDetailSlice";
-import { getInvoiceDetails, getPayosPaymentDetails, savePayosPayment } from "./paymentUtils";
+
+const unwrap = (response) => response?.data?.data ?? response?.data ?? response ?? {};
 
 const CoursePurchaseDetailPage = () => {
     const dispatch = useDispatch();
@@ -26,51 +27,46 @@ const CoursePurchaseDetailPage = () => {
         lessonsLoading,
         lessonsError,
     } = outletContext;
-    const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+    const [isPreparingPayment, setIsPreparingPayment] = useState(false);
 
     const summary = useMemo(() => getCourseSummary({ courseDetail, chapters, lessons }), [chapters, courseDetail, lessons]);
     const courseImage = getCourseImage(courseDetail);
     const bannerSrc = getCourseBanner(courseDetail);
 
     const startPurchase = async () => {
-        if (!courseDetail || isCreatingInvoice) return;
+        if (!courseDetail || isPreparingPayment) return;
 
-        setIsCreatingInvoice(true);
+        setIsPreparingPayment(true);
         try {
-            const response = await courseService.registerManualInvoice(courseDetail.code || courseDetail.courseId || courseId);
-            const invoiceDetails = getInvoiceDetails(response);
+            const courseReference = courseDetail.code || courseDetail.courseId || courseId;
+            const response = await courseService.getCoursePaymentInstructions(courseReference);
+            const instructions = unwrap(response);
 
-            if (!invoiceDetails.invoiceId) throw new Error("Không nhận được mã hóa đơn thanh toán.");
-
-            if (invoiceDetails.status === "PAID" && invoiceDetails.enrollmentCreated) {
+            if (["FREE", "ACTIVE"].includes(String(instructions?.status || "").toUpperCase())) {
                 navigate(ROUTES.COURSE_DETAIL(courseId), { replace: true, state: { resetAll: true } });
                 return;
             }
 
-            if (invoiceDetails.status !== "PENDING_PAYMENT") {
-                throw new Error("Hóa đơn không còn ở trạng thái chờ thanh toán. Vui lòng thử lại sau.");
+            if (!instructions?.paymentIntentId || String(instructions?.status || "").toUpperCase() !== "PENDING") {
+                throw new Error("Phiên thanh toán chưa sẵn sàng. Vui lòng thử lại sau.");
             }
 
-            const payosResponse = await courseService.createPayosPayment(invoiceDetails.invoiceId);
-            const payosPayment = getPayosPaymentDetails(payosResponse);
-
-            if (!payosPayment.paymentUrl) throw new Error("Không thể tạo liên kết thanh toán PayOS. Vui lòng thử lại sau.");
-
-            savePayosPayment({
-                ...payosPayment,
-                courseId,
-                courseTitle: courseDetail.title,
+            navigate(ROUTES.COURSE_PAYMENT_INTENT(courseId, instructions.paymentIntentId), {
+                state: {
+                    instructions,
+                    courseReference,
+                    courseTitle: courseDetail.title,
+                },
             });
-            window.location.assign(payosPayment.paymentUrl);
         } catch (requestError) {
             dispatch(addNotification({
                 type: "error",
-                title: "Không thể tạo hóa đơn",
+                title: "Không thể tạo thanh toán",
                 message: requestError?.message || "Vui lòng thử lại sau.",
                 autoHide: true,
             }));
         } finally {
-            setIsCreatingInvoice(false);
+            setIsPreparingPayment(false);
         }
     };
 
@@ -78,7 +74,7 @@ const CoursePurchaseDetailPage = () => {
         document.getElementById("course-lessons")?.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
-    const purchaseAction = { Icon: ShoppingCart, label: isCreatingInvoice ? "Đang chuyển đến PayOS..." : "Mua khóa học", onClick: startPurchase, disabled: isCreatingInvoice };
+    const purchaseAction = { Icon: ShoppingCart, label: isPreparingPayment ? "Đang chuẩn bị thanh toán..." : "Mua khóa học", onClick: startPurchase, disabled: isPreparingPayment };
 
     return (
         <main className="min-h-[calc(100dvh-80px)] overflow-x-clip bg-blue-50 text-blue-950">

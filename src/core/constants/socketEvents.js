@@ -56,6 +56,15 @@ export const SOCKET_EVENTS = {
         PAID: 'tuition-payment:intent:paid',
     },
 
+    COURSE_PAYMENT_INTENT: {
+        SUBSCRIBE: 'course-payment:intent:subscribe',
+        SUBSCRIBED: 'course-payment:intent:subscribed',
+        STATUS: 'course-payment:intent:status',
+        UNSUBSCRIBE: 'course-payment:intent:unsubscribe',
+        UNSUBSCRIBED: 'course-payment:intent:unsubscribed',
+        PAID: 'course-payment:intent:paid',
+    },
+
     // Class session events (optional - for future use)
     CLASS_SESSION: {
         STARTED: 'class-session:started',

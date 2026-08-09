@@ -70,8 +70,14 @@ const CompetitionDetailInfoTab = ({ detail: detailProp }) => {
             valueClass: 'text-gray-900',
         },
         {
-            label: 'Thời lượng (phút)',
-            value: detail?.durationMinutes ?? '--',
+            label: 'Thời gian làm bài',
+            value: detail?.isUnlimited
+                ? 'Không giới hạn'
+                : detail?.durationMinutes
+                    ? `${detail.durationMinutes} phút`
+                    : detail?.endDate
+                        ? 'Đến hạn chung'
+                        : '--',
             valueClass: 'text-gray-900',
         },
         {

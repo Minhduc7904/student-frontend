@@ -26,19 +26,15 @@ export const courseService = {
     );
   },
 
-  registerManualInvoice: async (courseIdOrCode) => {
+  getCoursePaymentInstructions: async (courseIdOrCode) => {
     return await axiosClient.post(
-      API_ENDPOINTS.COURSES.REGISTER_MANUAL_INVOICE(courseIdOrCode)
+      API_ENDPOINTS.COURSES.PAYMENT_INSTRUCTIONS(courseIdOrCode)
     );
   },
 
-  createPayosPayment: async (invoiceId) => {
-    return await axiosClient.post(API_ENDPOINTS.PAYMENTS.PAYOS, { invoiceId });
-  },
-
-  getOnlineCourseInvoicePaymentStatus: async (invoiceId) => {
+  getCoursePaymentIntentStatus: async (courseIdOrCode, paymentIntentId) => {
     return await axiosClient.get(
-      API_ENDPOINTS.ONLINE_COURSE_INVOICES.PAYMENT_STATUS(invoiceId)
+      API_ENDPOINTS.COURSES.PAYMENT_INTENT_STATUS(courseIdOrCode, paymentIntentId)
     );
   },
 };

@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { SOCKET_EVENTS } from '../../../core/constants/socketEvents';
 import { socketService } from '../../../core/services/socket/socket.service';
 import {
+    selectSocketIsUnlimited,
     selectSocketRemainingSeconds,
     socketAnswerChanged,
     socketAnswerFailed,
@@ -33,6 +34,7 @@ const logAnswerSaveFailure = ({ source, entry, payload }) => {
 export const useCompetitionSocket = ({ competitionId, submitId, onFinishError }) => {
     const dispatch = useDispatch();
     const remainingSeconds = useSelector(selectSocketRemainingSeconds);
+    const isUnlimited = useSelector(selectSocketIsUnlimited);
     const queuedAnswersRef = useRef(new Map());
     const activeSaveRef = useRef(null);
     const mountedRef = useRef(true);
@@ -285,10 +287,10 @@ export const useCompetitionSocket = ({ competitionId, submitId, onFinishError })
     }, [dispatch, handleAnswerSaved, handleSaveError, onFinishError, sendNext, synchronizeAttempt]);
 
     useEffect(() => {
-        if (remainingSeconds <= 0) return undefined;
+        if (isUnlimited || remainingSeconds <= 0) return undefined;
         const interval = window.setInterval(() => dispatch(socketTickTime()), 1000);
         return () => window.clearInterval(interval);
-    }, [dispatch, remainingSeconds]);
+    }, [dispatch, isUnlimited, remainingSeconds]);
 
     useEffect(() => () => {
         queuedAnswersRef.current.forEach((entry) => {

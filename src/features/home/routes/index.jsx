@@ -4,8 +4,8 @@ import { DashboardPage } from '../dashboard';
 import EnrollmentsPage from '../courses';
 import CourseMarketplacePage from '../../course-marketplace';
 import CoursePurchaseDetailPage from '../../course-marketplace/CoursePurchaseDetailPage';
+import CoursePaymentIntentPage from '../../course-marketplace/CoursePaymentIntentPage';
 import CoursePurchaseDetailLayout from '../../course-marketplace/layout/CoursePurchaseDetailLayout';
-import PayosPaymentStatusPage from '../../course-marketplace/PayosPaymentStatusPage';
 import { ROUTES } from '../../../core/constants';
 import { ProtectedRoute } from '../../../shared/components/protected/ProtectedRoute';
 import { Outlet } from 'react-router-dom';
@@ -94,22 +94,12 @@ export const homeRoutes = [
                 ],
             },
             {
-                path: ROUTES.PAYOS_RETURN,
+                path: ROUTES.COURSE_PAYMENT_INTENT(':courseId', ':paymentIntentId'),
                 element: <ProtectedRoute />,
                 children: [
                     {
                         index: true,
-                        element: <PayosPaymentStatusPage mode="return" />,
-                    },
-                ],
-            },
-            {
-                path: ROUTES.PAYOS_CANCEL,
-                element: <ProtectedRoute />,
-                children: [
-                    {
-                        index: true,
-                        element: <PayosPaymentStatusPage mode="cancel" />,
+                        element: <CoursePaymentIntentPage />,
                     },
                 ],
             },

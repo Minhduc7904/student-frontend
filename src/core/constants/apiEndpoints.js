@@ -39,7 +39,9 @@ export const API_ENDPOINTS = {
         DETAIL: (id) => `/courses/${id}`,
         STUDENT_DETAIL: (id) => `/courses/student/${id}`,
         STUDENT_ONLINE_NOT_ENROLLED: '/courses/student/online-not-enrolled',
-        REGISTER_MANUAL_INVOICE: (courseIdOrCode) => `/courses/public/seo/${courseIdOrCode}/register-manual-invoice/me`,
+        PAYMENT_INSTRUCTIONS: (courseIdOrCode) => `/courses/public/seo/${courseIdOrCode}/payment-instructions/me`,
+        PAYMENT_INTENT_STATUS: (courseIdOrCode, paymentIntentId) =>
+            `/courses/public/seo/${courseIdOrCode}/payment-instructions/me/${paymentIntentId}`,
         LESSONS: (id) => `/courses/${id}/lessons`,
         LESSON_DETAIL: (courseId, lessonId) => `/courses/${courseId}/lessons/${lessonId}`,
         ENROLL: (id) => `/courses/${id}/enroll`,
@@ -64,14 +66,6 @@ export const API_ENDPOINTS = {
     COURSE_ENROLLMENTS: {
         MY: '/course-enrollments/student/my',
         MY_BY_PROGRESS: '/course-enrollments/student/my/by-progress',
-    },
-
-    ONLINE_COURSE_INVOICES: {
-        PAYMENT_STATUS: (invoiceId) => `/online-course-invoices/${invoiceId}/payment-status`,
-    },
-
-    PAYMENTS: {
-        PAYOS: '/payments/payos',
     },
 
     // Class Sessions

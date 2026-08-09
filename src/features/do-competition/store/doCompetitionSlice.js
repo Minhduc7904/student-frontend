@@ -60,6 +60,7 @@ const initialState = {
     // Socket-first competition room state. Legacy REST screen does not depend on these fields.
     socketConnection: 'connecting',
     socketRemainingSeconds: 0,
+    socketIsUnlimited: false,
     socketTimeInitialized: false,
     socketTimeSyncVersion: 0,
     socketTimeIsOver: false,
@@ -278,7 +279,11 @@ const doCompetitionSlice = createSlice({
             const data = event.exam ?? event;
             // Socket consumers can dispatch either the full event or its `exam` property.
             const examData = data.exam ?? data;
-            state.competition = event.competition ?? data.competition ?? state.competition ?? null;
+            const competition = event.competition ?? data.competition ?? state.competition ?? null;
+            state.competition = competition;
+            if (typeof competition?.isUnlimited === 'boolean') {
+                state.socketIsUnlimited = competition.isUnlimited;
+            }
             state.exam = {
                 examId: examData.examId,
                 title: examData.title,
@@ -351,14 +356,18 @@ const doCompetitionSlice = createSlice({
         },
         socketTimeSynced: (state, action) => {
             const time = action.payload ?? {};
-            const remainingSeconds = getSocketRemainingSeconds(time);
+            const isUnlimited = time.isUnlimited === true
+                || time.formattedRemaining === '∞'
+                || (time.isUnlimited == null && state.competition?.isUnlimited === true);
+            const remainingSeconds = isUnlimited ? 0 : getSocketRemainingSeconds(time);
+            state.socketIsUnlimited = isUnlimited;
             state.socketRemainingSeconds = remainingSeconds;
             state.socketTimeInitialized = true;
             state.socketTimeSyncVersion += 1;
-            state.socketTimeIsOver = time.isOverTime === true || remainingSeconds === 0;
+            state.socketTimeIsOver = !isUnlimited && (time.isOverTime === true || remainingSeconds === 0);
         },
         socketTickTime: (state) => {
-            if (state.socketRemainingSeconds > 0) state.socketRemainingSeconds -= 1;
+            if (!state.socketIsUnlimited && state.socketRemainingSeconds > 0) state.socketRemainingSeconds -= 1;
         },
         socketAnswerChanged: (state, action) => {
             const { questionId, body, revision } = action.payload;
@@ -685,6 +694,7 @@ export const selectTotalAnswered = (state) => state.doCompetition.totalAnswered;
 export const selectTotalErrors = (state) => state.doCompetition.totalErrors;
 export const selectSocketConnection = (state) => state.doCompetition.socketConnection;
 export const selectSocketRemainingSeconds = (state) => state.doCompetition.socketRemainingSeconds;
+export const selectSocketIsUnlimited = (state) => state.doCompetition.socketIsUnlimited;
 export const selectSocketTimeInitialized = (state) => state.doCompetition.socketTimeInitialized;
 export const selectSocketTimeSyncVersion = (state) => state.doCompetition.socketTimeSyncVersion;
 export const selectSocketTimeIsOver = (state) => state.doCompetition.socketTimeIsOver;
