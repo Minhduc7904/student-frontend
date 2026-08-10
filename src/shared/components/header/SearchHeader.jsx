@@ -1,8 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { SvgIcon } from "..";
 import { DebouncedSearchInput } from "..";
-import UserClass from "../../../assets/icons/UserClass.svg";
 import { questionService } from "../../../core/services/modules/questionService";
 import { ROUTES } from "../../../core/constants";
 
@@ -52,7 +50,7 @@ const normalizeQuestionList = (payload) => {
  * Search Header Component
  * Search bar và nút thêm khóa học
  */
-const SearchHeader = memo(({ onAddCourse }) => {
+const SearchHeader = memo(() => {
     const navigate = useNavigate();
     const [keyword, setKeyword] = useState("");
     const [searchLoading, setSearchLoading] = useState(false);
@@ -180,22 +178,10 @@ const SearchHeader = memo(({ onAddCourse }) => {
                 ) : null}
             </div>
 
-            {/* Add Course Button */}
-            <button
-                onClick={onAddCourse}
-                className="bg-yellow-100 cursor-pointer active:scale-[0.98] hover:bg-yellow-500 
-                    rounded-full 
-                    px-4 py-1.5
-                    flex flex-row gap-1.5 sm:gap-2 
-                    items-center justify-center 
-                    transition
-                    "
-            >
-                <SvgIcon src={UserClass} className="w-5 h-5" />
-                <div className="text-sm text-semibold text-blue-800 whitespace-nowrap">
-                    Thêm khóa học
-                </div>
-            </button>
+            {/*
+                Tạm ẩn nút “Thêm khóa học” cho tới khi luồng đăng ký thủ công được dùng lại.
+                <button onClick={onAddCourse}>Thêm khóa học</button>
+            */}
         </div>
     );
 });

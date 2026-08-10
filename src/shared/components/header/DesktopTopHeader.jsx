@@ -20,6 +20,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
     const navItems = [
         { label: "Tổng quan", path: ROUTES.DASHBOARD },
         { label: "Khóa học", path: ROUTES.COURSE_ENROLLMENTS },
+        { label: "Mua sách", path: ROUTES.BOOK_MARKETPLACE },
         { label: "Cuộc thi", path: ROUTES.COMPETITION },
     ];
 

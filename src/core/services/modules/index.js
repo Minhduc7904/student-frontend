@@ -4,6 +4,7 @@
 
 export * from './authService';
 export * from './courseService';
+export * from './bookService';
 export * from './examService';
 export * from './userService';
 export * from './notificationService';

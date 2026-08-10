@@ -26,6 +26,8 @@ export const ROUTES = {
     // Course Routes
     COURSE_ENROLLMENTS: '/courses/enrollments',
     COURSE_MARKETPLACE: '/courses/purchase',
+    BOOK_MARKETPLACE: '/book/purchase',
+    BOOK_PURCHASE_DETAIL: (slug) => `/book/purchase/${slug}`,
     COURSE_PURCHASE_DETAIL: (id) => `/courses/purchase/${id}`,
     COURSE_PAYMENT_INTENT: (courseId, paymentIntentId) => `/courses/purchase/${courseId}/payment-intent/${paymentIntentId}`,
     COURSE_DETAIL: (id) => `/courses/${id}`,

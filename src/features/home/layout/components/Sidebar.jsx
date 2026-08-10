@@ -4,6 +4,7 @@ import { Logo } from "../../../../shared/components";
 import {
     LayoutDashboard,
     BookOpen,
+    LibraryBig,
     FileText,
     Trophy,
     Settings,
@@ -56,6 +57,7 @@ MenuItem.displayName = "MenuItem";
 const MENU_ITEMS = [
     { icon: LayoutDashboard, label: "Tổng quan", path: ROUTES.DASHBOARD },
     { icon: BookOpen, label: "Khóa học", path: ROUTES.COURSE_ENROLLMENTS },
+    { icon: LibraryBig, label: "Mua sách", path: ROUTES.BOOK_MARKETPLACE },
     { icon: FileText, label: "Đề mẫu", path: ROUTES.EXAMS },
     { icon: Trophy, label: "Cuộc thi", path: ROUTES.COMPETITION },
     // { icon: Library, label: "Thư viện", path: ROUTES.LIBRARY },

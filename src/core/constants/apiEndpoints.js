@@ -68,6 +68,13 @@ export const API_ENDPOINTS = {
         MY_BY_PROGRESS: '/course-enrollments/student/my/by-progress',
     },
 
+    BOOKS: {
+        STUDENT_MY: '/books/student/my',
+        STUDENT_CATEGORIES: '/books/student/my/categories',
+        STUDENT_DETAIL: (slug) => `/books/student/my/${slug}`,
+        STUDENT_TRACK_VIEW: (slug) => `/books/student/my/${slug}/view`,
+    },
+
     // Class Sessions
     CLASS_SESSIONS: {
         MY_SESSIONS: '/class-sessions/student/my-sessions',
