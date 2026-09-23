@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { AlertTriangle, FileText, Lock, RefreshCw } from 'lucide-react';
 
-import { ResultHeader, ScoreCard, StatsBar, ResultInsights, AnswerCard } from './components';
+import { ResultHeader, ScoreCard, FeedbackCard, StatsBar, ResultInsights, AnswerCard } from './components';
 import AnswerTimeChart from './components/AnswerTimeChart';
 import { ROUTES } from '../../../core/constants';
 
@@ -151,6 +151,7 @@ const CompetitionResultPage = ({ submitId: submitIdProp, competitionId: competit
         <main className="mt-4 flex flex-col gap-4 pb-8 sm:mt-5 sm:gap-5">
             <ResultHeader result={result} />
             <ScoreCard result={result} />
+            <FeedbackCard result={result} />
             <StatsBar result={result} />
             <ResultInsights answers={answers} rules={rules} />
             {rules?.showResultDetail && <AnswerTimeChart answers={answers} />}
