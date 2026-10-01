@@ -7,6 +7,37 @@ import DeMauImage from "../../../assets/images/DeMau.png";
 import LuyenDeImage from "../../../assets/images/LuyenDe.png";
 import RightHeader from "./RightHeader";
 import SearchHeader from "./SearchHeader";
+
+const TABLET_HEADER_QUERY = "(min-width: 768px)";
+const DESKTOP_HEADER_QUERY = "(min-width: 1280px)";
+
+const getHeaderViewport = () => {
+    if (typeof window === "undefined") return "mobile";
+    if (window.matchMedia(DESKTOP_HEADER_QUERY).matches) return "desktop";
+    if (window.matchMedia(TABLET_HEADER_QUERY).matches) return "tablet";
+    return "mobile";
+};
+
+const useHeaderViewport = () => {
+    const [viewport, setViewport] = useState(getHeaderViewport);
+
+    useEffect(() => {
+        const tabletQuery = window.matchMedia(TABLET_HEADER_QUERY);
+        const desktopQuery = window.matchMedia(DESKTOP_HEADER_QUERY);
+        const updateViewport = () => setViewport(getHeaderViewport());
+
+        tabletQuery.addEventListener("change", updateViewport);
+        desktopQuery.addEventListener("change", updateViewport);
+
+        return () => {
+            tabletQuery.removeEventListener("change", updateViewport);
+            desktopQuery.removeEventListener("change", updateViewport);
+        };
+    }, []);
+
+    return viewport;
+};
+
 /**
  * DesktopTopHeader
  * Header desktop/tablet chứa khu vực search và thông tin user.
@@ -16,6 +47,7 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
     const [isPracticeMenuOpen, setIsPracticeMenuOpen] = useState(false);
     const [isPracticeMenuPinned, setIsPracticeMenuPinned] = useState(false);
     const practiceMenuRef = useRef(null);
+    const headerViewport = useHeaderViewport();
 
     const navItems = [
         { label: "Tổng quan", path: ROUTES.DASHBOARD },
@@ -95,7 +127,9 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                             <Logo mode="default" className="h-7 w-auto object-contain" containerClassName="flex items-center" />
                         </div>
 
-                        <RightHeader profile={profile} compact />
+                        {headerViewport === "mobile" ? (
+                            <RightHeader profile={profile} compact />
+                        ) : null}
                     </div>
                 </div>
             </div>
@@ -107,7 +141,9 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                             <Logo mode="default" className="h-7 w-auto object-contain" containerClassName="flex items-center" />
 
                             <div className="xl:hidden">
-                                <RightHeader profile={profile} compact />
+                                {headerViewport === "tablet" ? (
+                                    <RightHeader profile={profile} compact />
+                                ) : null}
                             </div>
                         </div>
 
@@ -212,7 +248,9 @@ const DesktopTopHeader = memo(({ profile, onAddCourse, isMobileMenuOpen = false,
                             </div>
 
                             <div className="hidden xl:block">
-                                <RightHeader profile={profile} />
+                                {headerViewport === "desktop" ? (
+                                    <RightHeader profile={profile} />
+                                ) : null}
                             </div>
                         </div>
                     </div>
