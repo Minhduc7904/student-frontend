@@ -1,21 +1,22 @@
 import { io } from 'socket.io-client';
 
-class SocketService {
-    constructor() {
+export class SocketService {
+    constructor(socketFactory = io) {
         this.socket = null;
         this.isConnected = false;
         this.listeners = new Map();
         this.authFailed = false;
+        this.socketFactory = socketFactory;
     }
 
     connect(token) {
-        if (this.socket?.connected) return;
+        if (this.socket) return;
 
         this.authFailed = false;
-        const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+        const apiBaseUrl = import.meta.env?.VITE_API_BASE_URL || 'http://localhost:3001/api';
         const serverUrl = apiBaseUrl.replace('/api', '');
 
-        this.socket = io(serverUrl, {
+        this.socket = this.socketFactory(serverUrl, {
             auth: { token },
             transports: ['websocket', 'polling'],
             reconnection: true,
@@ -25,6 +26,7 @@ class SocketService {
         });
 
         this.setupDefaultHandlers();
+        this.attachRegisteredListeners();
     }
 
     setupDefaultHandlers() {
@@ -58,15 +60,27 @@ class SocketService {
         });
     }
 
-    disconnect() {
+    attachRegisteredListeners() {
         if (!this.socket) return;
 
-        this.listeners.forEach((_, event) => {
-            this.socket.off(event);
+        this.listeners.forEach((callbacks, event) => {
+            callbacks.forEach((callback) => {
+                this.socket.on(event, callback);
+            });
         });
-        this.listeners.clear();
-        this.socket.disconnect();
-        this.socket = null;
+    }
+
+    disconnect() {
+        if (this.socket) {
+            this.listeners.forEach((callbacks, event) => {
+                callbacks.forEach((callback) => {
+                    this.socket.off(event, callback);
+                });
+            });
+            this.socket.disconnect();
+            this.socket = null;
+        }
+
         this.isConnected = false;
     }
 
@@ -86,20 +100,31 @@ class SocketService {
     }
 
     on(event, callback) {
-        if (!this.socket) return;
+        if (!event || typeof callback !== 'function') return () => {};
 
-        if (this.listeners.has(event)) this.socket.off(event, this.listeners.get(event));
-        this.socket.on(event, callback);
-        this.listeners.set(event, callback);
+        let callbacks = this.listeners.get(event);
+        if (!callbacks) {
+            callbacks = new Set();
+            this.listeners.set(event, callbacks);
+        }
+
+        if (!callbacks.has(callback)) {
+            callbacks.add(callback);
+            this.socket?.on(event, callback);
+        }
+
+        return () => this.off(event, callback);
     }
 
-    off(event) {
-        if (!this.socket) return;
+    off(event, callback) {
+        if (!event || typeof callback !== 'function') return;
 
-        const callback = this.listeners.get(event);
-        if (!callback) return;
-        this.socket.off(event, callback);
-        this.listeners.delete(event);
+        const callbacks = this.listeners.get(event);
+        if (!callbacks?.has(callback)) return;
+
+        this.socket?.off(event, callback);
+        callbacks.delete(callback);
+        if (callbacks.size === 0) this.listeners.delete(event);
     }
 
     getConnectionStatus() {

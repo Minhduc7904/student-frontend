@@ -1,5 +1,5 @@
 // src/hooks/socket/useSocketEvent.js
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { socketService } from '@/core/services'
 
 /**
@@ -10,24 +10,26 @@ import { socketService } from '@/core/services'
  * 
  * @param {string} event - Event name to listen to
  * @param {Function} callback - Event handler function
- * @param {Array} dependencies - Dependencies array for useEffect
- * 
+ *
  * @example
  * useSocketEvent('new-notification', (data) => {
  *   console.log('New notification:', data)
  *   showNotification(data)
- * }, [])
+ * })
  */
-export const useSocketEvent = (event, callback, dependencies = []) => {
+export const useSocketEvent = (event, callback) => {
+    const callbackRef = useRef(callback)
+
     useEffect(() => {
-        if (!event || !callback) return
+        callbackRef.current = callback
+    }, [callback])
 
-        // Add event listener
-        socketService.on(event, callback)
+    useEffect(() => {
+        if (!event) return
 
-        // Cleanup: remove listener on unmount or dependency change
-        return () => {
-            socketService.off(event)
-        }
-    }, [event, ...dependencies])
+        const handler = (...args) => callbackRef.current?.(...args)
+        const unsubscribe = socketService.on(event, handler)
+
+        return unsubscribe
+    }, [event])
 }

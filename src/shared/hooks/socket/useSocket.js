@@ -45,9 +45,6 @@ export const useSocket = (options = {}) => {
         }
 
         socketService.connect(accessToken)
-        setIsConnected(socketService.getConnectionStatus())
-        setSocketId(socketService.getSocketId())
-        setAuthFailed(false)
     }, [accessToken])
 
     // Disconnect from socket
@@ -74,33 +71,31 @@ export const useSocket = (options = {}) => {
 
     // Listen to event
     const on = useCallback((event, callback) => {
-        socketService.on(event, callback)
+        return socketService.on(event, callback)
     }, [])
 
     // Remove event listener
-    const off = useCallback((event) => {
-        socketService.off(event)
+    const off = useCallback((event, callback) => {
+        socketService.off(event, callback)
     }, [])
 
     // Auto connect/disconnect based on authentication
     useEffect(() => {
         if (isAuthenticated && accessToken && autoConnect) {
             console.log('🔌 Auto-connecting socket (user authenticated)...')
-            connect()
 
-            // Setup connection status listeners
-            socketService.on('connect', () => {
+            const handleConnect = () => {
                 setIsConnected(true)
                 setSocketId(socketService.getSocketId())
                 setAuthFailed(false)
-            })
+            }
 
-            socketService.on('disconnect', () => {
+            const handleDisconnect = () => {
                 setIsConnected(false)
                 setSocketId(null)
-            })
+            }
 
-            socketService.on('connect_error', async () => {
+            const handleConnectError = async () => {
                 if (!socketService.getAuthFailed()) return
                 if (isRefreshing.current) return
                 isRefreshing.current = true
@@ -146,17 +141,25 @@ export const useSocket = (options = {}) => {
                 } finally {
                     isRefreshing.current = false
                 }
-            })
-        }
+            }
 
-        // Cleanup: disconnect when user logs out or component unmounts
-        return () => {
-            if (!isAuthenticated || !accessToken) {
-                console.log('🔌 Auto-disconnecting socket (user logged out)...')
-                disconnect()
+            socketService.on('connect', handleConnect)
+            socketService.on('disconnect', handleDisconnect)
+            socketService.on('connect_error', handleConnectError)
+            connect()
+
+            return () => {
+                socketService.off('connect', handleConnect)
+                socketService.off('disconnect', handleDisconnect)
+                socketService.off('connect_error', handleConnectError)
             }
         }
-    }, [isAuthenticated, accessToken, autoConnect])
+
+        if (!isAuthenticated || !accessToken) {
+            console.log('🔌 Auto-disconnecting socket (user logged out)...')
+            socketService.disconnect()
+        }
+    }, [isAuthenticated, accessToken, autoConnect, connect, dispatch])
 
     return {
         isConnected,
