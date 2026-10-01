@@ -38,16 +38,7 @@ export class SocketService {
 
         this.socket.on('connect_error', (error) => {
             this.isConnected = false;
-            const message = (error.message || '').toLowerCase();
-            const isAuthError = message.includes('jwt') ||
-                message.includes('expired') ||
-                message.includes('unauthorized') ||
-                message.includes('authentication') ||
-                message.includes('unauthenticated') ||
-                message.includes('invalid') ||
-                error.type === 'UnauthorizedException';
-
-            if (isAuthError) this.authFailed = true;
+            if (this.isAuthenticationError(error)) this.markAuthenticationFailure();
         });
 
         this.socket.on('disconnect', (reason) => {
@@ -57,6 +48,12 @@ export class SocketService {
 
         this.socket.on('reconnect', () => {
             this.isConnected = true;
+        });
+
+        this.socket.on('error', (error) => {
+            if (this.isAuthenticationError(error)) {
+                this.markAuthenticationFailure();
+            }
         });
     }
 
@@ -68,6 +65,31 @@ export class SocketService {
                 this.socket.on(event, callback);
             });
         });
+    }
+
+    isAuthenticationError(error) {
+        const message = typeof error === 'string'
+            ? error
+            : error?.message || error?.data?.message || '';
+        const code = error?.code || error?.data?.code;
+        const normalizedMessage = String(message).toLowerCase();
+
+        return code === 'SOCKET_AUTH_FAILED' ||
+            code === 'UNAUTHORIZED' ||
+            normalizedMessage.includes('jwt') ||
+            normalizedMessage.includes('expired') ||
+            normalizedMessage.includes('unauthorized') ||
+            normalizedMessage.includes('authentication') ||
+            normalizedMessage.includes('unauthenticated') ||
+            normalizedMessage.includes('invalid token') ||
+            normalizedMessage.includes('invalid or expired') ||
+            error?.type === 'UnauthorizedException';
+    }
+
+    markAuthenticationFailure() {
+        this.authFailed = true;
+        this.isConnected = false;
+        this.socket?.io?.reconnection?.(false);
     }
 
     disconnect() {

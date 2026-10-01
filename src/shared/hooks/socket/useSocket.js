@@ -95,10 +95,11 @@ export const useSocket = (options = {}) => {
                 setSocketId(null)
             }
 
-            const handleConnectError = async () => {
-                if (!socketService.getAuthFailed()) return
+            const handleSocketAuthError = async (error) => {
+                if (!socketService.getAuthFailed() && !socketService.isAuthenticationError(error)) return
                 if (isRefreshing.current) return
                 isRefreshing.current = true
+                setAuthFailed(true)
 
                 console.warn('🔒 Socket auth failed — attempting token refresh...')
 
@@ -145,13 +146,15 @@ export const useSocket = (options = {}) => {
 
             socketService.on('connect', handleConnect)
             socketService.on('disconnect', handleDisconnect)
-            socketService.on('connect_error', handleConnectError)
+            socketService.on('connect_error', handleSocketAuthError)
+            socketService.on('error', handleSocketAuthError)
             connect()
 
             return () => {
                 socketService.off('connect', handleConnect)
                 socketService.off('disconnect', handleDisconnect)
-                socketService.off('connect_error', handleConnectError)
+                socketService.off('connect_error', handleSocketAuthError)
+                socketService.off('error', handleSocketAuthError)
             }
         }
 

@@ -6,6 +6,7 @@ import { SocketService } from '../src/core/services/socket/socket.service.js'
 class FakeSocket {
   constructor() {
     this.connected = false
+    this.connectCalls = 0
     this.handlers = new Map()
     this.io = { reconnection: () => {} }
   }
@@ -37,6 +38,7 @@ class FakeSocket {
   }
 
   connect() {
+    this.connectCalls += 1
     this.connected = true
   }
 
@@ -112,6 +114,31 @@ test('keeps subscriptions across logout disconnect until they are explicitly rem
   assert.equal(sockets[1].listenerCount('notification:new'), 1)
   unsubscribe()
   assert.equal(sockets[1].listenerCount('notification:new'), 0)
+})
+
+test('marks server auth errors and does not reconnect with the stale token', () => {
+  const { service, sockets } = createService()
+  service.connect('expired-token')
+
+  sockets[0].emitEvent('error', { message: 'Authentication failed' })
+  sockets[0].emitEvent('disconnect', 'io server disconnect')
+
+  assert.equal(service.getAuthFailed(), true)
+  assert.equal(sockets[0].connectCalls, 0)
+})
+
+test('does not treat feature errors as socket auth failures', () => {
+  const { service, sockets } = createService()
+  service.connect('token')
+
+  sockets[0].emitEvent('error', {
+    code: 'INVALID_PAYMENT_INTENT_ID',
+    message: 'Invalid payment intent ID',
+  })
+  sockets[0].emitEvent('disconnect', 'io server disconnect')
+
+  assert.equal(service.getAuthFailed(), false)
+  assert.equal(sockets[0].connectCalls, 1)
 })
 
 test('does not create duplicate sockets while the first connection is pending', () => {
