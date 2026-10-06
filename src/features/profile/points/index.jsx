@@ -39,6 +39,7 @@ const METADATA_LABELS = {
     attendanceId: "Mã điểm danh",
     sessionId: "Mã buổi học",
     status: "Trạng thái",
+    attendanceType: "Loại điểm danh",
     competitionId: "Mã cuộc thi",
     competitionSubmitId: "Mã bài nộp",
     learningItemId: "Mã bài học",
@@ -48,6 +49,8 @@ const VALUE_LABELS = {
     PRESENT: "Có mặt",
     ABSENT: "Vắng mặt",
     LATE: "Đi muộn",
+    REGULAR: "Chính khóa",
+    MAKEUP: "Học bù",
     BONUS: "Cộng điểm",
     PENALTY: "Trừ điểm",
 };
