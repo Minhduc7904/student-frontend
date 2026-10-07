@@ -4,14 +4,17 @@ on:
   push:
     branches: [main]
     paths-ignore: ["**/*.md"]
+  # Pull requests only run CI; the deploy job runs for pushes to main.
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: student-frontend-production
-  cancel-in-progress: false
+  group: ${{ github.event_name == 'pull_request' && format('student-frontend-pr-{0}', github.ref) || 'student-frontend-production' }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   ci:
@@ -28,6 +31,8 @@ jobs:
       - run: npm run build
 
   deploy:
+    # Never deploy from a pull request.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: ci
     runs-on: ubuntu-latest
     timeout-minutes: 20
