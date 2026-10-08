@@ -1,10 +1,12 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowDown, ArrowLeft, ArrowUp, ArrowUpDown, CalendarDays, Coins, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { ArrowLeft, ArrowUpDown, Coins, RefreshCw } from "lucide-react";
 import { useNavigate, useOutletContext } from "react-router-dom";
 import { Card, CustomDropdown, DebouncedSearchInput, Pagination } from "../../../shared/components";
 import { profileService } from "../../../core/services/modules/profileService";
 import { getStudentTotalPoint } from "../utils/studentPointUtils";
 import { ROUTES } from "../../../core/constants";
+import { PointLogItem } from "./PointLogItem";
+import { formatNumber, normalizeLogsPayload, toSafeNumber } from "./pointLogFormat";
 
 const TYPE_OPTIONS = [
     { label: "Tất cả", value: "" },
@@ -16,174 +18,6 @@ const SORT_OPTIONS = [
     { label: "Mới nhất", value: "desc" },
     { label: "Cũ nhất", value: "asc" },
 ];
-
-const SOURCE_LABELS = {
-    ATTENDANCE: "Điểm danh",
-    COMPETITION_SUBMIT: "Nộp bài cuộc thi",
-    LEARNING_ITEM_LEARNED: "Hoàn thành bài học",
-    HOMEWORK_SUBMIT: "Nộp bài tập",
-    EXAM_SUBMIT: "Nộp bài kiểm tra",
-    MANUAL: "Cập nhật thủ công",
-};
-
-const REFERENCE_LABELS = {
-    ATTENDANCE: "Điểm danh",
-    COMPETITION: "Cuộc thi",
-    COMPETITION_SUBMIT: "Bài nộp cuộc thi",
-    LEARNING_ITEM: "Bài học",
-    HOMEWORK: "Bài tập",
-    EXAM: "Bài kiểm tra",
-};
-
-const METADATA_LABELS = {
-    attendanceId: "Mã điểm danh",
-    sessionId: "Mã buổi học",
-    status: "Trạng thái",
-    competitionId: "Mã cuộc thi",
-    competitionSubmitId: "Mã bài nộp",
-    learningItemId: "Mã bài học",
-};
-
-const VALUE_LABELS = {
-    PRESENT: "Có mặt",
-    ABSENT: "Vắng mặt",
-    LATE: "Đi muộn",
-    BONUS: "Cộng điểm",
-    PENALTY: "Trừ điểm",
-};
-
-const toSafeNumber = (value, fallback = 0) => {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : fallback;
-};
-
-const formatNumber = (value) => toSafeNumber(value).toLocaleString("vi-VN");
-
-const formatDateTime = (value) => {
-    if (!value) return "--";
-
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return "--";
-
-    return new Intl.DateTimeFormat("vi-VN", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-    }).format(date);
-};
-
-const formatLabel = (value, labels = {}) => {
-    if (!value) return "--";
-    return labels[value] || String(value).replaceAll("_", " ").toLowerCase();
-};
-
-const translateNote = (log) => {
-    const note = String(log?.note || "").trim();
-    const points = formatNumber(log?.points);
-    const sourceLabel = formatLabel(log?.source, SOURCE_LABELS);
-    const status = log?.metadata?.status ? formatLabel(log.metadata.status, VALUE_LABELS) : "";
-
-    if (/attendance/i.test(note) || log?.source === "ATTENDANCE") {
-        if (log?.type === "BONUS") {
-            return `Được cộng ${points} điểm khi điểm danh${status ? `: ${status.toLowerCase()}` : ""}.`;
-        }
-        return `Bị trừ ${points} điểm từ điểm danh${status ? `: ${status.toLowerCase()}` : ""}.`;
-    }
-
-    if (log?.type === "BONUS") {
-        return `Được cộng ${points} điểm từ ${sourceLabel.toLowerCase()}.`;
-    }
-
-    if (log?.type === "PENALTY") {
-        return `Bị trừ ${points} điểm từ ${sourceLabel.toLowerCase()}.`;
-    }
-
-    return `Điểm được cập nhật từ ${sourceLabel.toLowerCase()}.`;
-};
-
-const normalizeLogsPayload = (response) => {
-    const payload = response?.data || response || {};
-
-    return {
-        items: Array.isArray(payload.data) ? payload.data : [],
-        meta: payload.meta || { page: 1, limit: 10, total: 0, totalPages: 1 },
-        totalPoint: payload.totalPoint,
-    };
-};
-
-const PointLogItem = memo(({ log }) => {
-    const signedPoints = toSafeNumber(log?.signedPoints ?? log?.points);
-    const isBonus = log?.type === "BONUS" || signedPoints >= 0;
-    const referenceLabel = formatLabel(log?.referenceType, REFERENCE_LABELS);
-    const metadataEntries = Object.entries(log?.metadata || {}).slice(0, 4);
-
-    return (
-        <article className="rounded-xl border border-blue-100 bg-white px-4 py-3 shadow-sm transition-colors hover:border-blue-200 hover:bg-blue-50/40">
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                        <span
-                            className={`inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold ${
-                                isBonus
-                                    ? "bg-green-100 text-green-700"
-                                    : "bg-red-100 text-red-600"
-                            }`}
-                        >
-                            {isBonus ? <ArrowUp size={13} /> : <ArrowDown size={13} />}
-                            {isBonus ? "Cộng điểm" : "Trừ điểm"}
-                        </span>
-                        <span className="rounded-lg bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-800">
-                            {formatLabel(log?.source, SOURCE_LABELS)}
-                        </span>
-                    </div>
-
-                    <p className="mt-2 text-sm font-semibold text-blue-950">
-                        {translateNote(log)}
-                    </p>
-
-                    <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-500">
-                        <span className="inline-flex items-center gap-1">
-                            <CalendarDays size={13} />
-                            {formatDateTime(log?.createdAt)}
-                        </span>
-                        {log?.referenceId ? (
-                            <span>
-                                {referenceLabel} #{log.referenceId}
-                            </span>
-                        ) : null}
-                    </div>
-
-                    {metadataEntries.length ? (
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                            {metadataEntries.map(([key, value]) => (
-                                <div
-                                    key={key}
-                                    className="rounded-lg border border-blue-100 bg-blue-50/60 px-2.5 py-2"
-                                >
-                                    <p className="text-[11px] font-medium text-gray-500">
-                                        {METADATA_LABELS[key] || key}
-                                    </p>
-                                    <p className="mt-0.5 text-xs font-semibold text-blue-950">
-                                        {VALUE_LABELS[value] || String(value)}
-                                    </p>
-                                </div>
-                            ))}
-                        </div>
-                    ) : null}
-                </div>
-
-                <div className={`text-right text-xl font-bold ${isBonus ? "text-green-600" : "text-red-600"}`}>
-                    {isBonus ? "+" : "-"}
-                    {formatNumber(Math.abs(signedPoints))}
-                </div>
-            </div>
-        </article>
-    );
-});
-
-PointLogItem.displayName = "PointLogItem";
 
 const ProfilePointsPage = () => {
     const navigate = useNavigate();
