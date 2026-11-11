@@ -7,6 +7,7 @@ import { learningItemService } from "../../../core/services/modules/learningItem
 import {
     selectChapters,
     selectCourseDetail,
+    selectCourseLessons,
     selectCourseLessonsError,
     selectCourseLessonsLoading,
 } from "../store/courseDetailSlice";
@@ -57,6 +58,7 @@ export const CourseLessonsPage = () => {
     const { learningItemDetail, loading: learningItemLoading, error: learningItemError } = useLearningItemDetail();
     const courseDetail = useSelector(selectCourseDetail);
     const chapters = useSelector(selectChapters);
+    const courseLessons = useSelector(selectCourseLessons);
     const chaptersLoading = useSelector(selectCourseLessonsLoading);
     const chaptersError = useSelector(selectCourseLessonsError);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -68,6 +70,13 @@ export const CourseLessonsPage = () => {
     const viewChapters = useMemo(
         () => applyLearnedStateToChapters(chapters, locallyLearnedItems),
         [chapters, locallyLearnedItems]
+    );
+    // Sidebar: danh sách phẳng các buổi học, mới nhất -> cũ nhất (API trả về cũ -> mới)
+    const sidebarLessons = useMemo(
+        () => [...(courseLessons || [])]
+            .reverse()
+            .map((lesson) => applyLearnedStateToLesson(lesson, locallyLearnedItems)),
+        [courseLessons, locallyLearnedItems]
     );
     const flatItems = useMemo(() => flattenLearningItems(viewChapters), [viewChapters]);
     const listLesson = useMemo(() => findLessonInChapters(viewChapters, lessonId), [viewChapters, lessonId]);
@@ -208,7 +217,7 @@ export const CourseLessonsPage = () => {
         <main className="flex h-dvh min-h-[560px] w-full overflow-hidden bg-blue-50 text-blue-950">
             <div className={`hidden shrink-0 border-r border-blue-100 bg-blue-50/70 md:block ${shellMotion} ${isRailCollapsed ? "w-0 overflow-hidden" : "w-[320px] lg:w-[348px]"}`}>
                 <CourseSidebar
-                    chapters={viewChapters}
+                    lessons={sidebarLessons}
                     chaptersLoading={chaptersLoading}
                     chaptersError={chaptersError}
                     courseId={courseId}
@@ -238,7 +247,7 @@ export const CourseLessonsPage = () => {
                 </div>
                 <div className="h-[calc(100%-56px)]">
                     <CourseSidebar
-                        chapters={viewChapters}
+                        lessons={sidebarLessons}
                         chaptersLoading={chaptersLoading}
                         chaptersError={chaptersError}
                         courseId={courseId}
